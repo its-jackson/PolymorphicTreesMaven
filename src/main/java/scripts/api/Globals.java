@@ -45,7 +45,7 @@ public class Globals {
     // task arraylist
     public static List<Task> tasks = new ArrayList<>();
 
-    public static final String desc = ("# Polymorphic's Auto Woodcutter v1.04\n");
+    public static final String desc = ("# Polymorphic's Auto Woodcutter v1.05\n");
 
     // private constructor
     private Globals(){}
