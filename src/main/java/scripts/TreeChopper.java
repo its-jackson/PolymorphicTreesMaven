@@ -42,7 +42,7 @@ import java.util.List;
         authors = {"Polymorphic"},
         category = "Woodcutting",
         name = "Polymorphic Auto Woodcutter",
-        version = 1.04,
+        version = 1.05,
         description = Globals.desc,
         gameMode = 1)
 
