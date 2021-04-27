@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Purpose of class: Cut trees when inside the woodcutting location
@@ -203,12 +204,13 @@ public class Chop extends Node {
 
     private RSObject[] reachableTrees(RSObject[] trees) {
         List<RSObject> reachableTreeList = new ArrayList<>();
-        for (RSObject tree : trees) {
-            if (isTreeReachable(tree)) {
-                reachableTreeList.add(tree);
-            }
+        if (trees != null) {
+            reachableTreeList =
+                    Arrays.stream(trees)
+                            .filter(this::isTreeReachable)
+                            .collect(Collectors.toList());
         }
-        return new ArrayList<>(reachableTreeList).toArray(RSObject[]::new);
+        return reachableTreeList.toArray(RSObject[]::new);
     }
 
     private boolean chopTree(RSObject tree) {

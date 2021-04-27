@@ -108,6 +108,11 @@ public class Fletch extends Node implements Workable {
                 ||
                 Inventory.isFull()
                         && Workable.inventoryContainsKnife()
+                        && task.shouldFletchThenBank()
+                        && calculateBestFletchingOption(Progressive.generateFletchingLevel(), Workable.getAllLogs()).contains("arrow shafts")
+                ||
+                Inventory.isFull()
+                        && Workable.inventoryContainsKnife()
                         && task.shouldFletchThenDrop()
                         && Workable.isInLocation(task, Player.getRSPlayer())
                 ;

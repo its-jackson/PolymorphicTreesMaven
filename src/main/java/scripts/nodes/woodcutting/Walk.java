@@ -71,6 +71,14 @@ public class Walk extends Node {
                     setWalkToBankController(true);
                     return true;
                 }
+                if ((Inventory.find("Arrow shaft").length > 0)
+                        && Inventory.isFull()
+                        && Workable.getAllLogs().length == 0
+                        && task.shouldFletchThenBank()) {
+                    // walk to bank
+                    setWalkToBankController(true);
+                    return true;
+                }
                 if (Inventory.isFull()
                         && !BankHelper.isInBank()
                         && task.shouldBank()) {
@@ -103,31 +111,6 @@ public class Walk extends Node {
 
     private void getWalking(boolean walkToBankController, boolean walkToTreeController, Task task) {
         switch (task.getLogOption().toLowerCase()) {
-            case "fletch-bank", "fletch-drop" -> {
-                if ((Inventory.find("Arrow shaft").length > 0) && !Inventory.isFull()) {
-                    if (walkToBankController) {
-                        //debug("Walking to trees");
-                        //walkToTrees(task);
-                    } else if (walkToTreeController) {
-                        debug("Walking to trees");
-                        walkToTrees(task);
-                    } else {
-                        debug("Retrieving axe");
-                        walkToBank(task);
-                    }
-                } else {
-                    if (walkToBankController) {
-                        debug("Walking to bank");
-                        walkToBank(task);
-                    } else if (walkToTreeController) {
-                        debug("Walking to trees");
-                        walkToTrees(task);
-                    } else {
-                        debug("Retrieving axe");
-                        walkToBank(task);
-                    }
-                }
-            }
             default -> {
                 if (walkToBankController) {
                     debug("Walking to bank");
