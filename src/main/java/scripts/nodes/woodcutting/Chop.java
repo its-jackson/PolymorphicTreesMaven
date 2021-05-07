@@ -59,8 +59,12 @@ public class Chop extends Node {
 
         // filter the trees
         switch (task.getActualLocation()) {
-            case REDWOOD_NORTH, REDWOOD_SOUTH -> trees = Arrays.stream(Globals.objectsNear).filter(filter_lower_level(task)).toArray(RSObject[]::new);
-            case REDWOOD_SOUTH_UPPER_LEVEL, REDWOOD_NORTH_UPPER_LEVEL -> trees = Arrays.stream(Globals.objectsNear).filter(filter_upper_level(task)).toArray(RSObject[]::new);
+            case REDWOOD_NORTH, REDWOOD_SOUTH -> trees = Arrays.stream(Globals.objectsNear)
+                    .filter(filter_lower_level(task))
+                    .toArray(RSObject[]::new);
+            case REDWOOD_SOUTH_UPPER_LEVEL, REDWOOD_NORTH_UPPER_LEVEL -> trees = Arrays.stream(Globals.objectsNear)
+                    .filter(filter_upper_level(task))
+                    .toArray(RSObject[]::new);
             case ISLE_OF_SOULS, SORCERERS_TOWER -> trees = Globals.objectsNear;
             default -> trees = reachableTrees(Globals.objectsNear);
         }
@@ -117,21 +121,19 @@ public class Chop extends Node {
             debug("No valid trees");
         }
         // chop the next tree (short circuit)
-        if (getNextTree() != null && Objects.isAt(getNextTree().getPosition(), task.getTree()) && !Inventory.isFull()) {
+        if (getNextTree() != null && Objects.isAt(getNextTree().getPosition(), task.getTree()) && !Inventory.isFull() && !task.isValidated()) {
             Globals.nextWorkingTree = getNextTree();
+
             Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
-            final boolean next_chopping_result = chopTree(getNextTree());
 
             debug("Switching " + task.getTree().toLowerCase());
+
+            final boolean next_chopping_result = chopTree(getNextTree());
 
             if (next_chopping_result) {
                 completeChoppingTask(trees, nextTree, task);
             }
-            // destroy next working tree object.
-            Globals.nextWorkingTree = null;
         }
-        // destroy the global trees
-        Globals.objectsNear = null;
         // when no longer chopping (end of node execution). Generate the trackers for the next node
         AntiBan.generateTrackers((int) (System.currentTimeMillis() - getStartTime()), false);
     }
@@ -171,9 +173,14 @@ public class Chop extends Node {
             }
         }
         // perform tasks while chopping down tree...
-        while (Workable.isWorking() && Objects.isAt(tree_tile, task.getTree())) {
+        // Objects.isAt(tree_tile, task.getTree()
+        while (Workable.isWorking()) {
             General.sleep(1000, 1800);
             debug("Chopping " + task.getTree().toLowerCase());
+            if (task.isValidated()) {
+                debug("Task complete");
+                break;
+            }
             Workable.optimizeGame();
             General.sleep(200, 400);
             // found bird nest on ground
@@ -221,13 +228,13 @@ public class Chop extends Node {
             // seconds just in case we moved on to this tree while still performing
             // the chopping animation.
             final boolean time_result = Timing.waitCondition(() -> {
-                General.sleep(20, 80);
+                General.sleep(200, 300);
                 return !Workable.isWorking();
             }, General.random(1000, 1200));
         }
         // wait until we are cutting before timout
         return Timing.waitCondition(() -> {
-            General.sleep(20, 80);
+            General.sleep(200, 300);
             return Workable.isWorking();
         }, General.random(5000, 7000));
     }

@@ -32,7 +32,7 @@ public class SpecialAttack extends Node {
 
         if (special_box != null) {
             debug("Special attack boosting");
-            boolean result = performSpecialAttack(special_attack_preference, new Rectangle(special_box.getAbsoluteBounds()));
+            final boolean result = performSpecialAttack(special_attack_preference, new Rectangle(special_box.getAbsoluteBounds()));
             if (result) {
                 General.sleep(2500, 3000);
             }
@@ -70,9 +70,9 @@ public class SpecialAttack extends Node {
         switch (option) {
             case MAIN_HUD -> {
                 Mouse.moveBox(rectangle);
-                General.sleep(200, 300);
+                General.sleep(200, 400);
                 Mouse.click(0);
-                General.sleep(200, 300);
+                General.sleep(200, 400);
                 return true;
             }
             case COMBAT_TAB -> {
@@ -95,7 +95,7 @@ public class SpecialAttack extends Node {
         return GameTab.open(GameTab.TABS.COMBAT);
     }
 
-    public static boolean shouldUtilize(Task task) {
+    private static boolean shouldUtilize(Task task) {
         return Workable.getSpecialAttack() == 100
                 && !Inventory.isFull()
                 && Workable.isSpecialAxeEquipped()

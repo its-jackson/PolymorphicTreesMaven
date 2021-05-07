@@ -24,7 +24,7 @@ import java.util.*;
 
 public interface Workable {
     // anti-ban factorial constants (x >= 0.5 has significant sleep times that are long)
-    Set<Double> ANTI_BAN_FACTOR_SET = new LinkedHashSet<>(Arrays.asList(
+    Set<Double> ANTI_BAN_FACTOR_SET = Set.of(
             0.2,
             0.3,
             0.4,
@@ -32,8 +32,11 @@ public interface Workable {
             0.6,
             0.7,
             0.8,
-            0.9)
+            0.9
     );
+
+    // gold id constant
+    int GOLD = 995;
 
     // knife id constant
     int KNIFE = 946;
@@ -80,13 +83,16 @@ public interface Workable {
      * @return All axes
      */
     static int[] completeAxes() {
-        List<Integer> axes = new LinkedList<>(Arrays.asList(
+        List<Integer> temp = new LinkedList<>(Arrays.asList(
                 CRYSTAL_AXE_ACTIVE,
                 CRYSTAL_AXE_INACTIVE,
                 INFERNAL_AXE_ACTIVE,
-                INFERNAL_AXE_INACTIVE));
-        Arrays.stream(AXES).forEach(axes::add);
-        return axes.stream().mapToInt(Integer::intValue).toArray();
+                INFERNAL_AXE_INACTIVE)
+        );
+        Arrays.stream(AXES).forEach(temp::add);
+        return temp.stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
     }
 
     /**
@@ -110,17 +116,21 @@ public interface Workable {
     /**
      * Return player currently equipped axe if "special" attack usable
      *
-     * @return True if player axe is dragon/infernal/crystal
+     * @return True if player axe is dragon/infernal/crystal; false otherwise.
      */
     static boolean isSpecialAxeEquipped() {
         if (!isAxeEquipped()) {
             return false;
         }
         final RSItem axe = Equipment.getItem(Equipment.SLOTS.WEAPON);
-        final int axe_id = axe.getDefinition().getID();
+        final int axe_id = axe.getID();
         if (axe_id > 0) {
             switch (axe_id) {
-                case INFERNAL_AXE_ACTIVE, INFERNAL_AXE_INACTIVE, CRYSTAL_AXE_ACTIVE, CRYSTAL_AXE_INACTIVE, DRAGON_AXE -> {
+                case INFERNAL_AXE_ACTIVE,
+                        INFERNAL_AXE_INACTIVE,
+                        CRYSTAL_AXE_ACTIVE,
+                        CRYSTAL_AXE_INACTIVE,
+                        DRAGON_AXE -> {
                     return Equipment.isEquipped(axe_id);
                 }
             }
@@ -281,6 +291,10 @@ public interface Workable {
         return Inventory.find(KNIFE).length > 0;
     }
 
+    static boolean inventoryContainsGold() {
+        return Inventory.find(GOLD).length > 0;
+    }
+
     // a method that returns true if we have an axe equipped
     static boolean isAxeEquipped() {
         final int[] all_axes = completeAxes();
@@ -418,6 +432,10 @@ public interface Workable {
     static int average(List<Integer> times) {
         OptionalDouble stream = times.stream().mapToInt(Integer::intValue).average();
         return stream.isPresent() ? (int) stream.getAsDouble() : 0;
+    }
+
+    static RSItem[] getAllGold() {
+        return Inventory.find(GOLD);
     }
 
     default HashMap<String, Integer> getMappedBowLevels() {

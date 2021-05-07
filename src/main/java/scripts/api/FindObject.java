@@ -25,7 +25,6 @@ public class FindObject implements Runnable {
                     while (Workable.isWorking()) {
                         General.sleep(2000, 3000);
                         System.out.printf("Worker is chopping%sis waiting.", Thread.currentThread().getName());
-                        //pause();
                     }
                     System.out.printf("%sis locating%sfor distance%d", Thread.currentThread().getName(), getTask().getTree(), Globals.treeFactor);
                     locateObjects();
@@ -33,14 +32,6 @@ public class FindObject implements Runnable {
             } else {
                 System.out.printf("%s is sleeping", Thread.currentThread().getName());
             }
-        }
-    }
-
-    public void pause() {
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException exception) {
-            exception.printStackTrace();
         }
     }
 

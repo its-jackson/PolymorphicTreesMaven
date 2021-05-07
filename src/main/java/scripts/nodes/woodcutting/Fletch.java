@@ -48,6 +48,7 @@ public class Fletch extends Node implements Workable {
         if (best_fletching_option != null) {
             // if interface is already open, click the optimal fletching option
             final boolean first_click_result = clickFletchingOption(best_fletching_option);
+            // if the interface wasn't open, then proceed to run
             if (!first_click_result) {
                 // use the knife on log
                 debug("Utilizing knife");
@@ -453,9 +454,13 @@ public class Fletch extends Node implements Workable {
 
     private void completeFletchingTask(Task task) {
         while (Workable.isWorking()) {
-            General.sleep(1000, 1500);
+            General.sleep(1200, 1600);
             debug("Fletching " + task.getTree().toLowerCase() + " logs");
             AntiBan.timedActions();
+            if (task.isValidated()) {
+                debug("Task complete");
+                break;
+            }
         }
     }
 

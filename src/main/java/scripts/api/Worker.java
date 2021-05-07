@@ -15,7 +15,6 @@ public class Worker {
     private boolean isMember;
 
     public Worker() {
-
     }
 
     public Worker(int playerFletchingLevel) {

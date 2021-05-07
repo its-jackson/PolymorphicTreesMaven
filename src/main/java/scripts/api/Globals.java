@@ -18,8 +18,8 @@ public class Globals {
     public static boolean PROGRESSIVE;
 
     public static int treeFactor = 5;
-    public static int birdNestCount = 0;
     public static int worldHopFactor = 5;
+    public static int birdNestCount = 0;
 
     public static boolean worldHop;
     public static boolean worldHopNoTreesAvailable;
@@ -28,8 +28,14 @@ public class Globals {
     public static boolean specialAxe;
     public static boolean antiBanMicroSleep;
     public static boolean humanFatigue;
+    public static boolean useAllGold;
+    public static boolean useGoldPerTask;
 
-    //
+    public static boolean onRepeatShuffle;
+    public static boolean onRepeat;
+    public static boolean dontRepeat;
+
+    // trees
     public static RSObject[] objectsNear;
     public static RSObject currentWorkingTree;
     public static RSObject nextWorkingTree;
@@ -45,6 +51,7 @@ public class Globals {
     // task arraylist
     public static List<Task> tasks = new ArrayList<>();
 
+    // info
     public static final String desc = ("# Polymorphic's Auto Woodcutter v1.05\n");
 
     // private constructor

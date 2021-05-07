@@ -135,7 +135,7 @@ public class Progressive extends Node implements Runnable {
             final int quest_colour = songOfElvesCInterface.getTextColour();
             // get the name of the quest
             final String quest_name = songOfElvesCInterface.getText();
-
+            // return true if green (complete)
             return quest_colour == 901389;
         }
         return false;

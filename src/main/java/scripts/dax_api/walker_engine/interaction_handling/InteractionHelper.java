@@ -5,14 +5,15 @@ import org.tribot.api.Timing;
 import org.tribot.api.interfaces.Clickable07;
 import org.tribot.api.interfaces.Positionable;
 import org.tribot.api.types.generic.Filter;
+import org.tribot.api.util.abc.preferences.WalkingPreference;
 import org.tribot.api2007.*;
 import org.tribot.api2007.types.*;
 import scripts.api.Workable;
+import scripts.api.antiban.AntiBan;
 import scripts.dax_api.walker.utils.AccurateMouse;
 import scripts.dax_api.walker_engine.WaitFor;
 
 import java.util.function.Predicate;
-
 
 public class InteractionHelper {
 
@@ -45,7 +46,13 @@ public class InteractionHelper {
         RSTile position = ((Positionable) clickable).getPosition();
 
         if (!isOnScreenAndClickable(clickable)){
-            Workable.walkToTileA(position,5);
+            final int distance = position.distanceTo(Player.getPosition());
+            final WalkingPreference walkingPreference = AntiBan.generateWalkingPreference(distance);
+            if (walkingPreference.equals(WalkingPreference.SCREEN)){
+                Workable.screenWalkToTile(position);
+            } else {
+                Walking.walkTo(position);
+            }
         }
 
         WaitFor.Return result = WaitFor.condition(WaitFor.getMovementRandomSleep(position), new WaitFor.Condition() {

@@ -13,9 +13,12 @@ import scripts.api.antiban.AntiBan;
 import scripts.dax_api.shared.helpers.BankHelper;
 import scripts.dax_api.walker_engine.interaction_handling.InteractionHelper;
 
+import java.util.Arrays;
+
 public class Walk extends Node {
     private boolean walkToBankController;
     private boolean walkToTreeController;
+    private boolean walkToSawmillController;
 
     private final RSTile rope_ladder_tile_north = new RSTile(1575, 3493, 0);
     private final RSTile rope_ladder_tile_north_inside = new RSTile(1575, 3493, 1);
@@ -26,10 +29,13 @@ public class Walk extends Node {
     private final RSTile walking_tile_south = new RSTile(1576, 3483, 0);
     private final RSTile walking_tile_north = new RSTile(1576, 3493, 0);
 
+    private final RSTile sawmill_operator_woodcutting_guild_location = new RSTile(1625, 3500, 0);
+    private final RSTile sawmill_woodcutting_guild_secondary_bank = new RSTile(1650, 3498, 0);
+
     @Override
     public void execute(Task task) {
         Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
-        getWalking(isWalkToBankController(), isWalkToTreeController(), task);
+        getWalking(isWalkToBankController(), isWalkToTreeController(), isWalkToSawmillController(), task);
     }
 
     @Override
@@ -64,6 +70,19 @@ public class Walk extends Node {
 
         if (!Player.isMoving()) {
             if (Workable.inventoryContainsAxe() || Workable.isAxeEquipped()) {
+                if (task.shouldPlankThenBank() && Inventory.isFull() && !Plank.isAtSawmill() && Workable.inventoryContainsGold() && Workable.getAllLogs().length > 0) {
+                    long count = Arrays.stream(Workable.getAllLogs())
+                            .filter(rsItem -> rsItem.getDefinition().getName().equalsIgnoreCase("oak"))
+                            .count();
+                    if (count > 0) {
+                        final int value = Workable.getAllGold()[0].getDefinition().getValue();
+                        if (value >= 250 && value <= Gold.calculateActualGold(Gold.gold)) {
+                            // walk to sawmill
+                            setWalkToSawmillController(true);
+                            return true;
+                        }
+                    }
+                }
                 if (Inventory.isFull()
                         && !BankHelper.isInBank()
                         && task.shouldFletchThenBank()) {
@@ -87,7 +106,7 @@ public class Walk extends Node {
                     return true;
                 }
                 if (!Inventory.isFull()
-                        && !Workable.isWorking()
+                        //&& !Workable.isWorking()
                         && !Workable.isInLocation(task, player)) {
                     // walk to tree area
                     setWalkToTreeController(true);
@@ -109,7 +128,7 @@ public class Walk extends Node {
                 && !BankHelper.isInBank();
     }
 
-    private void getWalking(boolean walkToBankController, boolean walkToTreeController, Task task) {
+    private void getWalking(boolean walkToBankController, boolean walkToTreeController, boolean walkToSawmillController, Task task) {
         switch (task.getLogOption().toLowerCase()) {
             default -> {
                 if (walkToBankController) {
@@ -118,15 +137,40 @@ public class Walk extends Node {
                 } else if (walkToTreeController) {
                     debug("Walking to trees");
                     walkToTrees(task);
+                } else if (walkToSawmillController) {
+                    debug("Walking to sawmill");
+                    walkToSawmill(task);
                 } else {
                     debug("Retrieving axe");
                     walkToBank(task);
                 }
             }
         }
-
         setWalkToBankController(false);
         setWalkToTreeController(false);
+        setWalkToSawmillController(false);
+    }
+
+    private void walkToSawmill(Task task) {
+        final RSPlayer player = Player.getRSPlayer();
+        final RSTile player_tile = player.getPosition();
+        final int player_plane = player_tile.getPlane();
+
+        switch (task.getActualLocation()) {
+            case WOODCUTTING_GUILD_OAKS -> {
+                switch (player_plane) {
+                    case 0 -> {
+                        walkToSawmillLocation(this.sawmill_operator_woodcutting_guild_location, player_tile);
+                    }
+                    case 1 -> {
+
+                    }
+                    case 2 -> {
+
+                    }
+                }
+            }
+        }
     }
 
     private void walkToTrees(Task task) {
@@ -135,7 +179,7 @@ public class Walk extends Node {
 
         final RSPlayer player = Player.getRSPlayer();
         final RSTile player_tile = player.getPosition();
-        final int player_plane = player.getPosition().getPlane();
+        final int player_plane = player_tile.getPlane();
 
         switch (task.getActualLocation()) {
             case TAR_SWAMP: {
@@ -260,6 +304,14 @@ public class Walk extends Node {
             // walk to working location if player isn't there or if no trees are in the location
             if (destination != null && !Workable.isInLocation(task, player)) {
                 Workable.walkToTile(destination);
+            }
+        }
+    }
+
+    private void walkToSawmillLocation(RSTile walking_tile, RSTile player_tile) {
+        if (player_tile.distanceTo(walking_tile) > 5) {
+            if (!Workable.walkToTile(walking_tile)) {
+                Workable.walkToTileA(walking_tile, 5);
             }
         }
     }
@@ -456,6 +508,14 @@ public class Walk extends Node {
 
     public void setWalkToTreeController(boolean walkToTreeController) {
         this.walkToTreeController = walkToTreeController;
+    }
+
+    public boolean isWalkToSawmillController() {
+        return walkToSawmillController;
+    }
+
+    public void setWalkToSawmillController(boolean walkToSawmillController) {
+        this.walkToSawmillController = walkToSawmillController;
     }
 }
 

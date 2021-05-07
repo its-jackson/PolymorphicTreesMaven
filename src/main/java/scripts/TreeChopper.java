@@ -54,12 +54,12 @@ public class TreeChopper extends Script implements
         Ending,
         Breaking {
 
-    private final List<Node> node_list = new ArrayList<>();
+    volatile boolean runScript = true;
 
+    private final List<Node> node_list = new ArrayList<>();
 
     private final FindObject object_finder = new FindObject();
 
-    //private GUI gui;
     private GUIFX guifx;
     private URL fxml;
 
@@ -84,7 +84,7 @@ public class TreeChopper extends Script implements
     @Override
     public void run() {
         try {
-            fxml = new URL("https://jacksonjohnson.ca/gui/PolyGuiFX.fxml");
+            fxml = new URL("https://jacksonjohnson.ca/gui/test.fxml");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -96,7 +96,7 @@ public class TreeChopper extends Script implements
             sleep(500);
         }
 
-        System.out.println("Gui Completed\nInitializing Script");
+        System.out.println("Gui Completed.\n Initializing Script");
 
         DaxWalker.setCredentials(new DaxCredentialsProvider() {
             @Override
@@ -110,6 +110,9 @@ public class TreeChopper extends Script implements
 
         AntiBan.setMicroSleep(Globals.antiBanMicroSleep);
         System.out.println("AFK Micro Sleep - " + Globals.antiBanMicroSleep);
+
+        AntiBan.setHumanFatigue(Globals.humanFatigue);
+        System.out.println("Human Fatigue - " + Globals.humanFatigue);
 
         AntiBan.setPrintDebug(true);
         System.out.println("Print Debug - " + AntiBan.getPrintDebug());
@@ -126,7 +129,7 @@ public class TreeChopper extends Script implements
                 new Walk()
         );
 
-        while (true) {
+        while (runScript) {
             sleep(100, 300);
             if (Login.getLoginState() == Login.STATE.INGAME && Globals.START) {
                 if (!gameOptimizeComplete) {
@@ -137,36 +140,61 @@ public class TreeChopper extends Script implements
                     runObjectFinder(object_finder);
                     gameOptimizeComplete = true;
                 }
-                for (final Task task : Globals.tasks) {
-                    object_finder.setTask(task);
-                    switch (task.getActualLocation()) {
-                        case EDGEVILLE_YEWS -> Globals.treeFactor = 20;
-                        case SEERS_VILLAGE_MAGICS,
-                                VARROCK_WEST_OAKS,
-                                VARROCK_WEST_TREES,
-                                SEERS_VILLAGE_MAPLES -> Globals.treeFactor = 15;
-                        case SORCERERS_TOWER,
-                                VARROCK_PALACE_OAKS,
-                                VARROCK_PALACE_YEWS,
-                                REDWOOD_NORTH,
-                                REDWOOD_SOUTH,
-                                REDWOOD_NORTH_UPPER_LEVEL,
-                                REDWOOD_SOUTH_UPPER_LEVEL -> Globals.treeFactor = 10;
-                    }
-                    while (!task.isValidated()) {
-                        for (final Node node : node_list) {
-                            // cache the current script time
-                            // this.getRunningTime()
-                            Globals.currentTime = Timing.timeFromMark(START_TIME);
-                            if (node.validate(task)) {
-                                node.execute(task);
-                                if (node instanceof Chop) {
-                                    // todo
-                                }
-                            }
-                            sleep(General.random(100, 300)); // time in between executing scripts.nodes
+                do {
+                    for (final Task task : Globals.tasks) {
+                        // tell user task is complete
+                        General.println("New task: " + task.toString().toLowerCase());
+                        // reset working objects
+                        Globals.objectsNear = null;
+                        Globals.currentWorkingTree = null;
+                        Globals.nextWorkingTree = null;
+                        // reset the start time for each task
+                        task.getTime().setStartTime(System.currentTimeMillis());
+                        // set the object finder for each task
+                        object_finder.setTask(task);
+                        // switch the location for each task
+                        switch (task.getActualLocation()) {
+                            case EDGEVILLE_YEWS -> Globals.treeFactor = 20;
+                            case SEERS_VILLAGE_MAGICS,
+                                    VARROCK_WEST_OAKS,
+                                    VARROCK_WEST_TREES,
+                                    SEERS_VILLAGE_MAPLES -> Globals.treeFactor = 15;
+                            case SORCERERS_TOWER,
+                                    VARROCK_PALACE_OAKS,
+                                    VARROCK_PALACE_YEWS,
+                                    REDWOOD_NORTH,
+                                    REDWOOD_SOUTH,
+                                    REDWOOD_NORTH_UPPER_LEVEL,
+                                    REDWOOD_SOUTH_UPPER_LEVEL -> Globals.treeFactor = 10;
                         }
+                        // continue looping each task and node until task is complete
+                        while (!task.isValidated()) {
+                            for (final Node node : node_list) {
+                                if (node.validate(task)) {
+                                    node.execute(task);
+                                    if (node instanceof Chop) {
+                                        // TODO
+                                        // destroy tree objects
+                                        Globals.nextWorkingTree = null;
+                                        Globals.objectsNear = null;
+                                    }
+                                }
+                                sleep(General.random(100, 300)); // time in between executing nodes
+                            }
+                        }
+                        // tell user task is complete
+                        General.println(task.toString().toLowerCase());
+                        General.println("Task complete. Please be patient");
                     }
+                    // once all tasks complete, shuffle and repeat
+                    if (Globals.onRepeatShuffle) {
+                        Collections.shuffle(Globals.tasks);
+                    }
+                }
+                while (Globals.onRepeatShuffle || Globals.onRepeat);
+                // if not on repeat, throw RunTime exception, game over!
+                if (Globals.dontRepeat) {
+                    end();
                 }
             }
         }
@@ -208,7 +236,7 @@ public class TreeChopper extends Script implements
         gg.setColor(paint_secondary_colour);
 
         if (actualLevel >= 99) {
-            String name = General.getTRiBotUsername().toLowerCase();
+            String name = General.getTRiBotUsername();
             gg.setColor(paint_main_colour);
             gg.fillRect(240, 408, 250, 25);
             gg.setColor(paint_secondary_colour);
@@ -238,6 +266,11 @@ public class TreeChopper extends Script implements
 
         gg.setFont(FONT_LEVEL);
         gg.drawString("Currently Level " + actualLevel + ", " + levelCount + " Levels Gained.", 265, 465);
+    }
+
+    private void end() {
+        this.runScript = false;
+        throw new RuntimeException("Game Over! " + General.getTRiBotUsername() + " Thanks for playing!");
     }
 
     private void runObjectFinder(FindObject runnable) {
@@ -286,15 +319,14 @@ public class TreeChopper extends Script implements
         AntiBan.create();
 
         // generate fatigue system variables
-        Globals.var1000 = General.random(400, 500);
-        Globals.var1001 = General.random(800, 900);
-        Globals.var1002 = General.random(1200, 1300);
+        Globals.var1000 = General.random(400, 600);
+        Globals.var1001 = General.random(800, 1000);
+        Globals.var1002 = General.random(1200, 1400);
     }
 
     @Override
     public void onEnd() {
         AntiBan.destroy();
-        Globals.PROGRESSIVE = false;
     }
 
     @Override

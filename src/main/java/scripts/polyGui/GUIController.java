@@ -19,12 +19,17 @@ import org.tribot.util.Util;
 import scripts.api.Globals;
 import scripts.api.Task;
 import com.allatori.annotations.DoNotRename;
+import scripts.api.TimeElapse;
+import scripts.nodes.woodcutting.Gold;
 
 @DoNotRename
 public class GUIController implements Initializable {
 
     @DoNotRename
     private final Image img = new Image("https://jacksonjohnson.ca/gui/saradomin");
+
+    @DoNotRename
+    private final Image sawmill_woodcutting_guild = new Image("https://jacksonjohnson.ca/gui/sawmill");
 
     @DoNotRename
     private String[] tree_names = {
@@ -66,6 +71,11 @@ public class GUIController implements Initializable {
     };
 
     @DoNotRename
+    private String[] log_option_plank = {
+            "Plank-Bank"
+    };
+
+    @DoNotRename
     private GUIFX gui;
 
     @FXML
@@ -86,11 +96,39 @@ public class GUIController implements Initializable {
 
     @FXML
     @DoNotRename
+    private Label labelPlanking;
+
+    @FXML
+    @DoNotRename
+    private Label labelGoldPerTask;
+
+    @FXML
+    @DoNotRename
+    private Label labelTimeElapsed;
+
+    @FXML
+    @DoNotRename
+    private Label labelOr;
+
+    @FXML
+    @DoNotRename
+    private Label labelStatus;
+
+    @FXML
+    @DoNotRename
     private TextArea textAreaWelcome;
 
     @FXML
     @DoNotRename
     private TextField textFieldUntilLevel;
+
+    @FXML
+    @DoNotRename
+    private TextField textFieldTimeElapsed;
+
+    @FXML
+    @DoNotRename
+    private TextField textFieldGoldPerTask;
 
     @FXML
     @DoNotRename
@@ -150,6 +188,10 @@ public class GUIController implements Initializable {
 
     @FXML
     @DoNotRename
+    private TableColumn<Task, TimeElapse> colTimeElapsed;
+
+    @FXML
+    @DoNotRename
     private RadioButton upgradeAxeRdBtn;
 
     @FXML
@@ -178,20 +220,46 @@ public class GUIController implements Initializable {
 
     @FXML
     @DoNotRename
+    private RadioButton repeatShuffleRdBtn;
+
+    @FXML
+    @DoNotRename
+    private RadioButton repeatRdBtn;
+
+    @FXML
+    @DoNotRename
+    private RadioButton goldPerTaskRdBtn;
+
+    @FXML
+    @DoNotRename
+    private RadioButton dontRepeatRdBtn;
+
+    @FXML
+    @DoNotRename
+    private RadioButton useAllGoldRdBtn;
+
+    @FXML
+    @DoNotRename
     private Slider worldHopSlider;
 
     @FXML
     @DoNotRename
     private ImageView mainImgView;
 
+    @FXML
+    @DoNotRename
+    private ImageView sawWoodcuttingGuildImgView;
+
     @Override
     @DoNotRename
     public void initialize(URL location, ResourceBundle resources) {
         initTreeCBox();
-        initLogOptionsCBox();
+        //initLogOptionsCBox();
         onActionChoiceBoxTree();
         onActionTableViewMain();
+        onActionLocationCBox();
         mainImgView.setImage(img);
+        sawWoodcuttingGuildImgView.setImage(sawmill_woodcutting_guild);
         //colTree.setCellValueFactory(tree_property_value);
         //colLocation.setCellValueFactory(location_property_value);
         //colLogOption.setCellValueFactory(log_option_property_value);
@@ -225,6 +293,13 @@ public class GUIController implements Initializable {
                 return new ReadOnlyObjectWrapper(taskStringCellDataFeatures.getValue().getUntilLevel());
             }
         });
+
+        colTimeElapsed.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Task, TimeElapse>, ObservableValue<TimeElapse>>() {
+            @Override
+            public ObservableValue<TimeElapse> call(TableColumn.CellDataFeatures<Task, TimeElapse> taskTimeElapseCellDataFeatures) {
+                return new ReadOnlyObjectWrapper<>(taskTimeElapseCellDataFeatures.getValue().getTime());
+            }
+        });
     }
 
     @DoNotRename
@@ -242,25 +317,101 @@ public class GUIController implements Initializable {
     @FXML
     @DoNotRename
     private void btnCreateTaskPressed() {
-        String tree = (String) choiceBoxTree.getValue();
-        String location = (String) choiceBoxLocation.getValue();
-        String logOption = (String) choiceBoxLogOptions.getValue();
-        int level = Integer.parseInt(textFieldUntilLevel.getText());
+        String tree = "";
+        String location = "";
+        String logOption = "";
 
-        Task task = new Task(tree, location, logOption, level);
+        if (choiceBoxTree.getValue() != null) {
+            tree = (String) choiceBoxTree.getValue();
+        }
 
-        tableViewMain.getItems().add(task);
+        if (choiceBoxLocation.getValue() != null) {
+            location = (String) choiceBoxLocation.getValue();
+        }
 
-        Globals.tasks.add(task);
+        if (choiceBoxLogOptions.getValue() != null) {
+            logOption = (String) choiceBoxLogOptions.getValue();
+        }
+
+        boolean flag = true;
+
+        if (choiceBoxTree != null && choiceBoxTree.getSelectionModel().isEmpty()) {
+            flag = false;
+            String status = "Please select a tree.";
+            System.out.println(status);
+            setLabelStatus(new Label(status));
+        }
+
+        if (choiceBoxLocation != null && choiceBoxLocation.getSelectionModel().isEmpty()) {
+            flag = false;
+            String status = "Please select a location.";
+            System.out.println(status);
+            setLabelStatus(new Label(status));
+        }
+
+        if (choiceBoxLogOptions != null && choiceBoxLogOptions.getSelectionModel().isEmpty()) {
+            flag = false;
+            String status = "Please select a log disposal option.";
+            System.out.println(status);
+            setLabelStatus(new Label(status));
+        }
+
+        if (!(textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())
+             && !(textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank())) {
+            flag = false;
+            String status = "Please select either time elapsed or until level.";
+            System.out.println(status);
+            setLabelStatus(new Label(status));
+        }
+
+        if ((textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())
+                && (textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank())) {
+            flag = false;
+            String status = "Please select either time elapsed or until level.";
+            System.out.println(status);
+            setLabelStatus(new Label(status));
+        }
+
+        if (!(textFieldUntilLevel.getText().isEmpty()  || textFieldUntilLevel.getText().isBlank())
+        && textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank()) {
+            if (!(textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())) {
+                if (flag) {
+                    final int level = Integer.parseInt(textFieldUntilLevel.getText());
+                    if (level > 0) {
+                        Task task = new Task(tree, location, logOption, level);
+                        tableViewMain.getItems().add(task);
+                        Globals.tasks.add(task);
+                    }
+                }
+            }
+        }
+
+        if (!(textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank())
+        && textFieldUntilLevel.getText().isEmpty()  || textFieldUntilLevel.getText().isBlank()) {
+            if (flag) {
+                final String timeElapse = textFieldTimeElapsed.getText();
+                if (timeElapse.matches("\\d\\d:\\d\\d:\\d\\d:\\d\\d")) {
+                    Task task = new Task(tree,location,logOption,new TimeElapse(timeElapse));
+                    tableViewMain.getItems().add(task);
+                    Globals.tasks.add(task);
+                } else {
+                    System.out.println("Incorrect time elapsed format. DAYS:HOURS:MINUTES:SECONDS - 00:00:00:00");
+                }
+            }
+        }
     }
 
     @FXML
     @DoNotRename
     private void btnUpdateTaskPressed() {
+        // TODO
+        // add update validation before patch v1.06
         String tree = (String) choiceBoxTree.getValue();
         String location = (String) choiceBoxLocation.getValue();
         String logOption = (String) choiceBoxLogOptions.getValue();
         int level = Integer.parseInt(textFieldUntilLevel.getText());
+
+        TimeElapse timer = new TimeElapse(textFieldTimeElapsed.getText());
 
         Task selectTask = tableViewMain.getSelectionModel().getSelectedItem();
 
@@ -272,12 +423,14 @@ public class GUIController implements Initializable {
         currentTask.setLocation(location);
         currentTask.setLogOption(logOption);
         currentTask.setUntilLevel(level);
+        currentTask.setTime(timer);
         currentTask.setCompleteTask(location, tree);
 
         selectTask.setTree(tree);
         selectTask.setLocation(location);
         selectTask.setLogOption(logOption);
         selectTask.setUntilLevel(level);
+        selectTask.setTime(timer);
         selectTask.setCompleteTask(location, tree);
 
         choiceBoxLocation.setValue(selectTask.getLocation());
@@ -366,25 +519,27 @@ public class GUIController implements Initializable {
         if (splitData.length > 0) {
             for (String s : splitData) {
                 if (s != null) {
-                    String[] ss = s.split(":");
+                    String[] ss = s.split("--");
 
                     String tree = ss[0];
                     String location = ss[1];
                     String logOption = ss[2];
                     int untilLevel = Integer.parseInt(ss[3]);
+                    String time = ss[5];
 
                     System.out.println(tree);
                     System.out.println(location);
                     System.out.println(logOption);
                     System.out.println(untilLevel);
+                    System.out.println(time);
 
-                    Task task = new Task(tree, location, logOption, untilLevel);
+                    Task task = new Task(tree, location, logOption, untilLevel, new TimeElapse(time));
 
                     tableViewMain.getItems().add(task);
 
                     Globals.tasks.add(task);
 
-                    System.out.println("new -- " + Globals.tasks.get(Globals.tasks.indexOf(task)));
+                    System.out.println("new: " + Globals.tasks.get(Globals.tasks.indexOf(task)));
                 }
             }
         }
@@ -395,6 +550,8 @@ public class GUIController implements Initializable {
     @FXML
     @DoNotRename
     private void btnStartPressed() {
+        boolean flag = true;
+
         if (upgradeAxeRdBtn.isSelected()) {
             Globals.upgradeAxe = true;
         } else {
@@ -422,8 +579,42 @@ public class GUIController implements Initializable {
             Globals.humanFatigue = true;
         }
 
-        getGUI().close();
-        Globals.START = true;
+        if (dontRepeatRdBtn.isSelected()) {
+            Globals.dontRepeat = true;
+        }
+
+        if (repeatRdBtn.isSelected()) {
+            Globals.onRepeat = true;
+        }
+
+        if (repeatShuffleRdBtn.isSelected()) {
+            Globals.onRepeatShuffle = true;
+        }
+
+        if (useAllGoldRdBtn.isSelected()) {
+            Globals.useAllGold = true;
+        } else {
+            Globals.useGoldPerTask = true;
+            Gold.gold = textFieldGoldPerTask.getText();
+        }
+
+        if (goldPerTaskRdBtn.isSelected() && Gold.calculateActualGold(textFieldGoldPerTask.getText()) == 0) {
+            flag = false;
+            String status = "Incorrect gold format.";
+            System.out.println(status);
+        }
+
+        if (tableViewMain.getItems().size() == 0) {
+            flag = false;
+            String status = "Please add a task before starting.";
+            System.out.println(status);
+        }
+
+        if (flag) {
+            getGUI().close();
+            Globals.START = true;
+        }
+
     }
 
     @FXML
@@ -432,7 +623,7 @@ public class GUIController implements Initializable {
         choiceBoxTree.setOnAction((event) -> {
             String treeChoice = (String) choiceBoxTree.getSelectionModel().getSelectedItem();
             setLocationCBox(treeChoice);
-            System.out.println(treeChoice);
+            //System.out.println(treeChoice);
         });
     }
 
@@ -447,18 +638,39 @@ public class GUIController implements Initializable {
             String location1 = change.getList().get(0).getLocation();
             String logOption = change.getList().get(0).getLogOption();
             int untilLevel = change.getList().get(0).getUntilLevel();
+            TimeElapse timer = change.getList().get(0).getTime();
 
             choiceBoxTree.setValue(tree);
             setLocationCBox(tree);
             choiceBoxLocation.setValue(location1);
             choiceBoxLogOptions.setValue(logOption);
             textFieldUntilLevel.setText(String.valueOf(untilLevel));
+            textFieldTimeElapsed.setText(timer.toString());
 
-
-            System.out.printf("%s, %s, %s, %s%n", choiceBoxTree.getValue(), choiceBoxLocation.getValue(),
+            System.out.printf("%s, %s, %s, %s, %s%n",
+                    choiceBoxTree.getValue(),
+                    choiceBoxLocation.getValue(),
                     choiceBoxLogOptions.getValue(),
-                    textFieldUntilLevel);
+                    textFieldUntilLevel,
+                    textFieldTimeElapsed
+            );
         });
+    }
+
+    @FXML
+    @DoNotRename
+    private void onActionGoldPerTaskRdBtn() {
+        if (goldPerTaskRdBtn.isSelected()) {
+            textFieldGoldPerTask.setVisible(true);
+        }
+    }
+
+    @FXML
+    @DoNotRename
+    private void onActionUseAllGoldRdBtn() {
+        if (useAllGoldRdBtn.isSelected()) {
+            textFieldGoldPerTask.setVisible(false);
+        }
     }
 
     @FXML
@@ -466,9 +678,29 @@ public class GUIController implements Initializable {
     private void onActionWorldHopRdBtn() {
         if(!worldHopRdBtn.isSelected()) {
             worldHopSlider.setOpacity(0.5);
+            worldHopSlider.setDisable(true);
         } else {
             worldHopSlider.setOpacity(1.0);
+            worldHopSlider.setDisable(false);
         }
+    }
+
+    @FXML
+    @DoNotRename
+    private void onActionLocationCBox() {
+        choiceBoxLocation.setOnAction(event -> {
+                final String location = (String) choiceBoxLocation.getSelectionModel().getSelectedItem();
+
+                choiceBoxLogOptions.getItems().clear();
+
+                if (location != null && location.contains("Woodcutting Guild") && choiceBoxTree.getSelectionModel().getSelectedItem().equals("Oak")) {
+                    choiceBoxLogOptions.getItems().addAll(log_options);
+                    choiceBoxLogOptions.getItems().add(log_option_plank[0]);
+                } else {
+                    // choiceBoxLogOptions.getItems().remove(log_option_plank[0]);
+                    choiceBoxLogOptions.getItems().addAll(log_options);
+                }
+        });
     }
 
     @DoNotRename
@@ -580,5 +812,13 @@ public class GUIController implements Initializable {
     @DoNotRename
     public void setLogOptions(String[] log_options) {
         this.log_options = log_options;
+    }
+
+    public Label getLabelStatus() {
+        return labelStatus;
+    }
+
+    public void setLabelStatus(Label labelStatus) {
+        this.labelStatus = labelStatus;
     }
 }

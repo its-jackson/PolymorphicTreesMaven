@@ -6,14 +6,23 @@ public class Task {
     private String tree;
     private String location;
     private String logOption;
-
     private int untilLevel;
-
-    private Location actualLocation;
+    private TimeElapse timer;
 
     private RunescapeBank bankLocation;
 
+    private Location actualLocation;
+
     public Task() {
+    }
+
+    public Task(String tree, String location, String logOption, int untilLevel, TimeElapse timer) {
+        this.tree = tree;
+        this.location = location;
+        this.logOption = logOption;
+        this.untilLevel = untilLevel;
+        this.timer = timer;
+        setCompleteTask(this.location, this.tree);
     }
 
     public Task(String tree, String location, String logOption, int untilLevel) {
@@ -24,13 +33,43 @@ public class Task {
         setCompleteTask(this.location, this.tree);
     }
 
+    public Task(String tree, String location, String logOption, TimeElapse timer) {
+        this.tree = tree;
+        this.location = location;
+        this.logOption = logOption;
+        this.timer = timer;
+        setCompleteTask(this.location, this.tree);
+    }
+
     public boolean isValidated() {
-        return reachedLevel();
+        if ("plank-bank".equalsIgnoreCase(getLogOption())) {
+            return reachedGoldLimit()
+                    || reachedLevel()
+                    || reachedTime()
+                    ;
+        }
+        return reachedLevel()
+                || reachedTime()
+                ;
+    }
+
+    private boolean reachedGoldLimit() {
+        return false;
+    }
+
+    private boolean reachedTime() {
+        return getTime() != null && getTime().isValidated();
     }
 
     private boolean reachedLevel() {
-        final int woodcutting_level = Progressive.generateWoodcuttingLevel();
-        return woodcutting_level >= getUntilLevel();
+        if (getUntilLevel() == 0 || getUntilLevel() < 0) {
+            return false;
+        }
+        return Progressive.generateWoodcuttingLevel() >= getUntilLevel();
+    }
+
+    public boolean shouldPlankThenBank() {
+        return getLogOption().toLowerCase().contentEquals("plank-bank");
     }
 
     public boolean shouldFletchThenBank() {
@@ -236,8 +275,16 @@ public class Task {
         this.bankLocation = bankLocation;
     }
 
+    public TimeElapse getTime() {
+        return timer;
+    }
+
+    public void setTime(TimeElapse timer) {
+        this.timer = timer;
+    }
+
     @Override
     public String toString() {
-        return this.tree + ":" + this.location + ":" + this.logOption + ":" + this.untilLevel + ":" + this.actualLocation;
+        return this.tree + "--" + this.location + "--" + this.logOption + "--" + this.untilLevel + "--" + this.actualLocation + "--" + this.timer;
     }
 }

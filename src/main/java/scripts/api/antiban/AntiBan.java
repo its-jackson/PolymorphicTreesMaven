@@ -120,6 +120,7 @@ public final class AntiBan {
         abc_start_time = System.currentTimeMillis();
         print_debug = false;
         micro_sleep = false;
+        human_fatigue = false;
         resources_won = 0;
         resources_lost = 0;
         run_at = abc.generateRunActivation();
@@ -387,7 +388,7 @@ public final class AntiBan {
             getABCUtil().sleep(time);
             incrementABCCount();
         } catch (InterruptedException e) {
-            debug("Sleep has been skipped " + time + "ms");
+            debug("Sleep has been skipped");
         }
     }
 
