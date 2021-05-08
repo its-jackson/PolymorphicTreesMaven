@@ -20,7 +20,7 @@ import scripts.api.Globals;
 import scripts.api.Task;
 import com.allatori.annotations.DoNotRename;
 import scripts.api.TimeElapse;
-import scripts.nodes.woodcutting.Gold;
+import scripts.api.Gold;
 
 @DoNotRename
 public class GUIController implements Initializable {
@@ -595,10 +595,10 @@ public class GUIController implements Initializable {
             Globals.useAllGold = true;
         } else {
             Globals.useGoldPerTask = true;
-            Gold.gold = textFieldGoldPerTask.getText();
+            Gold.setGoldRegex(textFieldGoldPerTask.getText());
         }
 
-        if (goldPerTaskRdBtn.isSelected() && Gold.calculateActualGold(textFieldGoldPerTask.getText()) == 0) {
+        if (goldPerTaskRdBtn.isSelected() && Gold.calculateActualGoldRegex(Gold.getGoldRegex()) == 0) {
             flag = false;
             String status = "Incorrect gold format.";
             System.out.println(status);

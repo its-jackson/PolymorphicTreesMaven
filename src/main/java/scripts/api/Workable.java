@@ -57,6 +57,22 @@ public interface Workable {
     int BRONZE_AXE = 1351;
 
     /**
+     *
+     * @return All plank's currently inside the player's inventory
+     */
+    static RSItem[] getAllPlanks() {
+        return Inventory.find(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("plank"));
+    }
+
+    /**
+     *
+     * @return All gold currently inside the player's inventory
+     */
+    static RSItem[] getAllGold() {
+        return Inventory.find(GOLD);
+    }
+
+    /**
      * @return All logs currently inside the player's inventory
      */
     static RSItem[] getAllLogs() {
@@ -176,7 +192,7 @@ public interface Workable {
     /**
      * Find all tiles that have an object in correlation to trees
      *
-     * @param treeArea The area containg the trees
+     * @param treeArea The area containing the trees
      * @param treeName The tree name to find
      * @return All tiles belonging to the tree name
      */
@@ -430,12 +446,13 @@ public interface Workable {
     }
 
     static int average(List<Integer> times) {
-        OptionalDouble stream = times.stream().mapToInt(Integer::intValue).average();
-        return stream.isPresent() ? (int) stream.getAsDouble() : 0;
-    }
+        final OptionalDouble stream =
+                times
+                        .stream()
+                        .mapToInt(Integer::intValue)
+                        .average();
 
-    static RSItem[] getAllGold() {
-        return Inventory.find(GOLD);
+        return stream.isPresent() ? (int) stream.getAsDouble() : 0;
     }
 
     default HashMap<String, Integer> getMappedBowLevels() {

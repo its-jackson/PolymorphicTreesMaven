@@ -1,6 +1,7 @@
 package scripts.nodes.woodcutting;
 
 import org.tribot.api.General;
+import org.tribot.api2007.Login;
 import org.tribot.api2007.Player;
 import org.tribot.api2007.Players;
 import org.tribot.api2007.WorldHopper;
@@ -45,6 +46,7 @@ public class WorldHop extends Node {
         return Players.exists(filter(task), Globals.worldHopFactor)
                 && task.shouldWorldHop()
                 && Workable.isInLocation(task, Player.getRSPlayer())
+                && Login.getLoginState() == Login.STATE.INGAME
 
                 ||
 
@@ -52,6 +54,7 @@ public class WorldHop extends Node {
                         && !Workable.nearObjects(Globals.treeFactor, task.getTree())
                         && Globals.worldHopNoTreesAvailable
                         && Workable.isInLocation(task, Player.getRSPlayer())
+                        && Login.getLoginState() == Login.STATE.INGAME
                 ;
     }
 

@@ -70,13 +70,17 @@ public class Walk extends Node {
 
         if (!Player.isMoving()) {
             if (Workable.inventoryContainsAxe() || Workable.isAxeEquipped()) {
-                if (task.shouldPlankThenBank() && Inventory.isFull() && !Plank.isAtSawmill() && Workable.inventoryContainsGold() && Workable.getAllLogs().length > 0) {
-                    long count = Arrays.stream(Workable.getAllLogs())
+                if (task.shouldPlankThenBank() && Inventory.isFull()
+                        && !Plank.isAtSawmill()
+                        && Workable.inventoryContainsGold()
+                        && Workable.getAllLogs().length > 0) {
+                    long count = Arrays
+                            .stream(Workable.getAllLogs())
                             .filter(rsItem -> rsItem.getDefinition().getName().equalsIgnoreCase("oak"))
                             .count();
                     if (count > 0) {
-                        final int value = Workable.getAllGold()[0].getDefinition().getValue();
-                        if (value >= 250 && value <= Gold.calculateActualGold(Gold.gold)) {
+                        final int gold_value = Workable.getAllGold()[0].getDefinition().getValue();
+                        if (!task.isValidated() && gold_value >= 250) {
                             // walk to sawmill
                             setWalkToSawmillController(true);
                             return true;
@@ -85,7 +89,8 @@ public class Walk extends Node {
                 }
                 if (Inventory.isFull()
                         && !BankHelper.isInBank()
-                        && task.shouldFletchThenBank()) {
+                        && task.shouldFletchThenBank()
+                ) {
                     // walk to bank
                     setWalkToBankController(true);
                     return true;
@@ -93,21 +98,24 @@ public class Walk extends Node {
                 if ((Inventory.find("Arrow shaft").length > 0)
                         && Inventory.isFull()
                         && Workable.getAllLogs().length == 0
-                        && task.shouldFletchThenBank()) {
+                        && task.shouldFletchThenBank()
+                ) {
                     // walk to bank
                     setWalkToBankController(true);
                     return true;
                 }
                 if (Inventory.isFull()
                         && !BankHelper.isInBank()
-                        && task.shouldBank()) {
+                        && task.shouldBank()
+                ) {
                     // walk to bank
                     setWalkToBankController(true);
                     return true;
                 }
                 if (!Inventory.isFull()
                         //&& !Workable.isWorking()
-                        && !Workable.isInLocation(task, player)) {
+                        && !Workable.isInLocation(task, player)
+                ) {
                     // walk to tree area
                     setWalkToTreeController(true);
                     return true;
@@ -115,7 +123,8 @@ public class Walk extends Node {
                 if (!Inventory.isFull()
                         && !Workable.isWorking()
                         && Workable.isInLocation(task, player)
-                        && !Workable.nearObjects(Globals.treeFactor, task.getTree())) {
+                        && !Workable.nearObjects(Globals.treeFactor, task.getTree())
+                ) {
                     // walk to future tree
                     setWalkToTreeController(true);
                     return true;

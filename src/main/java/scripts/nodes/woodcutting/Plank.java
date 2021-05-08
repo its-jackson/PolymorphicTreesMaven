@@ -6,10 +6,7 @@ import org.tribot.api2007.Inventory;
 import org.tribot.api2007.NPCs;
 import org.tribot.api2007.Player;
 import org.tribot.api2007.types.*;
-import scripts.api.Globals;
-import scripts.api.Node;
-import scripts.api.Task;
-import scripts.api.Workable;
+import scripts.api.*;
 import scripts.dax_api.walker_engine.interaction_handling.NPCInteraction;
 
 import java.util.Arrays;
@@ -17,14 +14,28 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 public class Plank extends Node {
+    // cache the player's amount of gold before planking, currently inside the inventory
+    private int playerStartGold;
 
+    // cache the player's amount of gold after planking, currently inside the inventory
+    private int playerEndGold;
+
+    // cache the player's gold spent per planking trip
+    private int playerGoldSpent;
+
+    // filter for finding any sawmill operator
     private static Predicate<RSNPC> sawmill_operator_npc_filter() {
         return rsnpc -> rsnpc.getName().toLowerCase().contains("sawmill operator");
     }
 
+    private final Walk walk_node = new Walk();
+
     @Override
     public void execute(Task task) {
         Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
+
+        // set the players gold currently inside inventory
+        setPlayerStartGold(Workable.getAllGold()[0].getDefinition().getValue());
 
         // fetch all logs inside the player's inventory
         final RSItem[] logs = Workable.getAllLogs();
@@ -50,15 +61,34 @@ public class Plank extends Node {
             } else {
                 debug("Planking complete");
             }
+
+            // validate first, gold might be zero from buying planks previously.
+                // set the players end gold after buying planks.
+            if (Workable.getAllGold().length > 0 ) {
+                // end gold
+                setPlayerEndGold(Workable.getAllGold()[0].getDefinition().getValue());
+                // actual gold difference afterward
+                    // could be zero if failed planking. because startGold = endGold.
+                setPlayerGoldSpent(getPlayerStartGold() - getPlayerEndGold());
+            } else {
+                // no gold inside inventory after buying planks, must of spent all the remaining gold
+                setPlayerGoldSpent(getPlayerStartGold());
+                setPlayerEndGold(0);
+            }
+
+            if (getPlayerGoldSpent() > 0) {
+                Gold.setGoldSpentTotal(getPlayerGoldSpent());
+            }
+        } else {
+            debug("Couldn't plank. No oak logs");
         }
+
     }
 
     @Override
     public boolean validate(Task task) {
         return task.shouldPlankThenBank()
-                && Inventory.isFull()
-                && isAtSawmill()
-                && Workable.inventoryContainsGold();
+                && shouldMakePlank(task);
     }
 
     @Override
@@ -86,10 +116,12 @@ public class Plank extends Node {
     private String calculatePlankOption(RSItem[] logs) {
         String option = null;
 
-        if (Arrays.stream(logs)
+        if (Arrays
+                .stream(logs)
                 .anyMatch(rsItem -> rsItem.getDefinition().getName()
                 .toLowerCase()
-                .contains("oak"))) {
+                .contains("oak"))
+        ) {
             option = "Oak - 250gp";
         }
 
@@ -117,18 +149,49 @@ public class Plank extends Node {
     }
 
     private boolean shouldMakePlank(Task task) {
-        int playerGoldChoice = Gold.calculateActualGold(Gold.gold);
+        // goldSpent has to be less than or equal to playerChoiceGold for the plank node to execute
+            // if using goldPerTask.
+            // once the goldSpent has reached the actual gold limit, then the task is complete, can't make planks.
+
+        // if using all gold then doesn't matter if goldSpent has reached the limited.
+
+        //final int player_gold_limit = Gold.calculateActualGoldRegex(Gold.getGoldRegex());
+
+        //final int player_gold_spent = Gold.getGoldSpentTotal();
 
         if (task.shouldPlankThenBank() && Inventory.isFull()) {
-            if (isAtSawmill() && Workable.inventoryContainsGold() && !Globals.useAllGold) {
+            if (isAtSawmill() && Workable.inventoryContainsGold()) {
                 final RSItem inventory_gold = Workable.getAllGold()[0];
                 final int gold_value = inventory_gold.getDefinition().getValue();
-                if (gold_value >= 250 && gold_value <= playerGoldChoice) {
-                    return true;
-                }
+                // additional validation if using specific amount of gold per task
+                // additional validation if use all of the player's gold until dissipated.
+                return gold_value >= 250 && !task.isValidated();
             }
         }
         return false;
     }
 
+    public int getPlayerStartGold() {
+        return playerStartGold;
+    }
+
+    public void setPlayerStartGold(int playerStartGold) {
+        this.playerStartGold = playerStartGold;
+    }
+
+    public int getPlayerEndGold() {
+        return playerEndGold;
+    }
+
+    public void setPlayerEndGold(int playerEndGold) {
+        this.playerEndGold = playerEndGold;
+    }
+
+    public int getPlayerGoldSpent() {
+        return playerGoldSpent;
+    }
+
+    public void setPlayerGoldSpent(int playerGoldSpent) {
+        this.playerGoldSpent = playerGoldSpent;
+    }
 }

@@ -5,10 +5,16 @@ import scripts.api.Globals;
 import scripts.api.Node;
 import scripts.api.Task;
 
+/**
+ * Purpose of class: Dispose the logs accordingly to the current task.
+ *
+ */
+
 public class LogDisposal extends Node {
     private final Bank bank_node = new Bank();
     private final Drop drop_node = new Drop();
     private final Fletch fletch_node = new Fletch();
+    private final Plank plank_node = new Plank();
 
     private Node logDisposalNode;
 
@@ -29,6 +35,9 @@ public class LogDisposal extends Node {
             }
             case "fletch-bank", "fletch-drop" -> {
                 return fletch_node.validate(task);
+            }
+            case "plank-bank" -> {
+                return plank_node.validate(task);
             }
         }
         return false;
@@ -53,10 +62,14 @@ public class LogDisposal extends Node {
             debug("Fletch then bank");
             setLogDisposalNode(this.fletch_node);
             this.fletch_node.execute(task);
-        } else {
+        } else if (task.shouldFletchThenDrop()) {
             debug("Fletch then drop");
             setLogDisposalNode(this.fletch_node);
             this.fletch_node.execute(task);
+        } else {
+            debug("Plank then bank");
+            setLogDisposalNode(this.plank_node);
+            this.plank_node.execute(task);
         }
     }
 

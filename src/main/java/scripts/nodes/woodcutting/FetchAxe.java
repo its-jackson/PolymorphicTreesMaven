@@ -120,7 +120,7 @@ public class FetchAxe extends Node {
     @Override
     public boolean validate(Task task) {
         // return true; we are in the bank, no axe is equipped and no axe is in the inventory
-        return shouldFetchAxe(task);
+        return shouldFetchAxe();
     }
 
     @Override
@@ -633,7 +633,7 @@ public class FetchAxe extends Node {
      *
      * @return True if the player doesn't contain an axe on their person, false otherwise.
      */
-    private static boolean shouldFetchAxe(Task task) {
+    private boolean shouldFetchAxe() {
         return !Workable.inventoryContainsAxe() && !Workable.isAxeEquipped() && BankHelper.isInBank();
     }
 }

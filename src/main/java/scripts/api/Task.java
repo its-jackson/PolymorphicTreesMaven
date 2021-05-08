@@ -3,14 +3,15 @@ package scripts.api;
 import scripts.dax_api.api_lib.models.RunescapeBank;
 
 public class Task {
+    // not-dependable
     private String tree;
     private String location;
     private String logOption;
     private int untilLevel;
     private TimeElapse timer;
 
+    // dependable (location and tree)
     private RunescapeBank bankLocation;
-
     private Location actualLocation;
 
     public Task() {
@@ -42,8 +43,14 @@ public class Task {
     }
 
     public boolean isValidated() {
-        if ("plank-bank".equalsIgnoreCase(getLogOption())) {
+        if ("plank-bank".equalsIgnoreCase(getLogOption()) && Globals.useGoldPerTask) {
             return reachedGoldLimit()
+                    || reachedLevel()
+                    || reachedTime()
+                    ;
+        }
+        if ("plank-bank".equalsIgnoreCase(getLogOption()) && Globals.useAllGold) {
+            return reachedAllGold()
                     || reachedLevel()
                     || reachedTime()
                     ;
@@ -53,8 +60,12 @@ public class Task {
                 ;
     }
 
+    private boolean reachedAllGold() {
+        return Workable.getAllGold().length == 0 && Gold.getGoldTotalBank() != -1 && Gold.getGoldTotalBank() < 250;
+    }
+
     private boolean reachedGoldLimit() {
-        return false;
+        return Gold.getGoldSpentTotal() >= Gold.calculateActualGoldRegex(Gold.getGoldRegex());
     }
 
     private boolean reachedTime() {
@@ -101,10 +112,11 @@ public class Task {
     }
 
     public void setCompleteTask(String location, String tree) {
-        final String complete_location = location
-                .concat(" ")
-                .concat(tree)
-                .toLowerCase();
+        final String complete_location =
+                location
+                        .concat(" ")
+                        .concat(tree)
+                        .toLowerCase();
 
         switch (complete_location) {
             case "seers' village magic", "seers' village magic tree" -> {
