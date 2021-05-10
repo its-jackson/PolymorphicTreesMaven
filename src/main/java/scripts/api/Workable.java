@@ -69,7 +69,7 @@ public interface Workable {
      * @return All gold currently inside the player's inventory
      */
     static RSItem[] getAllGold() {
-        return Inventory.find(GOLD);
+        return Inventory.find(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("coins"));
     }
 
     /**
@@ -308,7 +308,7 @@ public interface Workable {
     }
 
     static boolean inventoryContainsGold() {
-        return Inventory.find(GOLD).length > 0;
+        return Inventory.find(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("coins")).length > 0;
     }
 
     // a method that returns true if we have an axe equipped

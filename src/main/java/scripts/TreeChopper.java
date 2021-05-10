@@ -120,7 +120,9 @@ public class TreeChopper extends Script implements
         Collections.addAll(
                 node_list,
                 new Chop(),
+                new Plank(),
                 new FetchAxe(),
+                new FetchGold(),
                 new FetchKnife(),
                 new SpecialAttack(),
                 new BirdNest(),
@@ -143,13 +145,18 @@ public class TreeChopper extends Script implements
                 do {
                     for (final Task task : Globals.tasks) {
                         // tell user task is complete
-                        General.println("New task: " + task.toString().toLowerCase());
+                        General.println("New task! " + task.toString().toLowerCase());
+                        // reset task gold
+                        Gold.resetGoldSpentTotal();
+                        Gold.resetGoldTotalBank();
                         // reset working objects
                         Globals.objectsNear = null;
                         Globals.currentWorkingTree = null;
                         Globals.nextWorkingTree = null;
                         // reset the start time for each task
-                        task.getTime().setStartTime(System.currentTimeMillis());
+                        if (task.getTime() != null) {
+                            task.getTime().setStartTime(System.currentTimeMillis());
+                        }
                         // set the object finder for each task
                         object_finder.setTask(task);
                         // switch the location for each task
@@ -270,7 +277,7 @@ public class TreeChopper extends Script implements
 
     private void end() {
         this.runScript = false;
-        throw new RuntimeException("Game Over! " + General.getTRiBotUsername() + " Thanks for playing!");
+        throw new RuntimeException("Game Over! " + General.getTRiBotUsername() + " thanks for playing!");
     }
 
     private void runObjectFinder(FindObject runnable) {

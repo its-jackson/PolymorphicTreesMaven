@@ -5,6 +5,7 @@ import org.tribot.api.General;
 import org.tribot.api.Timing;
 import org.tribot.api2007.*;
 import org.tribot.api2007.Objects;
+import org.tribot.api2007.types.RSItem;
 import org.tribot.api2007.types.RSObject;
 import org.tribot.api2007.types.RSPlayer;
 import org.tribot.api2007.types.RSTile;
@@ -19,6 +20,7 @@ public class Walk extends Node {
     private boolean walkToBankController;
     private boolean walkToTreeController;
     private boolean walkToSawmillController;
+    private boolean walkToWoodcuttingGuildAlternativeBankController;
 
     private final RSTile rope_ladder_tile_north = new RSTile(1575, 3493, 0);
     private final RSTile rope_ladder_tile_north_inside = new RSTile(1575, 3493, 1);
@@ -30,17 +32,23 @@ public class Walk extends Node {
     private final RSTile walking_tile_north = new RSTile(1576, 3493, 0);
 
     private final RSTile sawmill_operator_woodcutting_guild_location = new RSTile(1625, 3500, 0);
-    private final RSTile sawmill_woodcutting_guild_secondary_bank = new RSTile(1650, 3498, 0);
 
     @Override
     public void execute(Task task) {
         Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
-        getWalking(isWalkToBankController(), isWalkToTreeController(), isWalkToSawmillController(), task);
+
+        getWalking(
+                isWalkToBankController(),
+                isWalkToTreeController(),
+                isWalkToSawmillController(),
+                isWalkToWoodcuttingGuildAlternativeBankController(),
+                task
+        );
     }
 
     @Override
     public boolean validate(Task task) {
-        return shouldWalk(task);
+        return shouldGetWalking(task);
     }
 
     @Override
@@ -50,94 +58,184 @@ public class Walk extends Node {
         General.println(format.concat(status));
     }
 
-    private boolean shouldWalk(Task task) {
-        final RSPlayer player = Player.getRSPlayer();
-
-        if (task.getLogOption().equalsIgnoreCase("fletch-drop")
-                || task.getLogOption().equalsIgnoreCase("fletch-bank")) {
-            if (!Workable.inventoryContainsKnife()
-                    && !BankHelper.isInBank()
-                    && task.shouldFletchThenBank()
-                    ||
-                    !Workable.inventoryContainsKnife()
-                            && !BankHelper.isInBank()
-                            && task.shouldFletchThenDrop()) {
+    private boolean shouldRetrieveKnife(Task task) {
+        if (task.shouldFletchThenBank() || task.shouldFletchThenDrop()) {
+            if (Workable.inventoryContainsKnife()) {
+                return false;
+            }
+            if (!Workable.inventoryContainsKnife() && !BankHelper.isInBank()) {
                 // walk to bank, get a knife
                 setWalkToBankController(true);
                 return true;
             }
         }
 
-        if (!Player.isMoving()) {
-            if (Workable.inventoryContainsAxe() || Workable.isAxeEquipped()) {
-                if (task.shouldPlankThenBank() && Inventory.isFull()
-                        && !Plank.isAtSawmill()
-                        && Workable.inventoryContainsGold()
-                        && Workable.getAllLogs().length > 0) {
-                    long count = Arrays
-                            .stream(Workable.getAllLogs())
-                            .filter(rsItem -> rsItem.getDefinition().getName().equalsIgnoreCase("oak"))
-                            .count();
-                    if (count > 0) {
-                        final int gold_value = Workable.getAllGold()[0].getDefinition().getValue();
-                        if (!task.isValidated() && gold_value >= 250) {
-                            // walk to sawmill
-                            setWalkToSawmillController(true);
-                            return true;
-                        }
-                    }
-                }
-                if (Inventory.isFull()
-                        && !BankHelper.isInBank()
-                        && task.shouldFletchThenBank()
-                ) {
-                    // walk to bank
+        return false;
+    }
+
+    private boolean shouldRetrieveGold(Task task) {
+        if (task.shouldPlankThenBank()) {
+            // walk to bank, get gold
+            if (!Workable.inventoryContainsGold()) {
+                if (!task.isValidated() && !BankHelper.isInBank()) {
+                    // walk to bank, get gold now, no gold in the inventory, haven't surpassed the task gold.
                     setWalkToBankController(true);
-                    return true;
-                }
-                if ((Inventory.find("Arrow shaft").length > 0)
-                        && Inventory.isFull()
-                        && Workable.getAllLogs().length == 0
-                        && task.shouldFletchThenBank()
-                ) {
-                    // walk to bank
-                    setWalkToBankController(true);
-                    return true;
-                }
-                if (Inventory.isFull()
-                        && !BankHelper.isInBank()
-                        && task.shouldBank()
-                ) {
-                    // walk to bank
-                    setWalkToBankController(true);
-                    return true;
-                }
-                if (!Inventory.isFull()
-                        //&& !Workable.isWorking()
-                        && !Workable.isInLocation(task, player)
-                ) {
-                    // walk to tree area
-                    setWalkToTreeController(true);
-                    return true;
-                }
-                if (!Inventory.isFull()
-                        && !Workable.isWorking()
-                        && Workable.isInLocation(task, player)
-                        && !Workable.nearObjects(Globals.treeFactor, task.getTree())
-                ) {
-                    // walk to future tree
-                    setWalkToTreeController(true);
                     return true;
                 }
             }
         }
 
+        return false;
+    }
+
+    private boolean shouldWalkToSawmillLocation(Task task) {
+        // walk to sawmill
+        if (task.shouldPlankThenBank() && Inventory.isFull()
+                && !Plank.isAtSawmill()
+                && Workable.inventoryContainsGold()
+                && Workable.getAllLogs().length > 0) {
+            long count = Arrays
+                    .stream(Workable.getAllLogs())
+                    .filter(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("oak"))
+                    .count();
+            if (count > 0) {
+                if (!task.isValidated()) {
+                    // walk to sawmill
+                    setWalkToSawmillController(true);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // walk to bank alternative woodcutting bank deposit box--
+    // if task should plank then bank
+    // && if inventory is full
+    // && player is not in alternative bank
+    // && player has oak planks
+    // && player has gold greater than or equal to 250
+    // && no oak logs OR no oak logs equal to the amount of inventory gold that can be utilized
+    // how this works
+    // --- a method called calculatePlankGold() will multiply 250 by the amount of logs
+    // which will determine how many planks could be made.
+    // return value can determine the functionality:
+    // is less than the inventory gold, cant make planks
+    // is greater than or equal to the inventory gold, walk to alt bank
+    private boolean shouldWalkToSawmillBankA(Task task) {
+        if (!task.isValidated()) {
+            if (task.shouldPlankThenBank() && !Bank.isInWoodcuttingGuildAlternativeBank()) {
+                if (Inventory.isFull() && Workable.inventoryContainsGold()) {
+                    if (Workable.getAllPlanks().length > 0 && Plank.calculateOakPlankGold(Workable.getAllLogs()) == -1) {
+                        setWalkToWoodcuttingGuildAlternativeBankController(true);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean shouldWalkToBank(Task task) {
+        if (Inventory.isFull()
+                && !BankHelper.isInBank()
+                && task.shouldFletchThenBank()) {
+            // walk to bank
+            setWalkToBankController(true);
+            return true;
+        }
+        if ((Inventory.find("Arrow shaft").length > 0)
+                && Inventory.isFull()
+                && Workable.getAllLogs().length == 0
+                && task.shouldFletchThenBank()) {
+            // walk to bank
+            setWalkToBankController(true);
+            return true;
+        }
+        if (Inventory.isFull()
+                && !BankHelper.isInBank()
+                && task.shouldBank()) {
+            // walk to bank
+            setWalkToBankController(true);
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean shouldWalkToTrees(Task task) {
+        if (task.shouldPlankThenBank()) {
+            if (!Inventory.isFull() && !Workable.isInLocation(task, Player.getRSPlayer()) && Workable.inventoryContainsGold() && !task.isValidated()) {
+                // walk to tree area
+                setWalkToTreeController(true);
+                return true;
+            }
+        } else {
+            if (!Inventory.isFull()
+                    //&& !Workable.isWorking()
+                    && !Workable.isInLocation(task, Player.getRSPlayer())) {
+                // walk to tree area
+                setWalkToTreeController(true);
+                return true;
+            }
+
+            if (!Inventory.isFull()
+                    && !Workable.isWorking()
+                    && Workable.isInLocation(task, Player.getRSPlayer())
+                    && !Workable.nearObjects(Globals.treeFactor, task.getTree())) {
+                // walk to future tree
+                setWalkToTreeController(true);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean shouldGetWalking(Task task) {
+        if (!Player.isMoving()) {
+            // before doing anything, player must have an axe on their person;
+            // else go get an axe.
+            if (Workable.inventoryContainsAxe() || Workable.isAxeEquipped()) {
+                // get a knife if suppose to utilize knife during task.
+                if (shouldRetrieveKnife(task)) {
+                    return true;
+                }
+                // get gold for task
+                if (shouldRetrieveGold(task)) {
+                    return true;
+                }
+                // walk to sawmill woodcutting guild if task says to
+                if (shouldWalkToSawmillLocation(task)) {
+                    return true;
+                }
+                // && !task.isValidated
+                if (shouldWalkToSawmillBankA(task)) {
+                    return true;
+                }
+                // walk to the bank
+                if (shouldWalkToBank(task)) {
+                    return true;
+                }
+                // walk to trees
+                if (shouldWalkToTrees(task)) {
+                    return true;
+                }
+            }
+        }
+        // no axe on player, and not in bank, - return to bank and fetch an axe
         return !Workable.inventoryContainsAxe()
                 && !Workable.isAxeEquipped()
                 && !BankHelper.isInBank();
     }
 
-    private void getWalking(boolean walkToBankController, boolean walkToTreeController, boolean walkToSawmillController, Task task) {
+    private void getWalking(
+            boolean walkToBankController,
+            boolean walkToTreeController,
+            boolean walkToSawmillController,
+            boolean walkToWoodcuttingGuildAlternativeBankController,
+            Task task) {
         switch (task.getLogOption().toLowerCase()) {
             default -> {
                 if (walkToBankController) {
@@ -149,6 +247,9 @@ public class Walk extends Node {
                 } else if (walkToSawmillController) {
                     debug("Walking to sawmill");
                     walkToSawmill(task);
+                } else if (walkToWoodcuttingGuildAlternativeBankController) {
+                    debug("Walking alternative bank");
+                    walkToWoodcuttingGuildAlternativeBank(task);
                 } else {
                     debug("Retrieving axe");
                     walkToBank(task);
@@ -158,6 +259,26 @@ public class Walk extends Node {
         setWalkToBankController(false);
         setWalkToTreeController(false);
         setWalkToSawmillController(false);
+        setWalkToWoodcuttingGuildAlternativeBankController(false);
+    }
+
+    private void walkToWoodcuttingGuildAlternativeBank(Task task) {
+        final RSPlayer player = Player.getRSPlayer();
+        final RSTile player_tile = player.getPosition();
+        final int player_plane = player_tile.getPlane();
+
+        switch (task.getActualLocation()) {
+            case WOODCUTTING_GUILD_OAKS -> {
+                switch (player_plane) {
+                    case 0 -> walkToWoodcuttingGuildAlternativeBankLocation(Bank.getSawmillWoodcuttingGuildAlternativeBank());
+                    case 1 -> {
+                        final RSObject[] ladder_object = Objects.getAt(this.rope_ladder_tile_north_inside);
+                        walkToRedwoodLadderInside(player_tile, ladder_object, rope_ladder_tile_north);
+                    }
+                    case 2 -> enterCaveNorthUpperLevel(player_tile, player_plane);
+                }
+            }
+        }
     }
 
     private void walkToSawmill(Task task) {
@@ -169,14 +290,13 @@ public class Walk extends Node {
             case WOODCUTTING_GUILD_OAKS -> {
                 switch (player_plane) {
                     case 0 -> {
-                        walkToSawmillLocation(this.sawmill_operator_woodcutting_guild_location, player_tile);
+                        walkToSawmillLocation(this.sawmill_operator_woodcutting_guild_location);
                     }
                     case 1 -> {
-
+                        final RSObject[] ladder_object = Objects.getAt(this.rope_ladder_tile_north_inside);
+                        walkToRedwoodLadderInside(player_tile, ladder_object, rope_ladder_tile_north);
                     }
-                    case 2 -> {
-
-                    }
+                    case 2 -> enterCaveNorthUpperLevel(player_tile, player_plane);
                 }
             }
         }
@@ -317,8 +437,16 @@ public class Walk extends Node {
         }
     }
 
-    private void walkToSawmillLocation(RSTile walking_tile, RSTile player_tile) {
-        if (player_tile.distanceTo(walking_tile) > 5) {
+    private void walkToSawmillLocation(RSTile walking_tile) {
+        if (!Plank.isAtSawmill()) {
+            if (!Workable.walkToTile(walking_tile)) {
+                Workable.walkToTileA(walking_tile, 5);
+            }
+        }
+    }
+
+    private void walkToWoodcuttingGuildAlternativeBankLocation(RSTile walking_tile) {
+        if (!Bank.isInWoodcuttingGuildAlternativeBank()) {
             if (!Workable.walkToTile(walking_tile)) {
                 Workable.walkToTileA(walking_tile, 5);
             }
@@ -344,7 +472,7 @@ public class Walk extends Node {
     private void walkToBank(Task task) {
         final RSPlayer player = Player.getRSPlayer();
         final RSTile player_tile = player.getPosition();
-        final int player_plane = Player.getPosition().getPlane();
+        final int player_plane = player_tile.getPlane();
 
         switch (task.getActualLocation()) {
             case REDWOOD_SOUTH, REDWOOD_SOUTH_UPPER_LEVEL -> {
@@ -525,6 +653,14 @@ public class Walk extends Node {
 
     public void setWalkToSawmillController(boolean walkToSawmillController) {
         this.walkToSawmillController = walkToSawmillController;
+    }
+
+    public boolean isWalkToWoodcuttingGuildAlternativeBankController() {
+        return walkToWoodcuttingGuildAlternativeBankController;
+    }
+
+    public void setWalkToWoodcuttingGuildAlternativeBankController(boolean walkToWoodcuttingGuildAlternativeBankController) {
+        this.walkToWoodcuttingGuildAlternativeBankController = walkToWoodcuttingGuildAlternativeBankController;
     }
 }
 

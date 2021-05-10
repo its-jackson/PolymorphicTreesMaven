@@ -1,37 +1,20 @@
 package scripts.api;
 
-import org.tribot.api.General;
-
 /**
- * Purpose of class: Retrieve the amount of gold or all gold from the bank, when we run out of gold.
- * The player can either start with any amount of gold in the inventory
- * or start without gold.
+ * Purpose of class: Control the player's gold for planking.
  */
 
-public class Gold extends Node {
+public class Gold {
     private static String goldRegex = "";
     private static int goldSpentTotal = 0;
     private static int goldTotalBank = -1;
 
     private static final int factor_thousand = 1000;
     private static final int factor_million = 1000000;
-    private static final int max = 2147000000;
+    private static final int max_gold = 2147000000;
 
-    @Override
-    public void execute(Task task) {
-
-    }
-
-    @Override
-    public boolean validate(Task task) {
-        return false;
-    }
-
-    @Override
-    public void debug(String status) {
-        String format = ("[Gold Control] ");
-        Globals.STATE = (status);
-        General.println(format.concat(status));
+    // private constructor, cannot instantiate class
+    private Gold() {
     }
 
     /**
@@ -41,16 +24,15 @@ public class Gold extends Node {
      * @return Actual amount of gold to be withdrawn from bank; zero otherwise.
      */
     public static int calculateActualGoldRegex(String gold) {
-        gold =
-                gold
-                        .trim()
-                        .toLowerCase();
-
-        int actualGold = 0;
+        gold = gold
+                .trim()
+                .toLowerCase();
 
         if (gold.isEmpty() || gold.isBlank()) {
             return 0;
         }
+
+        int actualGold = 0;
 
         if (gold.matches("\\d+k")) {
             // parse in thousand (only numbers with "k" at the end)
@@ -67,16 +49,11 @@ public class Gold extends Node {
             actualGold = Integer.parseInt(gold);
         }
 
-        if (actualGold <= max && actualGold > 0) {
+        if (actualGold <= getMaxGold() && actualGold > 0) {
             return actualGold;
         }
 
         return 0;
-    }
-
-    private boolean shouldFetchGold(Task task) {
-
-        return false;
     }
 
     public static int getGoldTotalBank() {
@@ -95,8 +72,8 @@ public class Gold extends Node {
         return factor_million;
     }
 
-    public static int getMax() {
-        return max;
+    public static int getMaxGold() {
+        return max_gold;
     }
 
     public static String getGoldRegex() {
@@ -112,10 +89,18 @@ public class Gold extends Node {
     }
 
     public static void setGoldSpentTotal(int goldSpentTotal) {
-        Gold.goldSpentTotal += goldSpentTotal;
+        if (Gold.goldSpentTotal == 0) {
+            Gold.goldSpentTotal = goldSpentTotal;
+        } else {
+            Gold.goldSpentTotal += goldSpentTotal;
+        }
     }
 
     public static void resetGoldSpentTotal() {
         setGoldSpentTotal(0);
+    }
+
+    public static void resetGoldTotalBank() {
+        setGoldTotalBank(-1);
     }
 }

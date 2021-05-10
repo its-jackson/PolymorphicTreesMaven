@@ -45,6 +45,7 @@ public class Task {
     public boolean isValidated() {
         if ("plank-bank".equalsIgnoreCase(getLogOption()) && Globals.useGoldPerTask) {
             return reachedGoldLimit()
+                    || reachedAllGold()
                     || reachedLevel()
                     || reachedTime()
                     ;
@@ -61,7 +62,7 @@ public class Task {
     }
 
     private boolean reachedAllGold() {
-        return Workable.getAllGold().length == 0 && Gold.getGoldTotalBank() != -1 && Gold.getGoldTotalBank() < 250;
+        return Workable.getAllGold().length == 0 && Gold.getGoldTotalBank() == 0;
     }
 
     private boolean reachedGoldLimit() {

@@ -27,7 +27,7 @@ public class LogDisposal extends Node {
     @Override
     public boolean validate(Task task) {
         switch (task.getLogOption().toLowerCase()) {
-            case "bank" -> {
+            case "bank", "plank-bank" -> {
                 return bank_node.validate(task);
             }
             case "drop" -> {
@@ -35,9 +35,6 @@ public class LogDisposal extends Node {
             }
             case "fletch-bank", "fletch-drop" -> {
                 return fletch_node.validate(task);
-            }
-            case "plank-bank" -> {
-                return plank_node.validate(task);
             }
         }
         return false;
@@ -50,7 +47,7 @@ public class LogDisposal extends Node {
     }
 
     private void performLogDisposal(Task task) {
-        if (task.shouldBank()) {
+        if (task.shouldBank() || task.shouldPlankThenBank()) {
             debug("Bank");
             setLogDisposalNode(this.bank_node);
             this.bank_node.execute(task);
@@ -66,10 +63,6 @@ public class LogDisposal extends Node {
             debug("Fletch then drop");
             setLogDisposalNode(this.fletch_node);
             this.fletch_node.execute(task);
-        } else {
-            debug("Plank then bank");
-            setLogDisposalNode(this.plank_node);
-            this.plank_node.execute(task);
         }
     }
 

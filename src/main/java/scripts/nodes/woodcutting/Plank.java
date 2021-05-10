@@ -14,14 +14,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 public class Plank extends Node {
-    // cache the player's amount of gold before planking, currently inside the inventory
-    private int playerStartGold;
-
-    // cache the player's amount of gold after planking, currently inside the inventory
-    private int playerEndGold;
-
-    // cache the player's gold spent per planking trip
-    private int playerGoldSpent;
 
     // filter for finding any sawmill operator
     private static Predicate<RSNPC> sawmill_operator_npc_filter() {
@@ -34,8 +26,12 @@ public class Plank extends Node {
     public void execute(Task task) {
         Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
 
-        // set the players gold currently inside inventory
-        setPlayerStartGold(Workable.getAllGold()[0].getDefinition().getValue());
+        final int plank_gold = Plank.calculateOakPlankGold(Workable.getAllLogs());
+
+        if (plank_gold != -1) {
+            // set the players gold currently inside inventory
+            debug("Start gold = " + plank_gold);
+        }
 
         // fetch all logs inside the player's inventory
         final RSItem[] logs = Workable.getAllLogs();
@@ -59,30 +55,23 @@ public class Plank extends Node {
                     }
                 }
             } else {
-                debug("Planking complete");
+                debug("Planking complete!");
             }
-
-            // validate first, gold might be zero from buying planks previously.
-                // set the players end gold after buying planks.
-            if (Workable.getAllGold().length > 0 ) {
-                // end gold
-                setPlayerEndGold(Workable.getAllGold()[0].getDefinition().getValue());
-                // actual gold difference afterward
-                    // could be zero if failed planking. because startGold = endGold.
-                setPlayerGoldSpent(getPlayerStartGold() - getPlayerEndGold());
+            General.sleep(1000,3000);
+            //
+            final int plank_gold_end = Plank.calculateOakPlankGold(Workable.getAllLogs());
+            // if their are oak logs leftover check the plank gold
+            if (plank_gold_end != -1 && plank_gold != -1) {
+                // set the amount of gold that wasnt spent
+                Gold.setGoldSpentTotal(plank_gold - plank_gold_end);
             } else {
-                // no gold inside inventory after buying planks, must of spent all the remaining gold
-                setPlayerGoldSpent(getPlayerStartGold());
-                setPlayerEndGold(0);
+                Gold.setGoldSpentTotal(plank_gold);
             }
 
-            if (getPlayerGoldSpent() > 0) {
-                Gold.setGoldSpentTotal(getPlayerGoldSpent());
-            }
+            debug("Gold spent = " + Gold.getGoldSpentTotal());
         } else {
-            debug("Couldn't plank. No oak logs");
+            debug("Planking incomplete");
         }
-
     }
 
     @Override
@@ -97,10 +86,64 @@ public class Plank extends Node {
         General.println("[Plank Control] ".concat(status));
     }
 
+    /**
+     * Method determines if player can actually make oak planks.
+     *
+     * @param logs The logs to work with, oak logs specifically.
+     * @return True if the player has the correct amount of inventory gold to make oak planks
+     * equal to the amount of oak logs in the inventory, otherwise; false.
+     */
+    public static boolean canActuallyMakeOakPlank(RSItem[] logs) {
+        // no logs, or oak logs, or logs null, leave now
+        if (logs == null || logs.length == 0) {
+            return false;
+        }
+
+        final int plank_gold = calculateOakPlankGold(logs);
+
+        return plank_gold != -1 && Workable.inventoryContainsGold();
+    }
+
+    /**
+     * Method calculates how many oak planks could be made
+     * Multiply factor of 250 by oak log inventory count.
+     *
+     * @param logs To perform stream manipulation.
+     * @return The unsigned integer of the gold required to make oak planks based on inventory count of logs;
+     * otherwise return -1 if the inventory doesn't contain any logs or the logs aren't type Oak or logs null.
+     */
+    public static int calculateOakPlankGold(RSItem[] logs) {
+        // no logs or logs null, leave now return -1
+        if (logs == null || logs.length == 0) {
+            return -1;
+        }
+
+        final boolean is_oak_log = Arrays
+                .stream(logs)
+                .anyMatch(rsItem -> rsItem
+                        .getDefinition()
+                        .getName()
+                        .toLowerCase()
+                        .contains("oak"));
+
+        // no oak logs inside the inventory, leave now return -1
+        if (!is_oak_log) {
+            return -1;
+        }
+
+        // return the all oak logs in the inventory and multiply the count by 250
+        return (int) (Arrays.stream(logs)
+                .filter(rsItem -> rsItem
+                        .getDefinition()
+                        .getName()
+                        .toLowerCase()
+                        .contains("oak")).count() * 250);
+    }
+
     public static boolean isAtSawmill() {
         final RSNPC[] sawmill_NPCS = NPCs.findNearest(sawmill_operator_npc_filter());
 
-        if (sawmill_NPCS.length == 0 ) {
+        if (sawmill_NPCS.length == 0) {
             return false;
         }
 
@@ -118,10 +161,7 @@ public class Plank extends Node {
 
         if (Arrays
                 .stream(logs)
-                .anyMatch(rsItem -> rsItem.getDefinition().getName()
-                .toLowerCase()
-                .contains("oak"))
-        ) {
+                .anyMatch(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("oak"))) {
             option = "Oak - 250gp";
         }
 
@@ -150,48 +190,16 @@ public class Plank extends Node {
 
     private boolean shouldMakePlank(Task task) {
         // goldSpent has to be less than or equal to playerChoiceGold for the plank node to execute
-            // if using goldPerTask.
-            // once the goldSpent has reached the actual gold limit, then the task is complete, can't make planks.
+        // if using goldPerTask.
+        // once the goldSpent has reached the actual gold limit, then the task is complete, can't make planks.
 
         // if using all gold then doesn't matter if goldSpent has reached the limited.
 
-        //final int player_gold_limit = Gold.calculateActualGoldRegex(Gold.getGoldRegex());
-
-        //final int player_gold_spent = Gold.getGoldSpentTotal();
-
         if (task.shouldPlankThenBank() && Inventory.isFull()) {
             if (isAtSawmill() && Workable.inventoryContainsGold()) {
-                final RSItem inventory_gold = Workable.getAllGold()[0];
-                final int gold_value = inventory_gold.getDefinition().getValue();
-                // additional validation if using specific amount of gold per task
-                // additional validation if use all of the player's gold until dissipated.
-                return gold_value >= 250 && !task.isValidated();
+                return !task.isValidated() && canActuallyMakeOakPlank(Workable.getAllLogs());
             }
         }
         return false;
-    }
-
-    public int getPlayerStartGold() {
-        return playerStartGold;
-    }
-
-    public void setPlayerStartGold(int playerStartGold) {
-        this.playerStartGold = playerStartGold;
-    }
-
-    public int getPlayerEndGold() {
-        return playerEndGold;
-    }
-
-    public void setPlayerEndGold(int playerEndGold) {
-        this.playerEndGold = playerEndGold;
-    }
-
-    public int getPlayerGoldSpent() {
-        return playerGoldSpent;
-    }
-
-    public void setPlayerGoldSpent(int playerGoldSpent) {
-        this.playerGoldSpent = playerGoldSpent;
     }
 }
