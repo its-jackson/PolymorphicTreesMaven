@@ -65,12 +65,13 @@ public class Chop extends Node {
             case REDWOOD_SOUTH_UPPER_LEVEL, REDWOOD_NORTH_UPPER_LEVEL -> trees = Arrays.stream(Globals.objectsNear)
                     .filter(filter_upper_level(task))
                     .toArray(RSObject[]::new);
+            case WOODCUTTING_GUILD_OAKS -> trees = Arrays.stream(Globals.objectsNear).filter(rsObject -> task.getActualLocation().getRSArea().contains(rsObject.getPosition())).toArray(RSObject[]::new);
             case ISLE_OF_SOULS, SORCERERS_TOWER -> trees = Globals.objectsNear;
             default -> trees = reachableTrees(Globals.objectsNear);
         }
 
         // proceed to chop down the tree
-        if (trees.length > 0) {
+        if (trees != null && trees.length > 0) {
             debug("Locating " + task.getTree().toLowerCase());
             setTree(AntiBan.selectNextTarget(trees));
             Globals.currentWorkingTree = getTree();
@@ -210,14 +211,12 @@ public class Chop extends Node {
     }
 
     private RSObject[] reachableTrees(RSObject[] trees) {
-        List<RSObject> reachableTreeList = new ArrayList<>();
         if (trees != null) {
-            reachableTreeList =
-                    Arrays.stream(trees)
+            return Arrays.stream(trees)
                             .filter(this::isTreeReachable)
-                            .collect(Collectors.toList());
+                            .collect(Collectors.toList()).toArray(RSObject[]::new);
         }
-        return reachableTreeList.toArray(RSObject[]::new);
+        return null;
     }
 
     private boolean chopTree(RSObject tree) {
