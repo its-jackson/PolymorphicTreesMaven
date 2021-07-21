@@ -4,10 +4,10 @@ import org.tribot.api.General;
 import org.tribot.api.Timing;
 import org.tribot.api2007.Interfaces;
 import org.tribot.api2007.Inventory;
-import org.tribot.api2007.Player;
 import org.tribot.api2007.types.RSInterfaceChild;
 import org.tribot.api2007.types.RSInterfaceMaster;
 import org.tribot.api2007.types.RSItem;
+import org.tribot.api2007.types.RSItemDefinition;
 import scripts.api.*;
 import scripts.api.antiban.AntiBan;
 import scripts.dax_api.shared.helpers.BankHelper;
@@ -15,11 +15,10 @@ import scripts.dax_api.walker_engine.interaction_handling.InteractionHelper;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Gedankenexperiment
- *
  * Jackson Johnson (Polymorphic)
  */
 
@@ -34,16 +33,13 @@ public class Fletch extends Node implements Workable {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
-
-        // cache player fletching level
-        final Worker worker = new Worker(Progressive.generateFletchingLevel());
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
         // fetch all logs inside the player's inventory
         final RSItem[] logs = Workable.getAllLogs();
 
         // calculate best fletching option such as shortbow or longbow etc
-        final String best_fletching_option = calculateBestFletchingOption(worker.getPlayerFletchingLevel(), logs);
+        final String best_fletching_option = calculateBestFletchingOption(getWorker().getPlayerFletchingLevel(), logs);
 
         if (best_fletching_option != null) {
             // if interface is already open, click the optimal fletching option
@@ -64,16 +60,16 @@ public class Fletch extends Node implements Workable {
                 completeFletchingTask(task);
             }
         } else {
-            debug("Invalid level: " + worker.getPlayerFletchingLevel());
+            debug("Invalid level: " + getWorker().getPlayerFletchingLevel());
             // bank the logs because the player's fletching level isn't
             //  high enough to fletch the logs in the inventory
             if (task.shouldFletchThenBank()) {
-                if (bank_node.validate(task)) {
-                    bank_node.execute(task);
+                if (getBankNode().validate(task)) {
+                    getBankNode().execute(task);
                 }
             } else {
-                if (drop_node.validate(task)) {
-                    drop_node.execute(task);
+                if (getDropNode().validate(task)) {
+                    getDropNode().execute(task);
                 }
             }
         }
@@ -83,8 +79,8 @@ public class Fletch extends Node implements Workable {
                 if (!(Workable.getAllLogs().length > 0)) {
                     // no logs inside inventory, then bank
                     debug("Fletching complete");
-                    if (bank_node.validate(task)) {
-                        bank_node.execute(task);
+                    if (getBankNode().validate(task)) {
+                        getBankNode().execute(task);
                     }
                 }
             }
@@ -92,8 +88,8 @@ public class Fletch extends Node implements Workable {
                 if (!(Workable.getAllLogs().length > 0)) {
                     // no logs inside inventory, then drop
                     debug("Fletching complete");
-                    if (drop_node.validate(task)) {
-                        drop_node.execute(task);
+                    if (getDropNode().validate(task)) {
+                        getDropNode().execute(task);
                     }
                 }
             }
@@ -102,27 +98,25 @@ public class Fletch extends Node implements Workable {
 
     @Override
     public boolean validate(Task task) {
-        return Inventory.isFull()
-                && Workable.inventoryContainsKnife()
-                && task.shouldFletchThenBank()
-                && BankHelper.isInBank()
-                ||
-                Inventory.isFull()
-                        && Workable.inventoryContainsKnife()
-                        && task.shouldFletchThenBank()
-                        && calculateBestFletchingOption(Progressive.generateFletchingLevel(), Workable.getAllLogs()).contains("arrow shafts")
-                ||
-                Inventory.isFull()
-                        && Workable.inventoryContainsKnife()
-                        && task.shouldFletchThenDrop()
-                        && Workable.isInLocation(task, Player.getRSPlayer())
-                ;
+        if (Inventory.isFull() && Workable.inventoryContainsKnife()) {
+            if (task.shouldFletchThenBank()) {
+                String fletchingOption = calculateBestFletchingOption(Progressive.generateFletchingLevel(), Workable.getAllLogs());
+                if (fletchingOption != null && fletchingOption.contains("arrow shafts")) {
+                    return true;
+                }
+                if (BankHelper.isInBank()) {
+                    return true;
+                }
+            }
+            return task.shouldFletchThenDrop();
+        }
+        return false;
     }
 
     @Override
     public void debug(String status) {
         String format = ("[Fletch Control] ");
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 
@@ -147,17 +141,18 @@ public class Fletch extends Node implements Workable {
 
     private String calculateBestFletchingOption(int fletchingLevel, RSItem[] logs) {
         String option = null;
+
         String[] greyList;
 
-        if (logs.length > 0 && fletchingLevel > 0) {
+        if (logs != null && logs.length > 0 && fletchingLevel > 0) {
             final String log_name = Arrays.stream(logs)
+                    .map(RSItem::getDefinition)
+                    .filter(Objects::nonNull)
+                    .map(RSItemDefinition::getName)
                     .findFirst()
-                    .get()
-                    .getDefinition()
-                    .getName()
-                    .toLowerCase();
+                    .orElse("");
 
-            switch (log_name) {
+            switch (log_name.toLowerCase()) {
                 case "logs" -> {
                     greyList = new String[]{"Longbow", "Shortbow", "15 arrow shafts"};
 
@@ -470,6 +465,14 @@ public class Fletch extends Node implements Workable {
 
     public HashMap<String, Integer> getMapArrows() {
         return map_arrows;
+    }
+
+    public Bank getBankNode() {
+        return bank_node;
+    }
+
+    public Drop getDropNode() {
+        return drop_node;
     }
 
     public long getStartTime() {

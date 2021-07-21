@@ -2,9 +2,15 @@ package scripts.polyGui;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -15,12 +21,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
-import org.tribot.util.Util;
 import scripts.api.Globals;
 import scripts.api.Task;
 import com.allatori.annotations.DoNotRename;
 import scripts.api.TimeElapse;
 import scripts.api.Gold;
+import scripts.modules.fluffeesapi.utilities.Utilities;
 
 @DoNotRename
 public class GUIController implements Initializable {
@@ -42,7 +48,6 @@ public class GUIController implements Initializable {
             "Redwood",
             "Mahogany",
             "Teak",
-            "Sulliuscep"
     };
 
     @DoNotRename
@@ -58,8 +63,9 @@ public class GUIController implements Initializable {
             "Isle Of Souls",
             "Falador East",
             "Catherby",
-            "Tar Swamp",
-            "Sorcerer's Tower"
+            "Lumbridge Castle",
+            "Sorcerer's Tower",
+            "Grand Exchange"
     };
 
     @DoNotRename
@@ -339,29 +345,25 @@ public class GUIController implements Initializable {
             flag = false;
             String status = "Please select a tree.";
             System.out.println(status);
-            setLabelStatus(new Label(status));
         }
 
         if (choiceBoxLocation != null && choiceBoxLocation.getSelectionModel().isEmpty()) {
             flag = false;
             String status = "Please select a location.";
             System.out.println(status);
-            setLabelStatus(new Label(status));
         }
 
         if (choiceBoxLogOptions != null && choiceBoxLogOptions.getSelectionModel().isEmpty()) {
             flag = false;
             String status = "Please select a log disposal option.";
             System.out.println(status);
-            setLabelStatus(new Label(status));
         }
 
         if (!(textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())
-             && !(textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank())) {
+                && !(textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank())) {
             flag = false;
             String status = "Please select either time elapsed or until level.";
             System.out.println(status);
-            setLabelStatus(new Label(status));
         }
 
         if ((textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())
@@ -369,31 +371,35 @@ public class GUIController implements Initializable {
             flag = false;
             String status = "Please select either time elapsed or until level.";
             System.out.println(status);
-            setLabelStatus(new Label(status));
         }
 
-        if (!(textFieldUntilLevel.getText().isEmpty()  || textFieldUntilLevel.getText().isBlank())
-        && textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank()) {
-            if (!(textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())) {
-                if (flag) {
+        if (!(textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())
+                && textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank()) {
+            if (flag) {
+                try {
                     final int level = Integer.parseInt(textFieldUntilLevel.getText());
-                    if (level > 0) {
+                    if (level > 0 && level < 100) {
                         Task task = new Task(tree, location, logOption, level);
                         tableViewMain.getItems().add(task);
-                        Globals.tasks.add(task);
+                        Globals.getTasks().add(task);
+                    } else {
+                        System.out.println("Level must be greater than zero and less than 100.");
                     }
+                }
+                catch (NumberFormatException formatException) {
+                    System.out.println("Level must be numerical.");
                 }
             }
         }
 
         if (!(textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank())
-        && textFieldUntilLevel.getText().isEmpty()  || textFieldUntilLevel.getText().isBlank()) {
+                && textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank()) {
             if (flag) {
                 final String timeElapse = textFieldTimeElapsed.getText();
                 if (timeElapse.matches("\\d\\d:\\d\\d:\\d\\d:\\d\\d")) {
-                    Task task = new Task(tree,location,logOption,new TimeElapse(timeElapse));
+                    Task task = new Task(tree, location, logOption, new TimeElapse(timeElapse));
                     tableViewMain.getItems().add(task);
-                    Globals.tasks.add(task);
+                    Globals.getTasks().add(task);
                 } else {
                     System.out.println("Incorrect time elapsed format. DAYS:HOURS:MINUTES:SECONDS - 00:00:00:00");
                 }
@@ -406,36 +412,86 @@ public class GUIController implements Initializable {
     private void btnUpdateTaskPressed() {
         // TODO
         // add update validation before patch v1.06
-        String tree = (String) choiceBoxTree.getValue();
-        String location = (String) choiceBoxLocation.getValue();
-        String logOption = (String) choiceBoxLogOptions.getValue();
-        int level = Integer.parseInt(textFieldUntilLevel.getText());
+        boolean flag = true;
 
+        String tree = "";
+        String location = "";
+        String logOption = "";
+        int level = 0;
         TimeElapse timer = new TimeElapse(textFieldTimeElapsed.getText());
 
-        Task selectTask = tableViewMain.getSelectionModel().getSelectedItem();
+        if (choiceBoxTree.getValue() != null) {
+            tree = (String) choiceBoxTree.getValue();
+        }
 
-        int i = Globals.tasks.indexOf(selectTask);
+        if (choiceBoxLocation.getValue() != null) {
+            location = (String) choiceBoxLocation.getValue();
+        }
 
-        Task currentTask = Globals.tasks.get(i);
+        if (choiceBoxLogOptions.getValue() != null) {
+            logOption = (String) choiceBoxLogOptions.getValue();
+        }
 
-        currentTask.setTree(tree);
-        currentTask.setLocation(location);
-        currentTask.setLogOption(logOption);
-        currentTask.setUntilLevel(level);
-        currentTask.setTime(timer);
-        currentTask.setCompleteTask(location, tree);
+        if (!(textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())
+                && !(textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank())) {
+            flag = false;
+            System.out.println("Please select either time elapsed or until level.");
+        }
 
-        selectTask.setTree(tree);
-        selectTask.setLocation(location);
-        selectTask.setLogOption(logOption);
-        selectTask.setUntilLevel(level);
-        selectTask.setTime(timer);
-        selectTask.setCompleteTask(location, tree);
+        if ((textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())
+                && (textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank())) {
+            flag = false;
+            System.out.println("Please select either time elapsed or until level.");
+        }
 
-        choiceBoxLocation.setValue(selectTask.getLocation());
+        if (!(textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank())
+                && textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank()) {
+            try {
+                level = Integer.parseUnsignedInt(textFieldUntilLevel.getText());
+            } catch (NumberFormatException formatException) {
+                System.out.println("Level must be numerical.");
+            }
+            if (!(level > 0 && level < 100)) {
+                flag = false;
+                System.out.println("Level must be greater than zero and less than 100.");
+            }
+        }
 
-        tableViewMain.refresh();
+        if (!(textFieldTimeElapsed.getText().isEmpty() || textFieldTimeElapsed.getText().isBlank())
+                && textFieldUntilLevel.getText().isEmpty() || textFieldUntilLevel.getText().isBlank()) {
+            if (flag) {
+                final String timeElapse = textFieldTimeElapsed.getText();
+                if (!timeElapse.matches("\\d\\d:\\d\\d:\\d\\d:\\d\\d")) {
+                    flag = false;
+                    System.out.println("Incorrect time elapsed format. DAYS:HOURS:MINUTES:SECONDS - 00:00:00:00");
+                }
+            }
+        }
+
+        if (flag) {
+            Task selectTask = tableViewMain.getSelectionModel().getSelectedItem();
+            int i = Globals.getTasks().indexOf(selectTask);
+            if (i >= 0) {
+                Task currentTask = Globals.getTasks().get(i);
+
+                currentTask.setTree(tree);
+                currentTask.setLocation(location);
+                currentTask.setLogOption(logOption);
+                currentTask.setUntilLevel(level);
+                currentTask.setTime(timer);
+                currentTask.setCompleteTask(location, tree);
+
+                selectTask.setTree(tree);
+                selectTask.setLocation(location);
+                selectTask.setLogOption(logOption);
+                selectTask.setUntilLevel(level);
+                selectTask.setTime(timer);
+                selectTask.setCompleteTask(location, tree);
+
+                choiceBoxLocation.setValue(selectTask.getLocation());
+                tableViewMain.refresh();
+            }
+        }
     }
 
     @FXML
@@ -444,7 +500,7 @@ public class GUIController implements Initializable {
         int index = tableViewMain.getSelectionModel().getSelectedIndex();
 
         if (index > 0) {
-            Globals.tasks.remove(index);
+            Globals.getTasks().remove(index);
             tableViewMain.getItems().remove(index);
         }
     }
@@ -452,35 +508,48 @@ public class GUIController implements Initializable {
     @FXML
     @DoNotRename
     private void btnSaveProfilePressed() throws IOException {
-        StringBuilder content = new StringBuilder();
+        //StringBuilder content = new StringBuilder();
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
 
-        for (Task t : tableViewMain.getItems()) {
-            content.append(t).append("/");
-        }
+//        for (Task t : tableViewMain.getItems()) {
+//            //content.append(t).append("/");
+//            gson.toJson(t);
+//        }
 
         FileChooser fileChooser = new FileChooser();
 
-         //extension filter for text files
-        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter(".txt", "*.txt");
+        //extension filter for text files
+        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter(".json", "*.json");
         fileChooser.getExtensionFilters().add(extensionFilter);
 
-        fileChooser.setInitialDirectory(new File(Util.getWorkingDirectory().getAbsolutePath()));
+        // create directory if doesn't exist
+        if (!Files.exists(Paths.get(Utilities.getPolymorphicScriptsDirectory()))) {
+            File dir = new File(Utilities.getPolymorphicScriptsDirectory());
+            dir.mkdir();
+        }
+
+        fileChooser.setInitialDirectory(new File(Utilities.getPolymorphicScriptsDirectory()));
 
         // show save file
         File file = fileChooser.showSaveDialog(getGUI().getStage());
 
         if (file != null) {
-            if (file.createNewFile()) {
-                // save text tp file
-                saveTextToFile(content.toString(), file);
-            } else {
-                if (file.delete()) {
-                    if (file.createNewFile()) {
-                        // save text tp file
-                        saveTextToFile(content.toString(), file);
-                    }
-                }
-            }
+            // save text tp file
+            file = new File(file.getAbsolutePath() + ".json");
+            saveTextToFile(gson.toJson(tableViewMain.getItems()), file);
+//            if (file.createNewFile()) {
+//                //
+//            } else {
+//                if (file.delete()) {
+//                    if (file.createNewFile()) {
+//                        // save text tp file
+//                        //gson.toJson(tableViewMain.getItems(), new FileWriter(file));
+//                        saveTextToFile(gson.toJson(tableViewMain.getItems()), file);
+//                    }
+//                }
+//            }
         }
 
     }
@@ -488,61 +557,93 @@ public class GUIController implements Initializable {
     @FXML
     @DoNotRename
     private void btnLoadProfilePressed() {
-        tableViewMain.getItems().clear();
-        Globals.tasks.clear();
-
-        StringBuilder data = new StringBuilder();
-
         FileChooser fileChooser = new FileChooser();
 
         //extension filter for text files
-        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter(".txt", "*.txt");
+        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter(".json", "*.json");
         fileChooser.getExtensionFilters().add(extensionFilter);
 
+        // create directory if doesn't exist
+        if (!Files.exists(Paths.get(Utilities.getPolymorphicScriptsDirectory()))) {
+            File dir = new File(Utilities.getPolymorphicScriptsDirectory());
+            dir.mkdir();
+        }
+
         // work dir
-        fileChooser.setInitialDirectory(new File(Util.getWorkingDirectory().getAbsolutePath()));
+        fileChooser.setInitialDirectory(new File(Utilities.getPolymorphicScriptsDirectory()));
 
         // show open file
         File file = fileChooser.showOpenDialog(getGUI().getStage());
 
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                data.append(scanner.nextLine());
-            }
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
 
-        String[] splitData = data.toString().split("/");
-
-        if (splitData.length > 0) {
-            for (String s : splitData) {
-                if (s != null) {
-                    String[] ss = s.split("--");
-
-                    String tree = ss[0];
-                    String location = ss[1];
-                    String logOption = ss[2];
-                    int untilLevel = Integer.parseInt(ss[3]);
-                    String time = ss[5];
-
-                    System.out.println(tree);
-                    System.out.println(location);
-                    System.out.println(logOption);
-                    System.out.println(untilLevel);
-                    System.out.println(time);
-
-                    Task task = new Task(tree, location, logOption, untilLevel, new TimeElapse(time));
-
-                    tableViewMain.getItems().add(task);
-
-                    Globals.tasks.add(task);
-
-                    System.out.println("new: " + Globals.tasks.get(Globals.tasks.indexOf(task)));
+        try {
+            if (file.canRead()) {
+                FileReader fileReader = new FileReader(file);
+                Task[] task = gson.fromJson(fileReader, Task[].class);
+                if (task != null && task.length > 0) {
+                    tableViewMain.getItems().clear();
+                    Globals.getTasks().clear();
+                    for (Task t : task) {
+                        System.out.println(t);
+                        tableViewMain.getItems().add(t);
+                        Globals.getTasks().add(t);
+                    }
                 }
             }
+        } catch (FileNotFoundException exception) {
+            System.out.println("Caught file not found.");
         }
+        catch (NullPointerException nullPointerException) {
+            System.out.println("Caught null pointer.");
+        }
+        catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+            System.out.println("Caught index out of bounds.");
+        }
+        catch (SecurityException securityException) {
+            System.out.println("Caught security.");
+        }
+
+//        try (Scanner scanner = new Scanner(file)) {
+//            while (scanner.hasNextLine()) {
+//                data.append(scanner.nextLine());
+//            }
+//        }
+//        catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//
+//        String[] splitData = data.toString().split("/");
+//
+//        if (splitData.length > 0) {
+//            for (String s : splitData) {
+//                if (s != null) {
+//                    String[] ss = s.split("--");
+//
+//                    String tree = ss[0];
+//                    String location = ss[1];
+//                    String logOption = ss[2];
+//                    int untilLevel = Integer.parseInt(ss[3]);
+//                    String time = ss[5];
+//
+//                    System.out.println(tree);
+//                    System.out.println(location);
+//                    System.out.println(logOption);
+//                    System.out.println(untilLevel);
+//                    System.out.println(time);
+//
+//                    Task task = new Task(tree, location, logOption, untilLevel, new TimeElapse(time));
+//
+//                    tableViewMain.getItems().add(task);
+//
+//                    Globals.getTasks().add(task);
+//
+//                    System.out.println("new: " + Globals.getTasks().get(Globals.getTasks().indexOf(task)));
+//                }
+//            }
+//        }
 
         tableViewMain.refresh();
     }
@@ -553,48 +654,50 @@ public class GUIController implements Initializable {
         boolean flag = true;
 
         if (upgradeAxeRdBtn.isSelected()) {
-            Globals.upgradeAxe = true;
+            Globals.setUpgradeAxe(true);
         } else {
-            Globals.specialAxe = true;
+            Globals.setSpecialAxe(true);
         }
 
-        if (birdNestRdBtn.isSelected()) {
-            Globals.pickUpBirdNest = true;
+        if (!birdNestRdBtn.isSelected()) {
+            Globals.setPickUpBirdNest(false);
         }
 
-        if (worldHopRdBtn.isSelected()) {
-            Globals.worldHop = true;
-            Globals.worldHopFactor = (int) worldHopSlider.getValue();
+        if (!worldHopRdBtn.isSelected()) {
+            Globals.setWorldHop(false);
+
+        } else {
+            Globals.setWorldHopFactor((int) worldHopSlider.getValue());
         }
 
-        if (worldHopNoTreesRdBtn.isSelected()) {
-            Globals.worldHopNoTreesAvailable = true;
+        if (!worldHopNoTreesRdBtn.isSelected()) {
+            Globals.setWorldHopNoTreesAvailable(false);
         }
 
-        if (afkMicroSleepRdBtn.isSelected()){
-            Globals.antiBanMicroSleep = true;
+        if (!afkMicroSleepRdBtn.isSelected()) {
+            Globals.setAntiBanMicroSleep(false);
         }
 
-        if (replicateHumanFatigueRdBtn.isSelected()) {
-            Globals.humanFatigue = true;
+        if (!replicateHumanFatigueRdBtn.isSelected()) {
+            Globals.setHumanFatigue(false);
         }
 
-        if (dontRepeatRdBtn.isSelected()) {
-            Globals.dontRepeat = true;
-        }
+//        if (!dontRepeatRdBtn.isSelected()) {
+//            Globals.setDontRepeat(false);
+//        }
 
         if (repeatRdBtn.isSelected()) {
-            Globals.onRepeat = true;
+            Globals.setOnRepeat(true);
         }
 
         if (repeatShuffleRdBtn.isSelected()) {
-            Globals.onRepeatShuffle = true;
+            Globals.setOnRepeatShuffle(true);
         }
 
         if (useAllGoldRdBtn.isSelected()) {
-            Globals.useAllGold = true;
+            Globals.setUseAllGold(true);
+            Globals.setUseGoldPerTask(false);
         } else {
-            Globals.useGoldPerTask = true;
             Gold.setGoldRegex(textFieldGoldPerTask.getText());
         }
 
@@ -612,7 +715,7 @@ public class GUIController implements Initializable {
 
         if (flag) {
             getGUI().close();
-            Globals.START = true;
+            Globals.setStart(true);
         }
 
     }
@@ -634,26 +737,31 @@ public class GUIController implements Initializable {
 
             tableViewMain.refresh();
 
-            String tree = change.getList().get(0).getTree();
-            String location1 = change.getList().get(0).getLocation();
-            String logOption = change.getList().get(0).getLogOption();
-            int untilLevel = change.getList().get(0).getUntilLevel();
-            TimeElapse timer = change.getList().get(0).getTime();
+            if (change.getList().size() > 0) {
+                String tree = change.getList().get(0).getTree();
+                String location1 = change.getList().get(0).getLocation();
+                String logOption = change.getList().get(0).getLogOption();
+                int untilLevel = change.getList().get(0).getUntilLevel();
+                TimeElapse timer = change.getList().get(0).getTime();
 
-            choiceBoxTree.setValue(tree);
-            setLocationCBox(tree);
-            choiceBoxLocation.setValue(location1);
-            choiceBoxLogOptions.setValue(logOption);
-            textFieldUntilLevel.setText(String.valueOf(untilLevel));
-            textFieldTimeElapsed.setText(timer.toString());
+                choiceBoxTree.setValue(tree);
+                setLocationCBox(tree);
+                choiceBoxLocation.setValue(location1);
+                choiceBoxLogOptions.setValue(logOption);
+                textFieldUntilLevel.setText(String.valueOf(untilLevel));
 
-            System.out.printf("%s, %s, %s, %s, %s%n",
-                    choiceBoxTree.getValue(),
-                    choiceBoxLocation.getValue(),
-                    choiceBoxLogOptions.getValue(),
-                    textFieldUntilLevel,
-                    textFieldTimeElapsed
-            );
+                if (timer != null) {
+                    textFieldTimeElapsed.setText(timer.toString());
+                }
+
+                System.out.printf("%s%s%s%s%s%n",
+                        choiceBoxTree.getValue(),
+                        choiceBoxLocation.getValue(),
+                        choiceBoxLogOptions.getValue(),
+                        textFieldUntilLevel.getText(),
+                        textFieldTimeElapsed.getText()
+                );
+            }
         });
     }
 
@@ -676,7 +784,7 @@ public class GUIController implements Initializable {
     @FXML
     @DoNotRename
     private void onActionWorldHopRdBtn() {
-        if(!worldHopRdBtn.isSelected()) {
+        if (!worldHopRdBtn.isSelected()) {
             worldHopSlider.setOpacity(0.5);
             worldHopSlider.setDisable(true);
         } else {
@@ -689,17 +797,17 @@ public class GUIController implements Initializable {
     @DoNotRename
     private void onActionLocationCBox() {
         choiceBoxLocation.setOnAction(event -> {
-                final String location = (String) choiceBoxLocation.getSelectionModel().getSelectedItem();
+            final String location = (String) choiceBoxLocation.getSelectionModel().getSelectedItem();
 
-                choiceBoxLogOptions.getItems().clear();
+            choiceBoxLogOptions.getItems().clear();
 
-                if (location != null && location.contains("Woodcutting Guild") && choiceBoxTree.getSelectionModel().getSelectedItem().equals("Oak")) {
-                    choiceBoxLogOptions.getItems().addAll(log_options);
-                    choiceBoxLogOptions.getItems().add(log_option_plank[0]);
-                } else {
-                    // choiceBoxLogOptions.getItems().remove(log_option_plank[0]);
-                    choiceBoxLogOptions.getItems().addAll(log_options);
-                }
+            if (location != null && location.contains("Woodcutting Guild") && choiceBoxTree.getSelectionModel().getSelectedItem().equals("Oak")) {
+                choiceBoxLogOptions.getItems().addAll(log_options);
+                choiceBoxLogOptions.getItems().add(log_option_plank[0]);
+            } else {
+                // choiceBoxLogOptions.getItems().remove(log_option_plank[0]);
+                choiceBoxLogOptions.getItems().addAll(log_options);
+            }
         });
     }
 
@@ -711,6 +819,10 @@ public class GUIController implements Initializable {
             switch (treeChoice.toLowerCase()) {
                 case "tree" -> {
                     choiceBoxLocation.getItems().add(getTreeLocations()[2]); // varrock west
+                    choiceBoxLocation.getItems().add(getTreeLocations()[11]); // lumbridge castle
+                    choiceBoxLocation.getItems().add(getTreeLocations()[13]); // grand exchange
+                    choiceBoxLocation.getItems().add(getTreeLocations()[7]); // seers' village
+
                 }
                 case "oak" -> {
                     choiceBoxLocation.getItems().add(getTreeLocations()[0]); // woodcutting guild
@@ -752,9 +864,6 @@ public class GUIController implements Initializable {
                 }
                 case "mahogany", "teak" -> {
                     choiceBoxLocation.getItems().add(getTreeLocations()[8]); // isle of souls
-                }
-                case "sulliuscep" -> {
-                    choiceBoxLocation.getItems().add(getTreeLocations()[11]); // tar swamp
                 }
             }
         }

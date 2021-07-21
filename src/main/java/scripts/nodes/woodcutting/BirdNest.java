@@ -9,6 +9,7 @@ import org.tribot.api2007.types.RSGroundItem;
 import scripts.api.Globals;
 import scripts.api.Task;
 import scripts.api.Workable;
+import scripts.api.antiban.AntiBan;
 import scripts.dax_api.walker_engine.interaction_handling.InteractionHelper;
 
 /**
@@ -18,7 +19,7 @@ import scripts.dax_api.walker_engine.interaction_handling.InteractionHelper;
  */
 
 public class BirdNest extends Node {
-    final static private String[] bird_nest_names = {
+    final static private String[] BIRD_NEST_NAMES = {
             "Bird nest",
             "Clue nest (beginner)",
             "Clue nest (easy)",
@@ -29,11 +30,11 @@ public class BirdNest extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
         debug("Bird nest found");
 
-        final RSGroundItem[] bird_nests = GroundItems.findNearest(bird_nest_names);
+        final RSGroundItem[] bird_nests = GroundItems.findNearest(BIRD_NEST_NAMES);
 
         if (bird_nests.length > 0) {
             final RSGroundItem bird_nest = bird_nests[0];
@@ -44,7 +45,6 @@ public class BirdNest extends Node {
                 if (InteractionHelper.click(bird_nest, "Take")) {
                     final String bird_nest_name = bird_nest.getDefinition().getName().toLowerCase();
                     debug("Taking " + bird_nest_name);
-                    Globals.birdNestCount++;
                 }
             }
         }
@@ -52,24 +52,19 @@ public class BirdNest extends Node {
 
     @Override
     public boolean validate(Task task) {
-        return !Inventory.isFull()
-                && Globals.objectsNear != null
-                && Globals.objectsNear.length > 0
-                && exists()
-                && task.shouldPickupNest();
+        return task.shouldPickupNest() && !Inventory.isFull() && exists();
     }
 
     @Override
     public void debug(String status) {
         String format = ("[Nest Control] ");
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 
     public static boolean exists() {
-        return GroundItems.findNearest(bird_nest_names).length > 0;
+        return GroundItems.findNearest(BIRD_NEST_NAMES).length > 0;
     }
-
 }
 
 

@@ -2,11 +2,11 @@ package scripts.nodes.woodcutting;
 
 import org.tribot.api.General;
 import org.tribot.api2007.Banking;
+import org.tribot.api2007.Inventory;
 import org.tribot.api2007.types.RSItem;
 import scripts.api.*;
+import scripts.api.antiban.AntiBan;
 import scripts.dax_api.shared.helpers.BankHelper;
-
-import java.util.function.Predicate;
 
 /**
  * Purpose of class: Retrieve the amount of gold or all gold from the bank, when we run out of gold.
@@ -14,22 +14,22 @@ import java.util.function.Predicate;
  */
 
 public class FetchGold extends Node {
-
-    private static final Predicate<RSItem> gold_filter = rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("coins");
-
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
         debug("Retrieving gold");
 
         if (Bank.openBank()) {
             if (Banking.isBankLoaded()) {
-                if (Banking.find(gold_filter).length > 0) {
+                if (Inventory.isFull()) {
+                    Banking.depositAll();
+                }
+                if (Banking.find(Workable.GOLD).length > 0) {
                     // find the coins and withdraw accordingly
-                    RSItem[] coins = Banking.find(gold_filter);
+                    RSItem[] coins = Banking.find(Workable.GOLD);
 
-                    if (Globals.useAllGold) {
+                    if (Globals.isUseAllGold()) {
                         // count - The amount to withdraw. Use '0' for all, or '-1' for all but one.
                         Banking.withdrawItem(coins[0], 0);
                         debug("Withdrew all gold");
@@ -61,7 +61,7 @@ public class FetchGold extends Node {
     @Override
     public void debug(String status) {
         String format = ("[Gold Control] ");
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 

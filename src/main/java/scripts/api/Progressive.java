@@ -4,8 +4,6 @@ import org.tribot.api.General;
 import org.tribot.api2007.*;
 import org.tribot.api2007.types.RSInterface;
 
-import java.util.Locale;
-
 /**
  * Purpose of class: Actively track the player stats to determine which axe to use,
  * which tree to chop and the location to work in.
@@ -27,7 +25,7 @@ public class Progressive extends Node implements Runnable {
 
     // upon construction time, set the global state
     public Progressive() {
-        Globals.PROGRESSIVE = true;
+        Globals.setProgressive(true);
     }
 
     @Override
@@ -38,7 +36,7 @@ public class Progressive extends Node implements Runnable {
 
         General.sleep(5000);
 
-        while (Globals.PROGRESSIVE) {
+        while (Globals.isProgressive()) {
             General.sleep(5000, 10000);
             if (this.validate(null)) {
                 this.execute(null);
@@ -82,7 +80,7 @@ public class Progressive extends Node implements Runnable {
 
     @Override
     public boolean validate(Task task) {
-        if (Login.STATE.INGAME == Login.getLoginState() && Globals.PROGRESSIVE) {
+        if (Login.STATE.INGAME == Login.getLoginState() && Globals.isProgressive()) {
             return true;
         }
         return false;

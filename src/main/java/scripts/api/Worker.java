@@ -1,10 +1,9 @@
 package scripts.api;
 
-import org.tribot.api2007.Player;
-import org.tribot.api2007.types.RSTile;
-import scripts.nodes.woodcutting.FetchAxe;
-
-public class Worker {
+/**
+ *
+ */
+public class Worker implements Workable{
     private int playerAttackLevel;
     private int playerWoodcuttingLevel;
     private int playerFiremakingLevel;
@@ -15,44 +14,17 @@ public class Worker {
     private boolean isMember;
 
     public Worker() {
+        setCompleteWorkerState();
     }
 
-    public Worker(int playerFletchingLevel) {
-        this.playerFletchingLevel = playerFletchingLevel;
-    }
-
-    public Worker(
-            int playerWoodcuttingLevel,
-            int playerAttackLevel
-    )
-    {
-        this.playerWoodcuttingLevel = playerWoodcuttingLevel;
-        this.playerAttackLevel = playerAttackLevel;
-    }
-
-    public Worker(
-            int playerAttackLevel,
-            int playerWoodcuttingLevel,
-            int playerFiremakingLevel,
-            int playerAgilityLevel,
-            boolean songOfElvesComplete,
-            boolean isMember
-    )
-    {
-        this.playerAttackLevel = playerAttackLevel;
-        this.playerWoodcuttingLevel = playerWoodcuttingLevel;
-        this.playerFiremakingLevel = playerFiremakingLevel;
-        this.playerAgilityLevel = playerAgilityLevel;
-        this.songOfElvesComplete = songOfElvesComplete;
-        this.isMember = isMember;
-    }
-
-    public int getWorkerOptimalAxe() {
-        return FetchAxe.calculateBestAxe(getPlayerWoodcuttingLevel(), getPlayerFiremakingLevel(),
-                isSongOfElvesComplete());
-    }
-    private RSTile getWorkerPosition() {
-        return Player.getPosition();
+    public void setCompleteWorkerState() {
+        setPlayerAttackLevel(Progressive.generateAttackLevel());
+        setPlayerWoodcuttingLevel(Progressive.generateWoodcuttingLevel());
+        setPlayerFiremakingLevel(Progressive.generateFiremakingLevel());
+        setPlayerAgilityLevel(Progressive.generateAgilityLevel());
+        setPlayerFletchingLevel(Progressive.generateFletchingLevel());
+        setSongOfElvesComplete(Progressive.songOfElvesCompletable());
+        setMember(Progressive.isMember());
     }
 
     public int getPlayerAttackLevel() {
@@ -109,5 +81,18 @@ public class Worker {
 
     public void setPlayerFletchingLevel(int playerFletchingLevel) {
         this.playerFletchingLevel = playerFletchingLevel;
+    }
+
+    @Override
+    public String toString() {
+        return "Worker{" +
+                "playerAttackLevel=" + playerAttackLevel +
+                ", playerWoodcuttingLevel=" + playerWoodcuttingLevel +
+                ", playerFiremakingLevel=" + playerFiremakingLevel +
+                ", playerAgilityLevel=" + playerAgilityLevel +
+                ", playerFletchingLevel=" + playerFletchingLevel +
+                ", songOfElvesComplete=" + songOfElvesComplete +
+                ", isMember=" + isMember +
+                '}';
     }
 }

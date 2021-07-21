@@ -4,10 +4,7 @@ import org.tribot.api.General;
 import org.tribot.api.util.abc.preferences.WalkingPreference;
 import org.tribot.api2007.*;
 import org.tribot.api2007.Objects;
-import org.tribot.api2007.types.RSItem;
-import org.tribot.api2007.types.RSObject;
-import org.tribot.api2007.types.RSPlayer;
-import org.tribot.api2007.types.RSTile;
+import org.tribot.api2007.types.*;
 import scripts.api.antiban.AntiBan;
 import scripts.dax_api.api_lib.DaxWalker;
 import scripts.dax_api.api_lib.models.RunescapeBank;
@@ -23,18 +20,7 @@ import java.util.*;
  */
 
 public interface Workable {
-    // anti-ban factorial constants (x >= 0.5 has significant sleep times that are long)
-    Set<Double> ANTI_BAN_FACTOR_SET = Set.of(
-            0.2,
-            0.3,
-            0.4,
-            0.5,
-            0.6,
-            0.7,
-            0.8,
-            0.9
-    );
-
+     int OAK_FEE = 250;
     // gold id constant
     int GOLD = 995;
 
@@ -61,7 +47,10 @@ public interface Workable {
      * @return All plank's currently inside the player's inventory
      */
     static RSItem[] getAllPlanks() {
-        return Inventory.find(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("plank"));
+        return Inventory.find(rsItem -> {
+            RSItemDefinition itemDefinition = rsItem.getDefinition();
+            return itemDefinition != null && itemDefinition.getName().toLowerCase().contains("plank");
+        });
     }
 
     /**
@@ -69,28 +58,40 @@ public interface Workable {
      * @return All gold currently inside the player's inventory
      */
     static RSItem[] getAllGold() {
-        return Inventory.find(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("coins"));
+        return Inventory.find(rsItem -> {
+            RSItemDefinition itemDefinition = rsItem.getDefinition();
+            return itemDefinition != null && itemDefinition.getName().toLowerCase().contains("coins");
+        });
     }
 
     /**
      * @return All logs currently inside the player's inventory
      */
     static RSItem[] getAllLogs() {
-        return Inventory.find(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("log"));
+        return Inventory.find(rsItem -> {
+            RSItemDefinition itemDefinition = rsItem.getDefinition();
+            return itemDefinition != null && itemDefinition.getName().toLowerCase().contains("log");
+        });
     }
 
     /**
      * @return All bows currently inside the player's inventory
      */
     static RSItem[] getAllBows() {
-        return Inventory.find(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("bow"));
+        return Inventory.find(rsItem -> {
+            RSItemDefinition itemDefinition = rsItem.getDefinition();
+            return itemDefinition != null && itemDefinition.getName().toLowerCase().contains("bow");
+        });
     }
 
     /**
      * @return All arrow shafts currently inside the player's inventory
      */
     static RSItem[] getAllArrowShafts() {
-        return Inventory.find(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("arrow shaft"));
+        return Inventory.find(rsItem -> {
+            RSItemDefinition itemDefinition = rsItem.getDefinition();
+            return itemDefinition != null && itemDefinition.getName().toLowerCase().contains("arrow shaft");
+        });
     }
 
     /**
@@ -138,19 +139,24 @@ public interface Workable {
         if (!isAxeEquipped()) {
             return false;
         }
+
         final RSItem axe = Equipment.getItem(Equipment.SLOTS.WEAPON);
-        final int axe_id = axe.getID();
-        if (axe_id > 0) {
-            switch (axe_id) {
-                case INFERNAL_AXE_ACTIVE,
-                        INFERNAL_AXE_INACTIVE,
-                        CRYSTAL_AXE_ACTIVE,
-                        CRYSTAL_AXE_INACTIVE,
-                        DRAGON_AXE -> {
-                    return Equipment.isEquipped(axe_id);
+
+        if (axe != null) {
+            final int axe_id = axe.getID();
+            if (axe_id > 0) {
+                switch (axe_id) {
+                    case INFERNAL_AXE_ACTIVE,
+                            INFERNAL_AXE_INACTIVE,
+                            CRYSTAL_AXE_ACTIVE,
+                            CRYSTAL_AXE_INACTIVE,
+                            DRAGON_AXE -> {
+                        return Equipment.isEquipped(axe_id);
+                    }
                 }
             }
         }
+
         return false;
     }
 
@@ -160,15 +166,18 @@ public interface Workable {
      * @return True if their is a nearest object; false otherwise.
      */
     static boolean nearObjects(int distance, String object) {
-        final RSObject[] objects = Objects.findNearest(distance, object);
-        final int player_plane = Player.getPosition().getPlane();
-        if (objects.length > 0) {
-            for (final RSObject o : objects) {
-                if (o.getPosition().getPlane() == player_plane) {
-                    return true;
+        if (object != null) {
+            final RSObject[] objects = Objects.findNearest(distance, object);
+            final int player_plane = Player.getPosition().getPlane();
+            if (objects.length > 0) {
+                for (final RSObject o : objects) {
+                    if (o.getPosition().getPlane() == player_plane) {
+                        return true;
+                    }
                 }
             }
         }
+
         return false;
     }
 
@@ -179,13 +188,16 @@ public interface Workable {
      * @return True if object exists : false otherwise.
      */
     static boolean objectsExist(RSTile[] tiles, String objectName) {
-        if (tiles.length > 0 && !objectName.isEmpty()) {
-            for (final RSTile tile : tiles) {
-                if (Objects.isAt(tile, objectName)) {
-                    return true;
+        if (tiles != null & objectName != null) {
+            if (tiles.length > 0 && !objectName.isEmpty()) {
+                for (final RSTile tile : tiles) {
+                    if (Objects.isAt(tile, objectName)) {
+                        return true;
+                    }
                 }
             }
         }
+
         return false;
     }
 
@@ -198,14 +210,17 @@ public interface Workable {
      */
     static RSTile[] discoverTreeTiles(RSTile[] treeArea, String treeName) {
         List<RSTile> treeList = new ArrayList<>();
-        if (treeArea.length > 0 && !treeName.isEmpty()) {
-            for (RSTile tile : treeArea) {
-                if (Objects.isAt(tile, treeName)) {
-                    treeList.add(tile);
+        if (treeArea != null && treeName != null) {
+            if (treeArea.length > 0 && !treeName.isEmpty()) {
+                for (RSTile tile : treeArea) {
+                    if (Objects.isAt(tile, treeName)) {
+                        treeList.add(tile);
+                    }
                 }
+                Collections.shuffle(treeList);
             }
-            Collections.shuffle(treeList);
         }
+
         return new ArrayList<>(treeList).toArray(RSTile[]::new);
     }
 
@@ -283,10 +298,12 @@ public interface Workable {
     static boolean isInLocation(Task task, RSPlayer player) {
         final RSTile player_tile = player.getPosition();
         final int player_plane = player_tile.getPlane();
-        final RSTile[] location_tiles = task.getActualLocation().getRSArea().getAllTiles();
-        for (RSTile tile : location_tiles) {
-            if (tile.distanceTo(player_tile) <= 3 && player_plane == tile.getPlane()) {
-                return true;
+        if (task != null) {
+            final RSTile[] location_tiles = task.getActualLocation().getRSArea().getAllTiles();
+            for (RSTile tile : location_tiles) {
+                if (tile.distanceTo(player_tile) <= 3 && player_plane == tile.getPlane()) {
+                    return true;
+                }
             }
         }
         return false;
@@ -308,7 +325,7 @@ public interface Workable {
     }
 
     static boolean inventoryContainsGold() {
-        return Inventory.find(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("coins")).length > 0;
+        return getAllGold().length > 0;
     }
 
     // a method that returns true if we have an axe equipped
@@ -372,7 +389,9 @@ public interface Workable {
         }
     }
 
-    static void sleep(List<Integer> waitTimes, boolean humanFatigue) {
+    static int sleep(List<Integer> waitTimes, boolean humanFatigue) {
+        int reactionTime;
+
         if (waitTimes.isEmpty()) {
             AntiBan.generateTrackers(General.random(800, 1400), false);
         } else {
@@ -380,69 +399,15 @@ public interface Workable {
         }
 
         if (humanFatigue) {
-            final int abc_count = AntiBan.getABCCount();
-            if (abc_count < Globals.var1000) {
-                final int reaction_time = (int) (AntiBan.getReactionTime() * ANTI_BAN_FACTOR_SET
-                        .stream()
-                        .filter(aDouble -> aDouble == 0.2)
-                        .findFirst()
-                        .orElseThrow());
-                Globals.STATE = ("Human fatigue: LOW");
-                General.println("[ABC2] Human fatigue: LOW");
-                Globals.STATE = ("Sleeping " + reaction_time + "ms");
-                General.println("[ABC2] Sleeping " + reaction_time + "ms");
-                AntiBan.sleepReactionTime(reaction_time);
-                waitTimes.add(reaction_time);
-            } else if (abc_count < Globals.var1001) {
-                final int reaction_time = (int) (AntiBan.getReactionTime() * ANTI_BAN_FACTOR_SET
-                        .stream()
-                        .filter(aDouble -> aDouble == 0.4)
-                        .findFirst()
-                        .orElseThrow());
-                Globals.STATE = ("Human fatigue: MEDIUM");
-                General.println("[ABC2] Human fatigue: MEDIUM");
-                Globals.STATE = ("Sleeping " + reaction_time + "ms");
-                General.println("[ABC2] Sleeping " + reaction_time + "ms");
-                AntiBan.sleepReactionTime(reaction_time);
-                waitTimes.add(reaction_time);
-            } else if (abc_count < Globals.var1002) {
-                final int reaction_time = (int) (AntiBan.getReactionTime() * ANTI_BAN_FACTOR_SET
-                        .stream()
-                        .filter(aDouble -> aDouble == 0.6)
-                        .findFirst()
-                        .orElseThrow());
-                Globals.STATE = ("Human fatigue: HIGH");
-                General.println("[ABC2] Human fatigue: HIGH");
-                Globals.STATE = ("Sleeping " + reaction_time + "ms");
-                General.println("[ABC2] Sleeping " + reaction_time + "ms");
-                AntiBan.sleepReactionTime(reaction_time);
-                waitTimes.add(reaction_time);
-            } else {
-                final int reaction_time = (int) (AntiBan.getReactionTime() * ANTI_BAN_FACTOR_SET
-                        .stream()
-                        .filter(aDouble -> aDouble == 0.8)
-                        .findFirst()
-                        .orElseThrow());
-                Globals.STATE = ("Human fatigue: UNBELIEVABLE");
-                General.println("[ABC2] Human fatigue: UNBELIEVABLE");
-                Globals.STATE = ("Sleeping " + reaction_time + "ms");
-                General.println("[ABC2] Sleeping " + reaction_time + "ms");
-                AntiBan.sleepReactionTime(reaction_time);
-                waitTimes.add(reaction_time);
-            }
+            reactionTime = (int) (AntiBan.getReactionTime() * Globals.getCurrentFatigueMultiple());
+            AntiBan.sleepReactionTime(reactionTime);
+            waitTimes.add(reactionTime);
+            return reactionTime;
         } else {
-            final int reaction_time = (int) (AntiBan.getReactionTime() * ANTI_BAN_FACTOR_SET.stream().findAny().orElseThrow());
-
-            if (reaction_time > 13000) {
-                Globals.STATE = ("Sleep has been skipped " + reaction_time + "ms");
-                General.println("[ABC2] Sleep has been skipped " + reaction_time + "ms");
-            } else {
-                Globals.STATE = ("Sleeping " + reaction_time + "ms");
-                General.println("[ABC2] Sleeping " + reaction_time + "ms");
-                AntiBan.sleepReactionTime(reaction_time);
-                waitTimes.add(reaction_time);
-            }
+            reactionTime = AntiBan.getReactionTime();
         }
+
+        return reactionTime;
     }
 
     static int average(List<Integer> times) {

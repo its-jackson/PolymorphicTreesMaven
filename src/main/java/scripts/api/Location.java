@@ -134,8 +134,27 @@ public enum Location {
                     new RSTile(3668, 3727, 0)
             }
     )),
+    GRAND_EXCHANGE_TREES (new RSArea(
+            new RSTile[] {
+                    new RSTile(3151, 3447, 0),
+                    new RSTile(3173, 3452, 0),
+                    new RSTile(3170, 3457, 0),
+                    new RSTile(3159, 3460, 0),
+                    new RSTile(3157, 3466, 0),
+                    new RSTile(3150, 3465, 0)
+            }
+    )),
+    SEERS_VILLAGE_TREES (new RSArea(
+            new RSTile[] {
+                    new RSTile(2703, 3502, 0),
+                    new RSTile(2716, 3506, 0),
+                    new RSTile(2718, 3501, 0),
+                    new RSTile(2715, 3498, 0)
+            }
+    )),
     SORCERERS_TOWER (new RSArea(new RSTile(2700, 3399, 0), new RSTile(2705, 3397, 0))),
-    PORT_SARIM_WILLOWS (new RSArea(new RSTile(3056, 3255, 0), new RSTile(3063, 3250, 0)));
+    PORT_SARIM_WILLOWS (new RSArea(new RSTile(3056, 3255, 0), new RSTile(3063, 3250, 0))),
+    LUMBRIDGE_CASTLE_TREES (new RSArea(new RSTile(3166, 3239, 0), new RSTile(3196, 3211, 0)));
 
     private final RSArea location;
 

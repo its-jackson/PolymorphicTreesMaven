@@ -9,7 +9,7 @@ import org.tribot.api2007.types.RSInterface;
 import org.tribot.api2007.types.RSInterfaceChild;
 import org.tribot.api2007.types.RSItem;
 import scripts.api.*;
-import scripts.nodes.woodcutting.Bank;
+import scripts.api.antiban.AntiBan;
 import scripts.nodes.woodcutting.FetchAxe;
 
 /**
@@ -19,8 +19,6 @@ import scripts.nodes.woodcutting.FetchAxe;
 public class UpgradeAxe extends Node {
     private final long start_time = System.currentTimeMillis();
 
-    private int currentWoodcuttingLevel;
-    private int currentAttackLevel;
     private int currentEquippedAxeID;
     private int currentInventoryAxeID;
 
@@ -30,23 +28,7 @@ public class UpgradeAxe extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
-
-        // create worker
-        final Worker worker = new Worker(
-                Progressive.generateAttackLevel(),
-                Progressive.generateWoodcuttingLevel(),
-                Progressive.generateFiremakingLevel(),
-                Progressive.generateAgilityLevel(),
-                Progressive.songOfElvesCompletable(),
-                Progressive.isMember()
-        );
-
-        // set the players woodcutting level
-        setCurrentWoodcuttingLevel(Progressive.generateWoodcuttingLevel());
-
-        // set the players current attack level
-        setCurrentAttackLevel(Progressive.generateAttackLevel());
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
         // set the players currently equipped axe
         setCurrentEquippedAxeID(generateEquippedAxeID());
@@ -56,7 +38,7 @@ public class UpgradeAxe extends Node {
 
         String format = String.format("Woodcutting level: %s, attack level: %s, equipped axe id: " +
                 "%s, inventory axe " +
-                "id: %s%n", getCurrentWoodcuttingLevel(), getCurrentAttackLevel(), getCurrentEquippedAxeID(), getCurrentInventoryAxeID());
+                "id: %s%n", getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel(), getCurrentEquippedAxeID(), getCurrentInventoryAxeID());
 
         debug(format);
 
@@ -66,11 +48,11 @@ public class UpgradeAxe extends Node {
             int best_axe_id;
 
             // calculate the best axe
-            if (worker.isMember()) {
-                best_axe_id = FetchAxe.calculateBestAxe(getCurrentWoodcuttingLevel(),
-                        worker.getPlayerFiremakingLevel(), worker.isSongOfElvesComplete());
+            if (getWorker().isMember()) {
+                best_axe_id = FetchAxe.calculateBestAxe(getWorker().getPlayerWoodcuttingLevel(),
+                        getWorker().getPlayerFiremakingLevel(), getWorker().isSongOfElvesComplete());
             } else {
-                best_axe_id = FetchAxe.calculateBestAxeF2P(worker.getPlayerWoodcuttingLevel());
+                best_axe_id = FetchAxe.calculateBestAxeF2P(getWorker().getPlayerWoodcuttingLevel());
             }
 
             // check if axe is equipped; otherwise check if inventory has an axe
@@ -80,7 +62,7 @@ public class UpgradeAxe extends Node {
                     if (!(Workable.getMappedWCLevels().get(getCurrentEquippedAxeID()) > Workable.getMappedWCLevels().get(best_axe_id))) {
                         if (getCurrentInventoryAxeID() > 0) {
                             if (!(Workable.getMappedWCLevels().get(getCurrentInventoryAxeID()) > Workable.getMappedWCLevels().get(best_axe_id))) {
-                                if (upgradeCurrentAxe(best_axe_id, getCurrentWoodcuttingLevel(), getCurrentAttackLevel())) {
+                                if (upgradeCurrentAxe(best_axe_id, getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel())) {
                                     setAxeUpgradeComplete(true);
                                     debug("Upgrade complete");
                                 } else {
@@ -88,7 +70,7 @@ public class UpgradeAxe extends Node {
                                 }
                             }
                         } else {
-                            if (upgradeCurrentAxe(best_axe_id, getCurrentWoodcuttingLevel(), getCurrentAttackLevel())) {
+                            if (upgradeCurrentAxe(best_axe_id, getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel())) {
                                 setAxeUpgradeComplete(true);
                                 debug("Upgrade complete");
                             } else {
@@ -101,7 +83,7 @@ public class UpgradeAxe extends Node {
                 if (!isAxeUpgradeComplete() && getCurrentInventoryAxeID() > 0 && best_axe_id > 0) {
                     if (getCurrentInventoryAxeID() != best_axe_id) {
                         if (!(Workable.getMappedWCLevels().get(getCurrentInventoryAxeID()) > Workable.getMappedWCLevels().get(best_axe_id))) {
-                            if (upgradeCurrentAxe(best_axe_id, getCurrentWoodcuttingLevel(), getCurrentAttackLevel())) {
+                            if (upgradeCurrentAxe(best_axe_id, getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel())) {
                                 debug("Upgrade completed");
                             } else {
                                 debug("Upgrade incomplete");
@@ -126,7 +108,7 @@ public class UpgradeAxe extends Node {
     @Override
     public void debug(String status) {
         String format = ("[Upgrade Control] ");
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 
@@ -138,8 +120,8 @@ public class UpgradeAxe extends Node {
 
         debug("Upgrading axe");
 
-        if (!this.shouldOptimizeBank) {
-           this.shouldOptimizeBank = optimizeBank();
+        if (!isShouldOptimizeBank()) {
+           setShouldOptimizeBank(optimizeBank());
         }
 
         FetchAxe.withdrawAxe(bestAxeId);
@@ -206,28 +188,12 @@ public class UpgradeAxe extends Node {
         return 0;
     }
 
-    private int getCurrentAttackLevel() {
-        return currentAttackLevel;
-    }
-
-    private void setCurrentAttackLevel(int currentAttackLevel) {
-        this.currentAttackLevel = currentAttackLevel;
-    }
-
     public int getCurrentEquippedAxeID() {
         return currentEquippedAxeID;
     }
 
     public void setCurrentEquippedAxeID(int currentEquippedAxeID) {
         this.currentEquippedAxeID = currentEquippedAxeID;
-    }
-
-    public int getCurrentWoodcuttingLevel() {
-        return currentWoodcuttingLevel;
-    }
-
-    public void setCurrentWoodcuttingLevel(int currentWoodcuttingLevel) {
-        this.currentWoodcuttingLevel = currentWoodcuttingLevel;
     }
 
     public int getCurrentInventoryAxeID() {
@@ -248,5 +214,13 @@ public class UpgradeAxe extends Node {
 
     public long getStartTime() {
         return start_time;
+    }
+
+    public boolean isShouldOptimizeBank() {
+        return shouldOptimizeBank;
+    }
+
+    public void setShouldOptimizeBank(boolean shouldOptimizeBank) {
+        this.shouldOptimizeBank = shouldOptimizeBank;
     }
 }

@@ -4,44 +4,32 @@ import org.tribot.api.General;
 import org.tribot.api2007.*;
 import org.tribot.api2007.types.RSItem;
 import scripts.api.*;
+import scripts.api.antiban.AntiBan;
 import scripts.dax_api.shared.helpers.BankHelper;
 
 import java.util.*;
 
 /**
- * Gedankenexperiment
- *
  * Purpose of class: If the player doesn't have an axe on their person,
  * then open bank and withdraw the appropriate axe.
  * Attempts equipping the axe in comparison to appropriate stats/levels.
  */
 
 public class FetchAxe extends Node {
-    private Worker worker;
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
-
-        worker = new Worker(
-                Progressive.generateAttackLevel(),
-                Progressive.generateWoodcuttingLevel(),
-                Progressive.generateFiremakingLevel(),
-                Progressive.generateAgilityLevel(),
-                Progressive.songOfElvesCompletable(),
-                Progressive.isMember()
-        );
-
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
         // format debug
         String format = String.format(
                 "Woodcutting level: %s, attack level: %s, firemaking level: %s, " +
                         "agility level: " +
                         "%s, song of elves: %s%n",
-                worker.getPlayerWoodcuttingLevel(),
-                worker.getPlayerAttackLevel(),
-                worker.getPlayerFiremakingLevel(),
-                worker.getPlayerAgilityLevel(),
-                worker.isSongOfElvesComplete()
+                getWorker().getPlayerWoodcuttingLevel(),
+                getWorker().getPlayerAttackLevel(),
+                getWorker().getPlayerFiremakingLevel(),
+                getWorker().getPlayerAgilityLevel(),
+                getWorker().isSongOfElvesComplete()
         );
 
         debug(format);
@@ -53,8 +41,8 @@ public class FetchAxe extends Node {
                 if (Progressive.isMember()) {
                     // calculate the best axe found in the bank pertaining
                     // to player woodcutting/firemaking/quests respectively
-                    final int best_axe_id = calculateBestAxe(worker.getPlayerWoodcuttingLevel(), worker.getPlayerFiremakingLevel(),
-                            worker.isSongOfElvesComplete());
+                    final int best_axe_id = calculateBestAxe(getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerFiremakingLevel(),
+                            getWorker().isSongOfElvesComplete());
 
                     // confirm the axe has been withdrew
                     if ((best_axe_id > 0) && withdrawAxe(best_axe_id)) {
@@ -75,15 +63,15 @@ public class FetchAxe extends Node {
                     Banking.close();
 
                     // now equip the axe if appropriate
-                    if (equipAxe(best_axe_id, worker.getPlayerAttackLevel(), worker.getPlayerFiremakingLevel(),
-                            worker.getPlayerAgilityLevel())) {
+                    if (equipAxe(best_axe_id, getWorker().getPlayerAttackLevel(), getWorker().getPlayerFiremakingLevel(),
+                            getWorker().getPlayerAgilityLevel())) {
                         debug("Equipped axe");
                     }
 
                 } else {
                     // determine the best axe to withdraw from the players bank pertaining to woodcutting level
                     // for F2P players
-                    final int best_axe_id = calculateBestAxeF2P(worker.getPlayerWoodcuttingLevel());
+                    final int best_axe_id = calculateBestAxeF2P(getWorker().getPlayerWoodcuttingLevel());
                     RSItem[] optimalAxes;
 
                     // confirm the axe has been withdrawn
@@ -104,7 +92,7 @@ public class FetchAxe extends Node {
                     Banking.close();
 
                     // equip the axe if appropriate
-                    if (equipAxe(best_axe_id, worker.getPlayerAttackLevel())) {
+                    if (equipAxe(best_axe_id, getWorker().getPlayerAttackLevel())) {
                         debug("Equipped axe");
                     }
                 }
@@ -126,7 +114,7 @@ public class FetchAxe extends Node {
     @Override
     public void debug(String status) {
         String format = ("[Axe Control] ");
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 
@@ -264,7 +252,7 @@ public class FetchAxe extends Node {
 
             // player attack level greater than or equal to the mapped axe level
             // proceed to wield the axe
-            if (worker.getPlayerAttackLevel() >= mappedAxeLevels.get(axe_id) && axeToEquip[0] != null && mappedAxeLevels.get(axe_id) != null) {
+            if (getWorker().getPlayerAttackLevel() >= mappedAxeLevels.get(axe_id) && axeToEquip[0] != null && mappedAxeLevels.get(axe_id) != null) {
                 final RSItem axe_item = axeToEquip[0];
                 axe_item.click("Wield");
                 return true;
@@ -290,7 +278,7 @@ public class FetchAxe extends Node {
 
                 case Workable.CRYSTAL_AXE_ACTIVE: {
                     if (playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.CRYSTAL_AXE_ACTIVE)
-                            && isQuestComplete && !Globals.specialAxe) {
+                            && isQuestComplete && !Globals.isSpecialAxe()) {
                         bestAxe = Workable.CRYSTAL_AXE_ACTIVE;
                         break;
                     } else {
@@ -308,7 +296,7 @@ public class FetchAxe extends Node {
                         }
                     }
                     if (!hasCrystalAxe && playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.CRYSTAL_AXE_INACTIVE)
-                            && isQuestComplete && !Globals.specialAxe) {
+                            && isQuestComplete && !Globals.isSpecialAxe()) {
                         // if no better axe found, use this one
                             if (!(Inventory.find(Workable.CRYSTAL_AXE_ACTIVE, Workable.CRYSTAL_AXE_INACTIVE).length > 0)
                                     && !(Equipment.isEquipped(Workable.CRYSTAL_AXE_ACTIVE, Workable.CRYSTAL_AXE_INACTIVE))) {
@@ -322,7 +310,7 @@ public class FetchAxe extends Node {
 
                 case Workable.INFERNAL_AXE_ACTIVE: {
                     if (playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.INFERNAL_AXE_ACTIVE)
-                            && Globals.specialAxe
+                            && Globals.isSpecialAxe()
                             && playerFiremakingLevel >= 85) { // let the user decide if they want to use this
                         bestAxe = Workable.INFERNAL_AXE_ACTIVE;
                         break;
@@ -332,7 +320,7 @@ public class FetchAxe extends Node {
 
                 case Workable.INFERNAL_AXE_INACTIVE: {
                     if (playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.INFERNAL_AXE_INACTIVE)
-                            && playerFiremakingLevel >= 85 && !Globals.specialAxe) {
+                            && playerFiremakingLevel >= 85 && !Globals.isSpecialAxe()) {
 
                         // search for better axe before moving forward on final decision
                         int axeCount = 0;
@@ -361,7 +349,7 @@ public class FetchAxe extends Node {
 
                 case Workable.DRAGON_AXE: {
 
-                    if (playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.DRAGON_AXE) && !Globals.specialAxe) {
+                    if (playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.DRAGON_AXE) && !Globals.isSpecialAxe()) {
                         // search for better axe before moving forward on final decision
                         int axeCount = 0;
 

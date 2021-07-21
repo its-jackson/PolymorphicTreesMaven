@@ -1,11 +1,11 @@
 package scripts.nodes.woodcutting;
 
 import org.tribot.api2007.*;
-import org.tribot.api2007.types.RSItem;
 import org.tribot.api2007.types.RSTile;
 import scripts.api.*;
 import org.tribot.api.General;
 import org.tribot.api.Timing;
+import scripts.api.antiban.AntiBan;
 import scripts.dax_api.shared.helpers.BankHelper;
 import scripts.nodes.woodcutting.progressive.UpgradeAxe;
 
@@ -25,8 +25,7 @@ public class Bank extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
-
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
         debug("Opening bank");
 
         if (BankHelper.openBankAndWait()) {
@@ -39,8 +38,8 @@ public class Bank extends Node {
             }, General.random(1000, 2000));
         }
 
-        if (task.shouldUpgradeAxe() && upgrade_worker_axe_node.validate(task)) {
-            upgrade_worker_axe_node.execute(task);
+        if (task.shouldUpgradeAxe() && getUpgradeWorkerAxeNode().validate(task)) {
+            getUpgradeWorkerAxeNode().execute(task);
         }
     }
 
@@ -52,7 +51,7 @@ public class Bank extends Node {
     @Override
     public void debug(String status) {
         String format = ("[Bank Control] ");
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 
@@ -60,10 +59,10 @@ public class Bank extends Node {
         return Player.getPosition().distanceTo(getSawmillWoodcuttingGuildAlternativeBank()) < 7;
     }
 
-    private void depositInventory(Task task) {
+    public void depositInventory(Task task) {
         if (Banking.isBankScreenOpen() || Banking.isDepositBoxOpen()) {
 
-            Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
+            debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
             List<Integer> blackList = new ArrayList<>();
 
@@ -108,34 +107,29 @@ public class Bank extends Node {
 
         Banking.openBank();
 
-        return Timing.waitCondition(() -> {
-            General.sleep(200, 300);
-            return Banking.isBankScreenOpen();
-        }, General.random(4000, 5000));
+        return Timing.waitCondition(Banking::isBankScreenOpen, General.random(4000, 5000));
+    }
+
+    private boolean shouldBank(Task task) {
+        if (Inventory.isFull() && BankHelper.isInBank() &&!task.isValidated()) {
+            if (task.shouldPlankThenBank()
+                    && isInWoodcuttingGuildAlternativeBank()
+                    && Workable.getAllPlanks().length > 0
+                    && Plank.calculateOakPlankGold(Workable.getAllLogs()) == -1
+                    && Workable.inventoryContainsGold()) {
+                return true;
+            }
+            return task.shouldBank() || task.shouldFletchThenBank();
+        }
+
+        return false;
     }
 
     public static RSTile getSawmillWoodcuttingGuildAlternativeBank() {
         return sawmill_woodcutting_guild_alternative_bank;
     }
 
-    private boolean shouldBank(Task task) {
-        if (Inventory.isFull()) {
-            if (task.shouldPlankThenBank()
-                    && !task.isValidated()
-                    && isInWoodcuttingGuildAlternativeBank()
-                    && BankHelper.isInBank()
-                    && Workable.getAllPlanks().length > 0
-                    && Plank.calculateOakPlankGold(Workable.getAllLogs()) == -1
-                    && Workable.inventoryContainsGold()) {
-                return true;
-            }
-            if (task.shouldBank() && BankHelper.isInBank()) {
-                return true;
-            }
-            if (task.shouldFletchThenBank() && BankHelper.isInBank()) {
-                return true;
-            }
-        }
-        return false;
+    public UpgradeAxe getUpgradeWorkerAxeNode() {
+        return upgrade_worker_axe_node;
     }
 }

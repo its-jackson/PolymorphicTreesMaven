@@ -11,49 +11,227 @@ import java.util.List;
 
 public class Globals {
     // gui and script state
-    public static long currentTime;
+    private static long currentTime;
 
-    public static String STATE = "State";
-    public static boolean START;
-    public static boolean PROGRESSIVE;
+    private static String state = "State";
+    private static boolean start;
+    private static boolean progressive;
 
-    public static int treeFactor = 5;
-    public static int worldHopFactor = 5;
-    public static int birdNestCount = 0;
+    private static int treeFactor = 7;
+    private static int worldHopFactor = 5;
+    private static int birdNestCount = 0;
 
-    public static boolean worldHop;
-    public static boolean worldHopNoTreesAvailable;
-    public static boolean pickUpBirdNest;
-    public static boolean upgradeAxe;
-    public static boolean specialAxe;
-    public static boolean antiBanMicroSleep;
-    public static boolean humanFatigue;
-    public static boolean useAllGold;
-    public static boolean useGoldPerTask;
+    private static boolean worldHop = true;
+    private static boolean worldHopNoTreesAvailable = true;
+    private static boolean pickUpBirdNest = true;
+    private static boolean upgradeAxe = true;
+    private static boolean specialAxe;
+    private static boolean antiBanMicroSleep = true;
+    private static boolean humanFatigue = true;
+    private static boolean useAllGold;
+    private static boolean useGoldPerTask = true;
 
-    public static boolean onRepeatShuffle;
-    public static boolean onRepeat;
-    public static boolean dontRepeat;
+    private static boolean onRepeatShuffle;
+    private static boolean onRepeat;
+//    private static boolean dontRepeat = true;
 
     // trees
-    public static RSObject[] objectsNear;
-    public static RSObject currentWorkingTree;
-    public static RSObject nextWorkingTree;
+    private static RSObject currentWorkingTree;
+    private static RSObject nextWorkingTree;
 
-    // fatigue system variables
-    public static int var1000;
-    public static int var1001;
-    public static int var1002;
+    //
+    private static double currentFatigueMultiple;
 
     // sleep arraylist
-    public static List<Integer> waitTimes = new ArrayList<>();
+    private static List<Integer> waitTimes = new ArrayList<>();
 
     // task arraylist
-    public static List<Task> tasks = new ArrayList<>();
-
-    // info
-    public static final String desc = ("# Polymorphic's Auto Woodcutter v1.05\n");
+    private static List<Task> tasks = new ArrayList<>();
 
     // private constructor
     private Globals(){}
+
+    public static long getCurrentTime() {
+        return currentTime;
+    }
+
+    public static void setCurrentTime(long currentTime) {
+        Globals.currentTime = currentTime;
+    }
+
+    public static String getState() {
+        return state;
+    }
+
+    public static void setState(String state) {
+        Globals.state = state;
+    }
+
+    public static boolean isStart() {
+        return start;
+    }
+
+    public static void setStart(boolean start) {
+        Globals.start = start;
+    }
+
+    public static boolean isProgressive() {
+        return progressive;
+    }
+
+    public static void setProgressive(boolean progressive) {
+        Globals.progressive = progressive;
+    }
+
+    public static int getTreeFactor() {
+        return treeFactor;
+    }
+
+    public static void setTreeFactor(int treeFactor) {
+        Globals.treeFactor = treeFactor;
+    }
+
+    public static int getWorldHopFactor() {
+        return worldHopFactor;
+    }
+
+    public static void setWorldHopFactor(int worldHopFactor) {
+        Globals.worldHopFactor = worldHopFactor;
+    }
+
+    public static int getBirdNestCount() {
+        return birdNestCount;
+    }
+
+    public static void setBirdNestCount(int birdNestCount) {
+        Globals.birdNestCount = birdNestCount;
+    }
+
+    public static boolean isWorldHop() {
+        return worldHop;
+    }
+
+    public static void setWorldHop(boolean worldHop) {
+        Globals.worldHop = worldHop;
+    }
+
+    public static boolean isWorldHopNoTreesAvailable() {
+        return worldHopNoTreesAvailable;
+    }
+
+    public static void setWorldHopNoTreesAvailable(boolean worldHopNoTreesAvailable) {
+        Globals.worldHopNoTreesAvailable = worldHopNoTreesAvailable;
+    }
+
+    public static boolean isPickUpBirdNest() {
+        return pickUpBirdNest;
+    }
+
+    public static void setPickUpBirdNest(boolean pickUpBirdNest) {
+        Globals.pickUpBirdNest = pickUpBirdNest;
+    }
+
+    public static boolean isUpgradeAxe() {
+        return upgradeAxe;
+    }
+
+    public static void setUpgradeAxe(boolean upgradeAxe) {
+        Globals.upgradeAxe = upgradeAxe;
+    }
+
+    public static boolean isSpecialAxe() {
+        return specialAxe;
+    }
+
+    public static void setSpecialAxe(boolean specialAxe) {
+        Globals.specialAxe = specialAxe;
+    }
+
+    public static boolean isAntiBanMicroSleep() {
+        return antiBanMicroSleep;
+    }
+
+    public static void setAntiBanMicroSleep(boolean antiBanMicroSleep) {
+        Globals.antiBanMicroSleep = antiBanMicroSleep;
+    }
+
+    public static boolean isHumanFatigue() {
+        return humanFatigue;
+    }
+
+    public static void setHumanFatigue(boolean humanFatigue) {
+        Globals.humanFatigue = humanFatigue;
+    }
+
+    public static boolean isUseAllGold() {
+        return useAllGold;
+    }
+
+    public static void setUseAllGold(boolean useAllGold) {
+        Globals.useAllGold = useAllGold;
+    }
+
+    public static boolean isUseGoldPerTask() {
+        return useGoldPerTask;
+    }
+
+    public static void setUseGoldPerTask(boolean useGoldPerTask) {
+        Globals.useGoldPerTask = useGoldPerTask;
+    }
+
+    public static boolean isOnRepeatShuffle() {
+        return onRepeatShuffle;
+    }
+
+    public static void setOnRepeatShuffle(boolean onRepeatShuffle) {
+        Globals.onRepeatShuffle = onRepeatShuffle;
+    }
+
+    public static boolean isOnRepeat() {
+        return onRepeat;
+    }
+
+    public static void setOnRepeat(boolean onRepeat) {
+        Globals.onRepeat = onRepeat;
+    }
+
+    public static RSObject getCurrentWorkingTree() {
+        return currentWorkingTree;
+    }
+
+    public static void setCurrentWorkingTree(RSObject currentWorkingTree) {
+        Globals.currentWorkingTree = currentWorkingTree;
+    }
+
+    public static RSObject getNextWorkingTree() {
+        return nextWorkingTree;
+    }
+
+    public static void setNextWorkingTree(RSObject nextWorkingTree) {
+        Globals.nextWorkingTree = nextWorkingTree;
+    }
+
+    public static double getCurrentFatigueMultiple() {
+        return currentFatigueMultiple;
+    }
+
+    public static void setCurrentFatigueMultiple(double currentFatigueMultiple) {
+        Globals.currentFatigueMultiple = currentFatigueMultiple;
+    }
+
+    public static List<Integer> getWaitTimes() {
+        return waitTimes;
+    }
+
+    public static void setWaitTimes(List<Integer> waitTimes) {
+        Globals.waitTimes = waitTimes;
+    }
+
+    public static List<Task> getTasks() {
+        return tasks;
+    }
+
+    public static void setTasks(List<Task> tasks) {
+        Globals.tasks = tasks;
+    }
 }

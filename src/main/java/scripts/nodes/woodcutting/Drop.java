@@ -21,8 +21,7 @@ public class Drop extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
-
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
         Inventory.setDroppingMethod(AntiBan.generateDroppingPreference());
 
         Inventory.setDroppingPattern(AntiBan.generateDroppingPattern());
@@ -75,7 +74,7 @@ public class Drop extends Node {
     @Override
     public void debug(String status) {
         String format = ("[Drop Control] ");
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 

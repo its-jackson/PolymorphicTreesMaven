@@ -14,7 +14,6 @@ import org.tribot.api.util.abc.preferences.WalkingPreference;
 import org.tribot.api2007.*;
 import org.tribot.api2007.types.RSObject;
 import scripts.api.Globals;
-import scripts.api.antiban.SpecialAttackPreference;
 
 import java.util.concurrent.TimeUnit;
 
@@ -123,7 +122,7 @@ public final class AntiBan {
         abc = new ABCUtil();
         abc_count = 0;
         abc_start_time = System.currentTimeMillis();
-        abc_afk_timer = General.randomLong(600000, 900000); // 10-15 minutes
+        abc_afk_timer = General.randomLong(300000, 1200000); // 5-20 minutes
         print_debug = false;
         micro_sleep = false;
         human_fatigue = false;
@@ -310,8 +309,8 @@ public final class AntiBan {
         return human_fatigue;
     }
 
-    public static void setHumanFatigue(boolean human_fatigue) {
-        human_fatigue = human_fatigue;
+    public static void setHumanFatigue(boolean state) {
+        human_fatigue = state;
     }
 
     /**
@@ -627,12 +626,12 @@ public final class AntiBan {
                     Mouse.leaveGame();
                     sleepReactionTime(sleep_magic);
                     setAbcStartTime(System.currentTimeMillis());
-                    setAbcAfkTimer(General.randomLong(600000, 900000));
+                    setAbcAfkTimer(General.randomLong(300000, 1200000));
                     return true;
                 } else {
                     debug("AFK has been skipped");
                     setAbcStartTime(System.currentTimeMillis());
-                    setAbcAfkTimer(General.randomLong(600000, 900000));
+                    setAbcAfkTimer(General.randomLong(300000, 1200000));
                     return true;
                 }
             }
@@ -914,7 +913,7 @@ public final class AntiBan {
      *            The message to print.
      */
     private static void debug(Object message) {
-        Globals.STATE = (String) message;
+        Globals.setState((String) message);
         General.println("[ABC2] " + message);
     }
 }

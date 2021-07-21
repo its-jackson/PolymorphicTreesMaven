@@ -7,11 +7,19 @@ import org.tribot.api2007.NPCs;
 import org.tribot.api2007.Player;
 import org.tribot.api2007.types.*;
 import scripts.api.*;
+import scripts.api.antiban.AntiBan;
 import scripts.dax_api.walker_engine.interaction_handling.NPCInteraction;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Predicate;
+
+/**
+ * Purpose of class: Will perform the planking option by right clicking the sawmill operator.
+ * Author: Jackson (Polymorphic~TRiBot)
+ * Date:
+ * Time:
+ */
 
 public class Plank extends Node {
 
@@ -24,7 +32,7 @@ public class Plank extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
         final int plank_gold = Plank.calculateOakPlankGold(Workable.getAllLogs());
 
@@ -82,7 +90,7 @@ public class Plank extends Node {
 
     @Override
     public void debug(String status) {
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println("[Plank Control] ".concat(status));
     }
 
@@ -101,7 +109,15 @@ public class Plank extends Node {
 
         final int plank_gold = calculateOakPlankGold(logs);
 
-        return plank_gold != -1 && Workable.inventoryContainsGold();
+        RSItem[] goldArray = Workable.getAllGold();
+
+        int currentInventoryGold = 0;
+
+        if (goldArray.length > 0) {
+            currentInventoryGold = goldArray[0].getStack();
+        }
+
+        return plank_gold != -1 && currentInventoryGold >= Workable.OAK_FEE;
     }
 
     /**
@@ -137,17 +153,17 @@ public class Plank extends Node {
                         .getDefinition()
                         .getName()
                         .toLowerCase()
-                        .contains("oak")).count() * 250);
+                        .contains("oak")).count() * Workable.OAK_FEE);
     }
 
     public static boolean isAtSawmill() {
-        final RSNPC[] sawmill_NPCS = NPCs.findNearest(sawmill_operator_npc_filter());
+        final RSNPC[] sawmill_npcs = NPCs.findNearest(sawmill_operator_npc_filter());
 
-        if (sawmill_NPCS.length == 0) {
+        if (sawmill_npcs.length == 0) {
             return false;
         }
 
-        final RSNPC sawmill_NPC = sawmill_NPCS[0];
+        final RSNPC sawmill_NPC = sawmill_npcs[0];
 
         return Player.getPosition().distanceTo(sawmill_NPC) < 7;
     }
@@ -159,8 +175,7 @@ public class Plank extends Node {
     private String calculatePlankOption(RSItem[] logs) {
         String option = null;
 
-        if (Arrays
-                .stream(logs)
+        if (Arrays.stream(logs)
                 .anyMatch(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("oak"))) {
             option = "Oak - 250gp";
         }
@@ -192,9 +207,7 @@ public class Plank extends Node {
         // goldSpent has to be less than or equal to playerChoiceGold for the plank node to execute
         // if using goldPerTask.
         // once the goldSpent has reached the actual gold limit, then the task is complete, can't make planks.
-
         // if using all gold then doesn't matter if goldSpent has reached the limited.
-
         if (task.shouldPlankThenBank() && Inventory.isFull()) {
             if (isAtSawmill() && Workable.inventoryContainsGold()) {
                 return !task.isValidated() && canActuallyMakeOakPlank(Workable.getAllLogs());

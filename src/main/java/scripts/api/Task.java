@@ -1,5 +1,6 @@
 package scripts.api;
 
+import org.tribot.api2007.types.RSItem;
 import scripts.dax_api.api_lib.models.RunescapeBank;
 
 public class Task {
@@ -43,14 +44,14 @@ public class Task {
     }
 
     public boolean isValidated() {
-        if ("plank-bank".equalsIgnoreCase(getLogOption()) && Globals.useGoldPerTask) {
+        if ("plank-bank".equalsIgnoreCase(getLogOption()) && Globals.isUseGoldPerTask()) {
             return reachedGoldLimit()
                     || reachedAllGold()
                     || reachedLevel()
                     || reachedTime()
                     ;
         }
-        if ("plank-bank".equalsIgnoreCase(getLogOption()) && Globals.useAllGold) {
+        if ("plank-bank".equalsIgnoreCase(getLogOption()) && Globals.isUseAllGold()) {
             return reachedAllGold()
                     || reachedLevel()
                     || reachedTime()
@@ -62,6 +63,13 @@ public class Task {
     }
 
     private boolean reachedAllGold() {
+        RSItem[] goldArray = Workable.getAllGold();
+
+        if (goldArray.length > 0) {
+            int currentInventoryGold = goldArray[0].getStack();
+            return Gold.getGoldTotalBank() == 0 && currentInventoryGold < Workable.OAK_FEE;
+        }
+
         return Workable.getAllGold().length == 0 && Gold.getGoldTotalBank() == 0;
     }
 
@@ -101,15 +109,15 @@ public class Task {
     }
 
     public boolean shouldPickupNest() {
-        return Globals.pickUpBirdNest;
+        return Globals.isPickUpBirdNest();
     }
 
     public boolean shouldUpgradeAxe() {
-        return Globals.upgradeAxe;
+        return Globals.isUpgradeAxe();
     }
 
     public boolean shouldWorldHop() {
-        return Globals.worldHop;
+        return Globals.isWorldHop();
     }
 
     public void setCompleteTask(String location, String tree) {
@@ -228,14 +236,22 @@ public class Task {
                 this.setTree("Maple tree");
                 this.setBankLocation(RunescapeBank.CAMELOT);
             }
-            case "tar swamp sulliuscep" -> {
-                this.setActualLocation(Location.TAR_SWAMP);
-                this.setBankLocation(RunescapeBank.FOSSIL_ISLAND);
+            case "lumbridge castle tree" -> {
+                this.setActualLocation(Location.LUMBRIDGE_CASTLE_TREES);
+                this.setBankLocation(RunescapeBank.LUMBRIDGE_TOP);
             }
             case "sorcerer's tower magic", "sorcerer's tower magic tree" -> {
-                this.actualLocation = Location.SORCERERS_TOWER;
-                this.bankLocation = RunescapeBank.CAMELOT;
-                this.tree = "Magic tree";
+                this.setActualLocation(Location.SORCERERS_TOWER);
+                this.setBankLocation(RunescapeBank.CAMELOT);
+                this.setTree("Magic tree");
+            }
+            case "grand exchange tree" -> {
+                this.setActualLocation(Location.GRAND_EXCHANGE_TREES);
+                this.setBankLocation(RunescapeBank.GRAND_EXCHANGE);
+            }
+            case "seers' village trees" -> {
+                this.setActualLocation(Location.SEERS_VILLAGE_TREES);
+                this.setBankLocation(RunescapeBank.CAMELOT);
             }
         }
     }
@@ -298,6 +314,14 @@ public class Task {
 
     @Override
     public String toString() {
-        return this.tree + "--" + this.location + "--" + this.logOption + "--" + this.untilLevel + "--" + this.actualLocation + "--" + this.timer;
+        return "Task{" +
+                "tree='" + tree + '\'' +
+                ", location='" + location + '\'' +
+                ", logOption='" + logOption + '\'' +
+                ", untilLevel=" + untilLevel +
+                ", timer=" + timer +
+                ", bankLocation=" + bankLocation +
+                ", actualLocation=" + actualLocation +
+                '}';
     }
 }

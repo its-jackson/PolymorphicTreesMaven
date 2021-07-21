@@ -5,7 +5,6 @@ import org.tribot.api.General;
 import org.tribot.api.Timing;
 import org.tribot.api2007.*;
 import org.tribot.api2007.Objects;
-import org.tribot.api2007.types.RSItem;
 import org.tribot.api2007.types.RSObject;
 import org.tribot.api2007.types.RSPlayer;
 import org.tribot.api2007.types.RSTile;
@@ -35,8 +34,7 @@ public class Walk extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
-
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
         getWalking(
                 isWalkToBankController(),
                 isWalkToTreeController(),
@@ -54,7 +52,7 @@ public class Walk extends Node {
     @Override
     public void debug(String status) {
         String format = "[Walking Control] ";
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 
@@ -183,7 +181,7 @@ public class Walk extends Node {
             if (!Inventory.isFull()
                     && !Workable.isWorking()
                     && Workable.isInLocation(task, Player.getRSPlayer())
-                    && !Workable.nearObjects(Globals.treeFactor, task.getTree())) {
+                    && !Workable.nearObjects(Globals.getTreeFactor(), task.getTree())) {
                 // walk to future tree
                 setWalkToTreeController(true);
                 return true;

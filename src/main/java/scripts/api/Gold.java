@@ -5,7 +5,7 @@ package scripts.api;
  */
 
 public class Gold {
-    private static String goldRegex = "";
+    private static String goldRegex = "10k";
     private static int goldSpentTotal = 0;
     private static int goldTotalBank = -1;
 

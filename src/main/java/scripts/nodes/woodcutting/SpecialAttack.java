@@ -1,5 +1,6 @@
 package scripts.nodes.woodcutting;
 
+import org.tribot.api.Timing;
 import org.tribot.api.input.Mouse;
 import org.tribot.api2007.types.RSInterfaceChild;
 import scripts.api.*;
@@ -20,7 +21,7 @@ public class SpecialAttack extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
         final boolean is_resizable = General.isClientResizable();
         debug("Client resizable " + is_resizable);
@@ -34,7 +35,8 @@ public class SpecialAttack extends Node {
             debug("Special attack boosting");
             final boolean result = performSpecialAttack(special_attack_preference, new Rectangle(special_box.getAbsoluteBounds()));
             if (result) {
-                General.sleep(2500, 3000);
+                Timing.waitCondition(() -> !Workable.isWorking(), General.random(1200, 2000));
+                Timing.waitCondition(Workable::isWorking, General.random(2200, 3300));
             }
         }
     }
@@ -47,7 +49,7 @@ public class SpecialAttack extends Node {
     @Override
     public void debug(String status) {
         String format = ("[Special Control] ");
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 
@@ -99,8 +101,7 @@ public class SpecialAttack extends Node {
         return Workable.getSpecialAttack() == 100
                 && !Inventory.isFull()
                 && Workable.isSpecialAxeEquipped()
-                && Globals.objectsNear != null
-                && Globals.objectsNear.length > 0
+                && Workable.nearObjects(Globals.getTreeFactor(), task.getTree())
                 && Workable.isInLocation(task, Player.getRSPlayer())
                 && Inventory.getAll().length < 26;
     }

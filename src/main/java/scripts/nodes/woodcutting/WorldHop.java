@@ -7,6 +7,7 @@ import org.tribot.api2007.Players;
 import org.tribot.api2007.WorldHopper;
 import org.tribot.api2007.types.RSPlayer;
 import scripts.api.*;
+import scripts.api.antiban.AntiBan;
 
 import java.util.function.Predicate;
 
@@ -23,7 +24,7 @@ public class WorldHop extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.waitTimes, Globals.humanFatigue);
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
         setPlayerMember(Progressive.isMember());
 
@@ -43,7 +44,7 @@ public class WorldHop extends Node {
     @Override
     public boolean validate(Task task) {
         // n or more RSPlayers which are accepted by the filter.
-        return Players.exists(filter(task), Globals.worldHopFactor)
+        return Players.exists(filter(task), Globals.getWorldHopFactor())
                 && task.shouldWorldHop()
                 && Workable.isInLocation(task, Player.getRSPlayer())
                 && Login.getLoginState() == Login.STATE.INGAME
@@ -51,8 +52,8 @@ public class WorldHop extends Node {
                 ||
 
                 !Workable.objectsExist(task.getActualLocation().getRSArea().getAllTiles(), task.getTree())
-                        && !Workable.nearObjects(Globals.treeFactor, task.getTree())
-                        && Globals.worldHopNoTreesAvailable
+                        && !Workable.nearObjects(Globals.getTreeFactor(), task.getTree())
+                        && Globals.isWorldHopNoTreesAvailable()
                         && Workable.isInLocation(task, Player.getRSPlayer())
                         && Login.getLoginState() == Login.STATE.INGAME
                 ;
@@ -61,7 +62,7 @@ public class WorldHop extends Node {
     @Override
     public void debug(String status) {
         String format = ("[World Control] ");
-        Globals.STATE = (status);
+        Globals.setState(status);
         General.println(format.concat(status));
     }
 
