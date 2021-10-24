@@ -19,7 +19,8 @@ import scripts.dax_api.walker_engine.interaction_handling.InteractionHelper;
  */
 
 public class BirdNest extends Node {
-    final static private String[] BIRD_NEST_NAMES = {
+
+    private static final  String[] BIRD_NEST_NAMES = {
             "Bird nest",
             "Clue nest (beginner)",
             "Clue nest (easy)",

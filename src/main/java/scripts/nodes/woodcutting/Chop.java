@@ -196,24 +196,23 @@ public class Chop extends Node {
                 break;
             }
             Workable.optimizeGame();
-            General.sleep(200, 400);
             // found bird nest on ground
             // leave loop
             if (shouldPickupBirdNestNow(task)) {
                 getBirdNestNode().debug("Bird nest complete");
+                General.sleep(200, 400);
             }
-            General.sleep(200, 400);
             // special attack boost ready
             // leave loop
             if (shouldUtilizeSpecialAttackNow(task)) {
                 getSpecialAttackNode().debug("Special ability complete");
+                General.sleep(200, 400);
             }
-            General.sleep(200, 400);
             // time to world hop, too many players
             if (shouldWorldHopNow(task)) {
                 getWorldHopNode().debug("World change complete");
+                General.sleep(200, 400);
             }
-            General.sleep(200, 400);
             // let ABC2 determine the next anti-ban task/action
             AntiBan.checkAntiBanTask(trees, tree);
         }
