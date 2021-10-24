@@ -19,6 +19,7 @@ import java.util.List;
  */
 
 public class Bank extends Node {
+
     private final UpgradeAxe upgrade_worker_axe_node = new UpgradeAxe();
 
     private static final RSTile sawmill_woodcutting_guild_alternative_bank = new RSTile(1650, 3498, 0);

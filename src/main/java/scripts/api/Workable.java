@@ -20,7 +20,7 @@ import java.util.*;
  */
 
 public interface Workable {
-     int OAK_FEE = 250;
+    int OAK_FEE = 250;
     // gold id constant
     int GOLD = 995;
 
@@ -43,7 +43,6 @@ public interface Workable {
     int BRONZE_AXE = 1351;
 
     /**
-     *
      * @return All plank's currently inside the player's inventory
      */
     static RSItem[] getAllPlanks() {
@@ -54,7 +53,6 @@ public interface Workable {
     }
 
     /**
-     *
      * @return All gold currently inside the player's inventory
      */
     static RSItem[] getAllGold() {
@@ -146,11 +144,11 @@ public interface Workable {
             final int axe_id = axe.getID();
             if (axe_id > 0) {
                 switch (axe_id) {
-                    case INFERNAL_AXE_ACTIVE,
-                            INFERNAL_AXE_INACTIVE,
-                            CRYSTAL_AXE_ACTIVE,
-                            CRYSTAL_AXE_INACTIVE,
-                            DRAGON_AXE -> {
+                    case INFERNAL_AXE_ACTIVE:
+                    case INFERNAL_AXE_INACTIVE:
+                    case CRYSTAL_AXE_ACTIVE:
+                    case CRYSTAL_AXE_INACTIVE:
+                    case DRAGON_AXE: {
                         return Equipment.isEquipped(axe_id);
                     }
                 }

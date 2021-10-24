@@ -9,16 +9,25 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>15</maven.compiler.source>
-        <maven.compiler.target>15</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
-
 
     <dependencies>
         <dependency>
             <groupId>org.tribot</groupId>
             <artifactId>tribot-client</artifactId>
-            <version>12.0.6</version>
+            <version>99.99.992</version>
+        </dependency>
+        <dependency>
+            <groupId>org.tribot</groupId>
+            <artifactId>tribot-script-sdk</artifactId>
+            <version>0.0.17</version>
+        </dependency>
+        <dependency>
+            <groupId>org.tribot</groupId>
+            <artifactId>tribot-dax-walker</artifactId>
+            <version>0.0.4</version>
         </dependency>
     </dependencies>
 
@@ -40,4 +49,5 @@
             <url>https://gitlab.com/api/v4/projects/20741387/packages/maven</url>
         </snapshotRepository>
     </distributionManagement>
+
 </project>

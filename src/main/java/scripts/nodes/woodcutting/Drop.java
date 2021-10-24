@@ -2,9 +2,7 @@ package scripts.nodes.woodcutting;
 
 import org.tribot.api.General;
 import org.tribot.api2007.Inventory;
-import org.tribot.api2007.Player;
 import org.tribot.api2007.types.RSItem;
-import org.tribot.api2007.types.RSPlayer;
 import scripts.api.*;
 import scripts.api.antiban.AntiBan;
 
@@ -21,16 +19,17 @@ public class Drop extends Node {
 
     @Override
     public void execute(Task task) {
-        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
-        Inventory.setDroppingMethod(AntiBan.generateDroppingPreference());
 
+        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
+
+        Inventory.setDroppingMethod(AntiBan.generateDroppingPreference());
         Inventory.setDroppingPattern(AntiBan.generateDroppingPattern());
 
         debug("Dropping preference " + Inventory.getDroppingMethod().toString().toLowerCase());
         debug("Dropping pattern " + Inventory.getDroppingPattern().toString().toLowerCase());
 
         switch (task.getLogOption().toLowerCase()) {
-            case "drop" -> {
+            case "drop": {
                 final RSItem[] all_logs = Workable.getAllLogs();
 
                 if (all_logs.length > 0) {
@@ -41,7 +40,8 @@ public class Drop extends Node {
                     }
                 }
             }
-            case "fletch-drop" -> {
+            break;
+            case "fletch-drop": {
                 // todo
                 final RSItem[] all_bows = Workable.getAllBows();
                 final RSItem[] all_arrow_shafts = Workable.getAllArrowShafts();
@@ -68,7 +68,7 @@ public class Drop extends Node {
 
     @Override
     public boolean validate(Task task) {
-        return shouldDropLogs(task, Player.getRSPlayer()) || shouldFletchThenDrop(task, Player.getRSPlayer());
+        return shouldDropLogs(task) || shouldFletchThenDrop(task);
     }
 
     @Override
@@ -78,16 +78,15 @@ public class Drop extends Node {
         General.println(format.concat(status));
     }
 
-    private boolean shouldDropLogs(Task task, RSPlayer player) {
+    private boolean shouldDropLogs(Task task) {
         return Inventory.isFull()
-                && task.shouldDrop()
-                && Workable.isInLocation(task, player);
+                && task.shouldDrop();
+
     }
 
-    private boolean shouldFletchThenDrop(Task task, RSPlayer player) {
+    private boolean shouldFletchThenDrop(Task task) {
         return Inventory.isFull()
-                && task.shouldFletchThenDrop()
-                && Workable.isInLocation(task, player);
-    }
+                && task.shouldFletchThenDrop();
 
+    }
 }

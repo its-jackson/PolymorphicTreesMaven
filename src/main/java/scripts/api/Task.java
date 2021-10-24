@@ -128,131 +128,166 @@ public class Task {
                         .toLowerCase();
 
         switch (complete_location) {
-            case "seers' village magic", "seers' village magic tree" -> {
+            case "seers' village magic":
+            case "seers' village magic tree": {
                 this.setActualLocation(Location.SEERS_VILLAGE_MAGICS);
                 this.setTree("Magic tree");
                 this.setBankLocation(RunescapeBank.CAMELOT);
             }
-            case "north upper level redwood" -> {
+            break;
+            case "north upper level redwood": {
                 this.setActualLocation(Location.REDWOOD_NORTH_UPPER_LEVEL);
                 this.setBankLocation(RunescapeBank.WOODCUTTING_GUILD);
             }
-            case "north lower level redwood" -> {
+            break;
+            case "north lower level redwood": {
                 this.setActualLocation(Location.REDWOOD_NORTH);
                 this.setBankLocation(RunescapeBank.WOODCUTTING_GUILD);
             }
-            case "south lower level redwood" -> {
+            break;
+            case "south lower level redwood": {
                 this.setActualLocation(Location.REDWOOD_SOUTH);
                 this.setBankLocation(RunescapeBank.WOODCUTTING_GUILD);
             }
-            case "south upper level redwood" -> {
+            break;
+            case "south upper level redwood": {
                 this.setActualLocation(Location.REDWOOD_SOUTH_UPPER_LEVEL);
                 this.setBankLocation(RunescapeBank.WOODCUTTING_GUILD);
             }
-            case "woodcutting guild oak" -> {
+            break;
+            case "woodcutting guild oak": {
                 this.setActualLocation(Location.WOODCUTTING_GUILD_OAKS);
                 this.setBankLocation(RunescapeBank.WOODCUTTING_GUILD);
             }
-            case "woodcutting guild maple", "woodcutting guild maple tree" -> {
+            break;
+            case "woodcutting guild maple":
+            case "woodcutting guild maple tree": {
                 this.setActualLocation(Location.WOODCUTTING_GUILD_MAPLES);
                 this.setTree("Maple tree");
                 this.setBankLocation(RunescapeBank.WOODCUTTING_GUILD);
             }
-            case "woodcutting guild willow" -> {
+            break;
+            case "woodcutting guild willow": {
                 this.setActualLocation(Location.WOODCUTTING_GUILD_WILLOWS);
                 this.setBankLocation(RunescapeBank.WOODCUTTING_GUILD);
             }
-            case "woodcutting guild magic", "woodcutting guild magic tree" -> {
+            break;
+            case "woodcutting guild magic":
+            case "woodcutting guild magic tree": {
                 this.setActualLocation(Location.WOODCUTTING_GUILD_MAGICS);
                 this.setTree("Magic tree");
                 this.setBankLocation(RunescapeBank.WOODCUTTING_GUILD);
             }
-            case "woodcutting guild yew" -> {
+            break;
+            case "woodcutting guild yew": {
                 this.setActualLocation(Location.WOODCUTTING_GUILD_YEWS);
                 this.setBankLocation(RunescapeBank.WOODCUTTING_GUILD);
             }
-            case "draynor yew" -> {
+            break;
+            case "draynor yew": {
                 this.setActualLocation(Location.DRAYNOR_YEWS);
                 this.setBankLocation(RunescapeBank.DRAYNOR);
             }
-            case "draynor willow" -> {
+            break;
+            case "draynor willow": {
                 this.setActualLocation(Location.DRAYNOR_WILLOWS);
                 this.setBankLocation(RunescapeBank.DRAYNOR);
             }
-            case "falador yew" -> {
+            break;
+            case "falador yew": {
                 this.setActualLocation(Location.FALADOR_YEWS);
                 this.setBankLocation(RunescapeBank.FALADOR_EAST);
             }
-            case "edgeville yew" -> {
+            break;
+            case "edgeville yew": {
                 this.setActualLocation(Location.EDGEVILLE_YEWS);
                 this.setBankLocation(RunescapeBank.EDGEVILLE);
             }
-            case "varrock west tree" -> {
+            break;
+            case "varrock west tree": {
                 this.setActualLocation(Location.VARROCK_WEST_TREES);
                 this.setBankLocation(RunescapeBank.VARROCK_WEST);
             }
-            case "varrock west oak" -> {
+            break;
+            case "varrock west oak": {
                 this.setActualLocation(Location.VARROCK_WEST_OAKS);
                 this.setBankLocation(RunescapeBank.VARROCK_WEST);
             }
-            case "varrock palace oak" -> {
+            break;
+            case "varrock palace oak": {
                 this.setActualLocation(Location.VARROCK_PALACE_OAKS);
                 this.setBankLocation(RunescapeBank.GRAND_EXCHANGE);
             }
-            case "varrock palace yew" -> {
+            break;
+            case "varrock palace yew": {
                 this.setActualLocation(Location.VARROCK_PALACE_YEWS);
                 this.setBankLocation(RunescapeBank.GRAND_EXCHANGE);
             }
-            case "port sarim willow" -> {
+            break;
+            case "port sarim willow": {
                 this.setActualLocation(Location.PORT_SARIM_WILLOWS);
                 this.setBankLocation(RunescapeBank.DRAYNOR);
             }
-            case "isle of souls teak", "isle of souls mahogany" -> {
+            break;
+            case "isle of souls teak":
+            case "isle of souls mahogany": {
                 this.setActualLocation(Location.ISLE_OF_SOULS);
                 this.setBankLocation(RunescapeBank.ISLE_OF_SOULS);
             }
-            case "falador east oak" -> {
+            break;
+            case "falador east oak": {
                 this.setActualLocation(Location.FALADOR_EAST_OAKS);
                 this.setBankLocation(RunescapeBank.FALADOR_EAST);
             }
-            case "catherby yew" -> {
+            break;
+            case "catherby yew": {
                 this.setActualLocation(Location.CATHERBY_YEWS);
                 this.setBankLocation(RunescapeBank.CATHERBY);
             }
-            case "catherby willow" -> {
+            break;
+            case "catherby willow": {
                 this.setActualLocation(Location.CATHERBY_WILLOWS);
                 this.setBankLocation(RunescapeBank.CATHERBY);
             }
-            case "seers' village yew" -> {
+            break;
+            case "seers' village yew": {
                 this.setActualLocation(Location.SEERS_VILLAGE_YEWS);
                 this.setBankLocation(RunescapeBank.CAMELOT);
             }
-            case "seers' village willow" -> {
+            break;
+            case "seers' village willow": {
                 this.setActualLocation(Location.SEERS_VILLAGE_WILLOWS);
                 this.setBankLocation(RunescapeBank.CAMELOT);
             }
-            case "seers' village maple", "seers' village maple tree" -> {
+            break;
+            case "seers' village maple":
+            case "seers' village maple tree": {
                 this.setActualLocation(Location.SEERS_VILLAGE_MAPLES);
                 this.setTree("Maple tree");
                 this.setBankLocation(RunescapeBank.CAMELOT);
             }
-            case "lumbridge castle tree" -> {
+            break;
+            case "lumbridge castle tree": {
                 this.setActualLocation(Location.LUMBRIDGE_CASTLE_TREES);
                 this.setBankLocation(RunescapeBank.LUMBRIDGE_TOP);
             }
-            case "sorcerer's tower magic", "sorcerer's tower magic tree" -> {
+            break;
+            case "sorcerer's tower magic":
+            case "sorcerer's tower magic tree": {
                 this.setActualLocation(Location.SORCERERS_TOWER);
                 this.setBankLocation(RunescapeBank.CAMELOT);
                 this.setTree("Magic tree");
             }
-            case "grand exchange tree" -> {
+            case "grand exchange tree": {
                 this.setActualLocation(Location.GRAND_EXCHANGE_TREES);
                 this.setBankLocation(RunescapeBank.GRAND_EXCHANGE);
             }
-            case "seers' village trees" -> {
+            break;
+            case "seers' village trees": {
                 this.setActualLocation(Location.SEERS_VILLAGE_TREES);
                 this.setBankLocation(RunescapeBank.CAMELOT);
             }
+            break;
         }
     }
 

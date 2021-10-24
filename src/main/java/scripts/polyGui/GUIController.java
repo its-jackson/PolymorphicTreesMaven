@@ -21,12 +21,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
+
 import scripts.api.Globals;
 import scripts.api.Task;
 import com.allatori.annotations.DoNotRename;
 import scripts.api.TimeElapse;
 import scripts.api.Gold;
-import scripts.modules.fluffeesapi.utilities.Utilities;
+import scripts.fluffeeapi.Utilities;
+
 
 @DoNotRename
 public class GUIController implements Initializable {
@@ -385,8 +387,7 @@ public class GUIController implements Initializable {
                     } else {
                         System.out.println("Level must be greater than zero and less than 100.");
                     }
-                }
-                catch (NumberFormatException formatException) {
+                } catch (NumberFormatException formatException) {
                     System.out.println("Level must be numerical.");
                 }
             }
@@ -595,14 +596,11 @@ public class GUIController implements Initializable {
             }
         } catch (FileNotFoundException exception) {
             System.out.println("Caught file not found.");
-        }
-        catch (NullPointerException nullPointerException) {
+        } catch (NullPointerException nullPointerException) {
             System.out.println("Caught null pointer.");
-        }
-        catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
             System.out.println("Caught index out of bounds.");
-        }
-        catch (SecurityException securityException) {
+        } catch (SecurityException securityException) {
             System.out.println("Caught security.");
         }
 
@@ -817,31 +815,35 @@ public class GUIController implements Initializable {
 
         if (treeChoice != null) {
             switch (treeChoice.toLowerCase()) {
-                case "tree" -> {
+                case "tree": {
                     choiceBoxLocation.getItems().add(getTreeLocations()[2]); // varrock west
                     choiceBoxLocation.getItems().add(getTreeLocations()[11]); // lumbridge castle
                     choiceBoxLocation.getItems().add(getTreeLocations()[13]); // grand exchange
                     choiceBoxLocation.getItems().add(getTreeLocations()[7]); // seers' village
 
                 }
-                case "oak" -> {
+                break;
+                case "oak": {
                     choiceBoxLocation.getItems().add(getTreeLocations()[0]); // woodcutting guild
                     choiceBoxLocation.getItems().add(getTreeLocations()[2]); // varrock west
                     choiceBoxLocation.getItems().add(getTreeLocations()[3]); // varrock palace
                     choiceBoxLocation.getItems().add(getTreeLocations()[9]); // falador east
                 }
-                case "willow" -> {
+                break;
+                case "willow": {
                     choiceBoxLocation.getItems().add(getTreeLocations()[0]); // woodcutting guild
                     choiceBoxLocation.getItems().add(getTreeLocations()[1]); // draynor
                     choiceBoxLocation.getItems().add(getTreeLocations()[6]); // port sarim
                     choiceBoxLocation.getItems().add(getTreeLocations()[10]); // catherby
                     choiceBoxLocation.getItems().add(getTreeLocations()[7]); // seers' village
                 }
-                case "maple" -> {
+                break;
+                case "maple": {
                     choiceBoxLocation.getItems().add(getTreeLocations()[0]); // woodcutting guild
                     choiceBoxLocation.getItems().add(getTreeLocations()[7]); // seers' village
                 }
-                case "yew" -> {
+                break;
+                case "yew": {
                     choiceBoxLocation.getItems().add(getTreeLocations()[0]); // woodcutting guild
                     choiceBoxLocation.getItems().add(getTreeLocations()[1]); // draynor
                     choiceBoxLocation.getItems().add(getTreeLocations()[4]); // falador
@@ -850,19 +852,24 @@ public class GUIController implements Initializable {
                     choiceBoxLocation.getItems().add(getTreeLocations()[10]); // catherby
                     choiceBoxLocation.getItems().add(getTreeLocations()[7]); // seers' village
                 }
-                case "magic", "magic tree" -> {
+                break;
+                case "magic":
+                case "magic tree": {
                     choiceBoxLocation.getItems().add(getTreeLocations()[0]); // woodcutting guild
                     choiceBoxLocation.getItems().add(getTreeLocations()[7]); // seers' village
                     choiceBoxLocation.getItems().add(getTreeLocations()[12]); // sorcerer's tower
                 }
-                case "redwood" -> {
+                break;
+                case "redwood": {
                     choiceBoxLocation.getItems().add("North Lower Level"); // woodcutting guild
                     choiceBoxLocation.getItems().add("North Upper Level"); // woodcutting guild
                     choiceBoxLocation.getItems().add("South Lower Level"); // woodcutting guild
                     choiceBoxLocation.getItems().add("South Upper Level"); // woodcutting guild
 
                 }
-                case "mahogany", "teak" -> {
+                break;
+                case "mahogany":
+                case "teak": {
                     choiceBoxLocation.getItems().add(getTreeLocations()[8]); // isle of souls
                 }
             }

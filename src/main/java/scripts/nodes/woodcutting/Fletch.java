@@ -4,6 +4,7 @@ import org.tribot.api.General;
 import org.tribot.api.Timing;
 import org.tribot.api2007.Interfaces;
 import org.tribot.api2007.Inventory;
+import org.tribot.api2007.Skills;
 import org.tribot.api2007.types.RSInterfaceChild;
 import org.tribot.api2007.types.RSInterfaceMaster;
 import org.tribot.api2007.types.RSItem;
@@ -39,7 +40,7 @@ public class Fletch extends Node implements Workable {
         final RSItem[] logs = Workable.getAllLogs();
 
         // calculate best fletching option such as shortbow or longbow etc
-        final String best_fletching_option = calculateBestFletchingOption(getWorker().getPlayerFletchingLevel(), logs);
+        final String best_fletching_option = calculateBestFletchingOption(Skills.SKILLS.FLETCHING.getActualLevel(), logs);
 
         if (best_fletching_option != null) {
             // if interface is already open, click the optimal fletching option
@@ -75,7 +76,7 @@ public class Fletch extends Node implements Workable {
         }
 
         switch (task.getLogOption().toLowerCase()) {
-            case "fletch-bank" -> {
+            case "fletch-bank": {
                 if (!(Workable.getAllLogs().length > 0)) {
                     // no logs inside inventory, then bank
                     debug("Fletching complete");
@@ -84,7 +85,8 @@ public class Fletch extends Node implements Workable {
                     }
                 }
             }
-            case "fletch-drop" -> {
+            break;
+            case "fletch-drop": {
                 if (!(Workable.getAllLogs().length > 0)) {
                     // no logs inside inventory, then drop
                     debug("Fletching complete");
@@ -153,7 +155,7 @@ public class Fletch extends Node implements Workable {
                     .orElse("");
 
             switch (log_name.toLowerCase()) {
-                case "logs" -> {
+                case "logs": {
                     greyList = new String[]{"Longbow", "Shortbow", "15 arrow shafts"};
 
                     final Optional<String> longbow_key = getMapBows()
@@ -189,7 +191,8 @@ public class Fletch extends Node implements Workable {
                         }
                     }
                 }
-                case "oak logs" -> {
+                break;
+                case "oak logs": {
                     greyList = new String[]{"Oak longbow", "Oak shortbow", "30 arrow shafts"};
 
                     final Optional<String> longbow_key = getMapBows()
@@ -224,9 +227,9 @@ public class Fletch extends Node implements Workable {
                             return option;
                         }
                     }
-
                 }
-                case "willow logs" -> {
+                break;
+                case "willow logs": {
                     greyList = new String[]{"Willow longbow", "Willow shortbow", "45 arrow shafts"};
 
                     final Optional<String> longbow_key = getMapBows()
@@ -262,7 +265,8 @@ public class Fletch extends Node implements Workable {
                         }
                     }
                 }
-                case "maple logs" -> {
+                break;
+                case "maple logs": {
                     greyList = new String[]{"Maple longbow", "Maple shortbow", "60 arrow shafts"};
 
                     final Optional<String> longbow_key = getMapBows()
@@ -297,9 +301,9 @@ public class Fletch extends Node implements Workable {
                             return option;
                         }
                     }
-
                 }
-                case "yew logs" -> {
+                break;
+                case "yew logs": {
                     greyList = new String[]{"Yew longbow", "Yew shortbow", "75 arrow shafts"};
 
                     final Optional<String> longbow_key = getMapBows()
@@ -335,7 +339,8 @@ public class Fletch extends Node implements Workable {
                         }
                     }
                 }
-                case "magic logs" -> {
+                break;
+                case "magic logs": {
                     greyList = new String[]{"Magic longbow", "Magic shortbow", "90 arrow shafts"};
 
                     final Optional<String> longbow_key = getMapBows()
@@ -371,7 +376,8 @@ public class Fletch extends Node implements Workable {
                         }
                     }
                 }
-                case "redwood logs" -> {
+                break;
+                case "redwood logs": {
                     greyList = new String[]{"Redwood longbow", "Redwood shortbow", "105 arrow shafts"};
 
                     final Optional<String> longbow_key = getMapBows()
@@ -407,20 +413,23 @@ public class Fletch extends Node implements Workable {
                         }
                     }
                 }
-                case "teak logs" -> {
+                break;
+                case "teak logs": {
                     greyList = new String[]{"Teak stock"};
                     if (fletchingLevel >= 46) {
                         option = greyList[0];
                         return option;
                     }
                 }
-                case "mahogany logs" -> {
+                break;
+                case "mahogany logs": {
                     greyList =  new String[]{"Mahogany stock"};
                     if (fletchingLevel >= 61) {
                         option = greyList[0];
                         return option;
                     }
                 }
+                break;
             }
         }
 

@@ -26,13 +26,15 @@ public class LogDisposal extends Node {
     @Override
     public boolean validate(Task task) {
         switch (task.getLogOption().toLowerCase()) {
-            case "bank", "plank-bank" -> {
+            case "bank":
+                case "plank-bank": {
                 return getBankNode().validate(task);
             }
-            case "drop" -> {
+            case "drop":  {
                 return getDropNode().validate(task);
             }
-            case "fletch-bank", "fletch-drop" -> {
+            case "fletch-bank":
+                case "fletch-drop": {
                 return getFletchNode().validate(task);
             }
         }

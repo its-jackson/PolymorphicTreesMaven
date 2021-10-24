@@ -23,9 +23,6 @@ public class SpecialAttack extends Node {
     public void execute(Task task) {
         debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
-        final boolean is_resizable = General.isClientResizable();
-        debug("Client resizable " + is_resizable);
-
         final SpecialAttackPreference special_attack_preference = AntiBan.generateSpecialAttackPreference();
         debug("Special preference " + special_attack_preference.toString().toLowerCase());
 
@@ -70,14 +67,14 @@ public class SpecialAttack extends Node {
      */
     private boolean performSpecialAttack(SpecialAttackPreference option, Rectangle rectangle) {
         switch (option) {
-            case MAIN_HUD -> {
+            case MAIN_HUD : {
                 Mouse.moveBox(rectangle);
                 General.sleep(200, 400);
                 Mouse.click(0);
                 General.sleep(200, 400);
                 return true;
             }
-            case COMBAT_TAB -> {
+            case COMBAT_TAB : {
                 openCombatTab();
                 General.sleep(400, 800);
                 Mouse.moveBox(rectangle);
@@ -103,7 +100,7 @@ public class SpecialAttack extends Node {
                 && Workable.isSpecialAxeEquipped()
                 && Workable.nearObjects(Globals.getTreeFactor(), task.getTree())
                 && Workable.isInLocation(task, Player.getRSPlayer())
-                && Inventory.getAll().length < 26;
+                ;
     }
 
 }

@@ -857,19 +857,16 @@ public final class AntiBan {
     public static Inventory.DROPPING_PATTERN generateDroppingPattern() {
         int code = General.random(1, 4);
         switch (code) {
-            case 1 -> {
-                return Inventory.DROPPING_PATTERN.LEFT_TO_RIGHT;
-            }
-            case 2 -> {
+            case 2: {
                 return Inventory.DROPPING_PATTERN.TOP_TO_BOTTOM;
             }
-            case 3 -> {
+            case 3: {
                 return Inventory.DROPPING_PATTERN.TOP_TO_BOTTOM_ZIGZAG;
             }
-            case 4 -> {
+            case 4: {
                 return Inventory.DROPPING_PATTERN.ZIGZAG;
             }
-            default -> {
+            default: {
                 return Inventory.DROPPING_PATTERN.LEFT_TO_RIGHT;
             }
         }

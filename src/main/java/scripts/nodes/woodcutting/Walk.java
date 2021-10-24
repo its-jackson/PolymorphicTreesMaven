@@ -234,8 +234,6 @@ public class Walk extends Node {
             boolean walkToSawmillController,
             boolean walkToWoodcuttingGuildAlternativeBankController,
             Task task) {
-        switch (task.getLogOption().toLowerCase()) {
-            default -> {
                 if (walkToBankController) {
                     debug("Walking to bank");
                     walkToBank(task);
@@ -252,8 +250,6 @@ public class Walk extends Node {
                     debug("Retrieving axe");
                     walkToBank(task);
                 }
-            }
-        }
         setWalkToBankController(false);
         setWalkToTreeController(false);
         setWalkToSawmillController(false);
@@ -266,14 +262,17 @@ public class Walk extends Node {
         final int player_plane = player_tile.getPlane();
 
         switch (task.getActualLocation()) {
-            case WOODCUTTING_GUILD_OAKS -> {
+            case WOODCUTTING_GUILD_OAKS: {
                 switch (player_plane) {
-                    case 0 -> walkToWoodcuttingGuildAlternativeBankLocation(Bank.getSawmillWoodcuttingGuildAlternativeBank());
-                    case 1 -> {
+                    case 0 : walkToWoodcuttingGuildAlternativeBankLocation(Bank.getSawmillWoodcuttingGuildAlternativeBank());
+                    break;
+                    case 1 : {
                         final RSObject[] ladder_object = Objects.getAt(this.rope_ladder_tile_north_inside);
                         walkToRedwoodLadderInside(player_tile, ladder_object, rope_ladder_tile_north);
                     }
-                    case 2 -> enterCaveNorthUpperLevel(player_tile, player_plane);
+                    break;
+                    case 2: enterCaveNorthUpperLevel(player_tile, player_plane);
+                    break;
                 }
             }
         }
@@ -285,16 +284,21 @@ public class Walk extends Node {
         final int player_plane = player_tile.getPlane();
 
         switch (task.getActualLocation()) {
-            case WOODCUTTING_GUILD_OAKS -> {
+            case WOODCUTTING_GUILD_OAKS: {
                 switch (player_plane) {
-                    case 0 -> {
+                    case 0: {
                         walkToSawmillLocation(this.sawmill_operator_woodcutting_guild_location);
                     }
-                    case 1 -> {
+                    break;
+                    case 1: {
                         final RSObject[] ladder_object = Objects.getAt(this.rope_ladder_tile_north_inside);
                         walkToRedwoodLadderInside(player_tile, ladder_object, rope_ladder_tile_north);
                     }
-                    case 2 -> enterCaveNorthUpperLevel(player_tile, player_plane);
+                    break;
+                    case 2 : {
+                        enterCaveNorthUpperLevel(player_tile, player_plane);
+                    }
+                    break;
                 }
             }
         }
@@ -403,12 +407,19 @@ public class Walk extends Node {
             }
             default: {
                 switch (player_plane) {
-                    case 0 -> walkToNextObject(destination, woodcutting_location_tiles, player, task);
-                    case 1 -> {
+                    case 0: {
+                        walkToNextObject(destination, woodcutting_location_tiles, player, task);
+                    }
+                    break;
+                    case 1: {
                         final RSObject[] ladder_object = Objects.getAt(this.rope_ladder_tile_north_inside);
                         walkToRedwoodLadderInside(player_tile, ladder_object, rope_ladder_tile_north);
                     }
-                    case 2 -> enterCaveNorthUpperLevel(player_tile, player_plane);
+                    break;
+                    case 2: {
+                        enterCaveNorthUpperLevel(player_tile, player_plane);
+                    }
+                    break;
                 }
             }
         }
@@ -473,51 +484,61 @@ public class Walk extends Node {
         final int player_plane = player_tile.getPlane();
 
         switch (task.getActualLocation()) {
-            case REDWOOD_SOUTH, REDWOOD_SOUTH_UPPER_LEVEL -> {
+            case REDWOOD_SOUTH:
+            case REDWOOD_SOUTH_UPPER_LEVEL: {
                 switch (player_plane) {
-                    case 0 -> {
+                    case 0: {
                         if (!Workable.walkToBank(task.getBankLocation())) {
                             Workable.walkToTileA(task.getBankLocation().getPosition(), 15);
                         }
                     }
-                    case 1 -> {
+                    break;
+                    case 1: {
                         final RSObject[] ladder_object = Objects.getAt(this.rope_ladder_tile_south_inside);
                         walkToRedwoodLadderInside(player_tile, ladder_object, rope_ladder_tile_south);
                     }
-                    case 2 -> // call this in case of miss click while cutting below plane 2
+                    break;
+                    case 2: // call this in case of miss click while cutting below plane 2
                             enterCaveSouthUpperLevel(player_tile, player_plane);
                 }
             }
-            case REDWOOD_NORTH, REDWOOD_NORTH_UPPER_LEVEL -> {
+            case REDWOOD_NORTH:
+                case REDWOOD_NORTH_UPPER_LEVEL: {
                 switch (player_plane) {
-                    case 0 -> {
+                    case 0: {
                         if (!Workable.walkToBank(task.getBankLocation())) {
                             Workable.walkToTileA(task.getBankLocation().getPosition(), 15);
                         }
                     }
-                    case 1 -> {
+                    break;
+                    case 1: {
                         final RSObject[] ladder_object = Objects.getAt(this.rope_ladder_tile_north_inside);
                         walkToRedwoodLadderInside(player_tile, ladder_object, rope_ladder_tile_north);
                     }
-                    case 2 -> {
+                    break;
+                    case 2: {
                         enterCaveNorthUpperLevel(player_tile, player_plane);
                     }
+                    break;
                 }
             }
-            default -> {
+            default: {
                 switch (player_plane) {
-                    case 0 -> {
+                    case 0: {
                         if (!Workable.walkToBank(task.getBankLocation())) {
                             Workable.walkToTileA(task.getBankLocation().getPosition(), 5);
                         }
                     }
-                    case 1 -> {
+                    break;
+                    case 1: {
                         final RSObject[] ladder_object = Objects.getAt(this.rope_ladder_tile_north_inside);
                         walkToRedwoodLadderInside(player_tile, ladder_object, rope_ladder_tile_north);
                     }
-                    case 2 -> {
+                    break;
+                    case 2: {
                         enterCaveNorthUpperLevel(player_tile, player_plane);
                     }
+                    break;
                 }
             }
         }

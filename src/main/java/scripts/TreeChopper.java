@@ -20,8 +20,8 @@ import org.tribot.api2007.Skills;
 import org.tribot.api.General;
 import org.tribot.script.Script;
 import org.tribot.script.ScriptManifest;
-import scripts.modules.fluffeesapi.utilities.ArgumentUtilities;
-import scripts.modules.fluffeesapi.utilities.Utilities;
+import scripts.fluffeeapi.ArgumentUtilities;
+import scripts.fluffeeapi.Utilities;
 import scripts.nodes.woodcutting.*;
 
 import scripts.polyGui.GUIFX;
@@ -179,18 +179,24 @@ public class TreeChopper extends Script implements
                         }
                         // switch the location for each task
                         switch (task.getActualLocation()) {
-                            case EDGEVILLE_YEWS -> Globals.setTreeFactor(20);
-                            case SEERS_VILLAGE_MAGICS,
-                                    VARROCK_WEST_OAKS,
-                                    VARROCK_WEST_TREES,
-                                    SEERS_VILLAGE_MAPLES -> Globals.setTreeFactor(15);
-                            case SORCERERS_TOWER,
-                                    VARROCK_PALACE_OAKS,
-                                    VARROCK_PALACE_YEWS,
-                                    REDWOOD_NORTH,
-                                    REDWOOD_SOUTH,
-                                    REDWOOD_NORTH_UPPER_LEVEL,
-                                    REDWOOD_SOUTH_UPPER_LEVEL -> Globals.setTreeFactor(10);
+                            case EDGEVILLE_YEWS:
+                                Globals.setTreeFactor(20);
+                                break;
+                            case SEERS_VILLAGE_MAGICS:
+                            case VARROCK_WEST_OAKS:
+                            case VARROCK_WEST_TREES:
+                            case SEERS_VILLAGE_MAPLES:
+                                Globals.setTreeFactor(15);
+                                break;
+                            case SORCERERS_TOWER:
+                            case VARROCK_PALACE_OAKS:
+                            case VARROCK_PALACE_YEWS:
+                            case REDWOOD_NORTH:
+                            case REDWOOD_SOUTH:
+                            case REDWOOD_NORTH_UPPER_LEVEL:
+                            case REDWOOD_SOUTH_UPPER_LEVEL:
+                                Globals.setTreeFactor(10);
+                                break;
                         }
                         // continue looping each task and node until task is complete
                         while (!task.isValidated()) {
@@ -352,7 +358,6 @@ public class TreeChopper extends Script implements
     @Override
     public void onBreakStart(long l) {
         Globals.setCurrentWorkingTree(null);
-        Globals.setNextWorkingTree(null);
         Globals.setState("Taking break " + Timing.msToString(l));
     }
 
@@ -375,44 +380,44 @@ public class TreeChopper extends Script implements
                 System.out.println("Use All Gold - " + Globals.isUseAllGold());
             }
 
-                if (parsedArguments.containsKey("repeat")) {
-                    Globals.setOnRepeat(Boolean.parseBoolean(parsedArguments.get("repeat")));
-                    System.out.println("Repeat - " + Globals.isOnRepeat());
-                } else if (parsedArguments.containsKey("repeatShuffle")) {
-                    Globals.setOnRepeatShuffle(Boolean.parseBoolean(parsedArguments.get("repeatShuffle")));
-                    System.out.println("Repeat Shuffle - " + Globals.isOnRepeatShuffle());
-                }
+            if (parsedArguments.containsKey("repeat")) {
+                Globals.setOnRepeat(Boolean.parseBoolean(parsedArguments.get("repeat")));
+                System.out.println("Repeat - " + Globals.isOnRepeat());
+            } else if (parsedArguments.containsKey("repeatShuffle")) {
+                Globals.setOnRepeatShuffle(Boolean.parseBoolean(parsedArguments.get("repeatShuffle")));
+                System.out.println("Repeat Shuffle - " + Globals.isOnRepeatShuffle());
+            }
 
-                if (parsedArguments.containsKey("useInfernalAxe")) {
-                    Globals.setUpgradeAxe(false);
-                    Globals.setSpecialAxe(Boolean.parseBoolean(parsedArguments.get("useInfernalAxe")));
-                    System.out.println("Use Infernal Axe - " + Globals.isSpecialAxe());
-                }
+            if (parsedArguments.containsKey("useInfernalAxe")) {
+                Globals.setUpgradeAxe(false);
+                Globals.setSpecialAxe(Boolean.parseBoolean(parsedArguments.get("useInfernalAxe")));
+                System.out.println("Use Infernal Axe - " + Globals.isSpecialAxe());
+            }
 
-                if (parsedArguments.containsKey("birdNest")) {
-                    Globals.setPickUpBirdNest(Boolean.parseBoolean(parsedArguments.get("birdNest")));
-                    System.out.println("Bird Nests - " +Globals.isPickUpBirdNest());
-                }
+            if (parsedArguments.containsKey("birdNest")) {
+                Globals.setPickUpBirdNest(Boolean.parseBoolean(parsedArguments.get("birdNest")));
+                System.out.println("Bird Nests - " + Globals.isPickUpBirdNest());
+            }
 
-                if (parsedArguments.containsKey("worldHopNoTrees")) {
-                    Globals.setWorldHopNoTreesAvailable(Boolean.parseBoolean(parsedArguments.get("worldHopNoTrees")));
-                    System.out.println("World Hop Trees - " + Globals.isWorldHopNoTreesAvailable());
-                }
+            if (parsedArguments.containsKey("worldHopNoTrees")) {
+                Globals.setWorldHopNoTreesAvailable(Boolean.parseBoolean(parsedArguments.get("worldHopNoTrees")));
+                System.out.println("World Hop Trees - " + Globals.isWorldHopNoTreesAvailable());
+            }
 
-                if (parsedArguments.containsKey("worldHopPlayers")) {
-                    Globals.setWorldHop(Boolean.parseBoolean(parsedArguments.get("worldHopPlayers")));
-                    System.out.println("World Hop Players - " + Globals.isWorldHop());
-                }
+            if (parsedArguments.containsKey("worldHopPlayers")) {
+                Globals.setWorldHop(Boolean.parseBoolean(parsedArguments.get("worldHopPlayers")));
+                System.out.println("World Hop Players - " + Globals.isWorldHop());
+            }
 
-                if (parsedArguments.containsKey("afkMicroSleep")) {
-                    Globals.setAntiBanMicroSleep(Boolean.parseBoolean(parsedArguments.get("afkMicroSleep")));
-                    System.out.println("AFK Micro Sleep - " + Globals.isAntiBanMicroSleep());
-                }
+            if (parsedArguments.containsKey("afkMicroSleep")) {
+                Globals.setAntiBanMicroSleep(Boolean.parseBoolean(parsedArguments.get("afkMicroSleep")));
+                System.out.println("AFK Micro Sleep - " + Globals.isAntiBanMicroSleep());
+            }
 
-                if (parsedArguments.containsKey("replicateFatigue")) {
-                    Globals.setHumanFatigue(Boolean.parseBoolean(parsedArguments.get("replicateFatigue")));
-                    System.out.println("Replicate Fatigue - " + Globals.isHumanFatigue());
-                }
+            if (parsedArguments.containsKey("replicateFatigue")) {
+                Globals.setHumanFatigue(Boolean.parseBoolean(parsedArguments.get("replicateFatigue")));
+                System.out.println("Replicate Fatigue - " + Globals.isHumanFatigue());
+            }
 
 
             if (parsedArguments.containsKey("worldHopFactor")) {
@@ -420,8 +425,7 @@ public class TreeChopper extends Script implements
                     int integer = Integer.parseInt(parsedArguments.get("worldHopFactor"));
                     Globals.setWorldHopFactor(integer);
                     System.out.println("World Hop Factor - " + Globals.getWorldHopFactor());
-                }
-                catch (NumberFormatException ex) {
+                } catch (NumberFormatException ex) {
                     System.out.println("Incorrect number format.");
                 }
             }
@@ -450,8 +454,7 @@ public class TreeChopper extends Script implements
                 System.out.println(t);
                 Globals.getTasks().add(t);
             }
-        }
-        catch (FileNotFoundException exception) {
+        } catch (FileNotFoundException exception) {
             System.out.println(exception.getLocalizedMessage());
         }
     }

@@ -11,7 +11,6 @@ import scripts.dax_api.walker_engine.interaction_handling.InteractionHelper;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Purpose of class: Cut trees when inside the woodcutting location
@@ -31,15 +30,27 @@ public class Chop extends Node {
     private RSObject nextTree;
 
     private static Predicate<RSObject> filter_upper_level(Task task) {
-        return rsObject -> rsObject.getPosition().getPlane() == 2
-                && rsObject.getDefinition().getName().contains(task.getTree())
-                && rsObject.getDefinition().getActions().length > 0;
+        return rsObject -> {
+            RSObjectDefinition definition = rsObject.getDefinition();
+            if (definition == null) {
+                return false;
+            }
+            return rsObject.getPosition().getPlane() == 2
+                    && definition.getName().contains(task.getTree())
+                    && definition.getActions().length > 0;
+        };
     }
 
     private static Predicate<RSObject> filter_lower_level(Task task) {
-        return rsObject -> rsObject.getPosition().getPlane() == 1
-                && rsObject.getDefinition().getName().contains(task.getTree())
-                && rsObject.getDefinition().getActions().length > 0;
+        return rsObject -> {
+            RSObjectDefinition definition = rsObject.getDefinition();
+            if (definition == null) {
+                return false;
+            }
+            return rsObject.getPosition().getPlane() == 1
+                    && definition.getName().contains(task.getTree())
+                    && definition.getActions().length > 0;
+        };
     }
 
     @Override
@@ -50,17 +61,34 @@ public class Chop extends Node {
 
         // filter the trees
         switch (task.getActualLocation()) {
-            case REDWOOD_NORTH, REDWOOD_SOUTH -> setTrees(Arrays.stream(getTrees())
+            case REDWOOD_SOUTH:
+            case REDWOOD_NORTH: {
+                setTrees(Arrays.stream(getTrees())
                     .filter(filter_lower_level(task))
                     .toArray(RSObject[]::new));
-            case REDWOOD_SOUTH_UPPER_LEVEL, REDWOOD_NORTH_UPPER_LEVEL -> setTrees(Arrays.stream(getTrees())
-                    .filter(filter_upper_level(task))
-                    .toArray(RSObject[]::new));
-            case WOODCUTTING_GUILD_OAKS -> setTrees(Arrays.stream(getTrees())
-                    .filter(rsObject -> task.getActualLocation().getRSArea().contains(rsObject.getPosition()))
-                    .toArray(RSObject[]::new));
-            case ISLE_OF_SOULS, SORCERERS_TOWER -> setTrees(getTrees());
-            default -> setTrees(reachableTrees(getTrees()));
+            }
+            break;
+            case REDWOOD_SOUTH_UPPER_LEVEL:
+            case REDWOOD_NORTH_UPPER_LEVEL: {
+                setTrees(Arrays.stream(getTrees())
+                        .filter(filter_upper_level(task))
+                        .toArray(RSObject[]::new));
+            }
+            break;
+            case WOODCUTTING_GUILD_OAKS: {
+                setTrees(Arrays.stream(getTrees())
+                        .filter(rsObject -> task.getActualLocation().getRSArea().contains(rsObject.getPosition()))
+                        .toArray(RSObject[]::new));
+            }
+            break;
+            case ISLE_OF_SOULS:
+                case SORCERERS_TOWER: {
+                setTrees(getTrees());
+            }
+            break;
+            default:  {
+                setTrees(reachableTrees(getTrees()));
+            }
         }
 
         // proceed to chop down the tree
@@ -71,7 +99,7 @@ public class Chop extends Node {
 
             Globals.setCurrentWorkingTree(getTree());
 
-            for (RSObject tree : trees) {
+            for (RSObject tree : getTrees()) {
                 if (!tree.equals(getTree())) {
                     setNextTree(tree);
                     break;
@@ -142,7 +170,10 @@ public class Chop extends Node {
         final RSTile tree_tile = tree.getPosition().clone();
 
         switch (task.getActualLocation()) {
-            case REDWOOD_NORTH, REDWOOD_SOUTH, REDWOOD_NORTH_UPPER_LEVEL, REDWOOD_SOUTH_UPPER_LEVEL: {
+            case REDWOOD_NORTH:
+            case REDWOOD_SOUTH:
+            case REDWOOD_NORTH_UPPER_LEVEL:
+            case REDWOOD_SOUTH_UPPER_LEVEL: {
                 int optimal = Camera.getOptimalAngleForPositionable(tree);
                 if (Camera.getCameraAngle() != optimal) {
                     final boolean tree_adjust_result = tree.adjustCameraTo();
@@ -196,10 +227,10 @@ public class Chop extends Node {
         if (trees != null) {
             return Arrays.stream(trees)
                     .filter(this::isTreeReachable)
-                    .collect(Collectors.toList())
                     .toArray(RSObject[]::new);
         }
-        return null;
+
+        return new RSObject[]{};
     }
 
     private boolean chopTree(RSObject tree) {
@@ -246,10 +277,11 @@ public class Chop extends Node {
                 if (Workable.inventoryContainsAxe() || Workable.isAxeEquipped()) {
                     // return based on log disposal, inventory must have knife to return true for fletch
                     switch (log_disposal_option) {
-                        case "fletch-bank", "fletch-drop" -> {
+                        case "fletch-bank" :
+                            case"fletch-drop" : {
                             return Workable.inventoryContainsKnife();
                         }
-                        default -> {
+                        default: {
                             return true;
                         }
                     }
