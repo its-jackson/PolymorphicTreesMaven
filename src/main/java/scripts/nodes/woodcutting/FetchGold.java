@@ -10,10 +10,13 @@ import scripts.dax_api.shared.helpers.BankHelper;
 
 /**
  * Purpose of class: Retrieve the amount of gold or all gold from the bank, when we run out of gold.
- * The player can either start with any amount of gold in the inventory or start without gold. =)
+ * The player can either start with any amount of gold in the inventory or start without gold.
+ *
+ * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
  */
 
 public class FetchGold extends Node {
+
     @Override
     public void execute(Task task) {
         debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
@@ -23,7 +26,9 @@ public class FetchGold extends Node {
         if (Bank.openBank()) {
             if (Banking.isBankLoaded()) {
                 if (Inventory.isFull()) {
-                    Banking.depositAll();
+                    if (Banking.depositAll() > 0) {
+                        debug("Deposited inventory");
+                    }
                 }
                 if (Banking.find(Workable.GOLD).length > 0) {
                     // find the coins and withdraw accordingly
@@ -31,17 +36,20 @@ public class FetchGold extends Node {
 
                     if (Globals.isUseAllGold()) {
                         // count - The amount to withdraw. Use '0' for all, or '-1' for all but one.
-                        Banking.withdrawItem(coins[0], 0);
-                        debug("Withdrew all gold");
+                        if (Banking.withdrawItem(coins[0], 0)) {
+                            debug("Withdrew all gold");
+                        }
                     } else {
                         // withdraw the remaining gold from the bank for the given task
                         // actualPlayerChosenGold - actualPlayerSpentGold = amount of gold to withdraw for given task
+                        final int gold_to_withdraw;
                         if (Gold.getGoldSpentTotal() != 0) {
-                            int gold_to_withdraw = (Gold.calculateActualGoldRegex(Gold.getGoldRegex()) - Gold.getGoldSpentTotal());
-                            Banking.withdrawItem(coins[0], gold_to_withdraw);
-                            debug("Withdrew " + gold_to_withdraw + " gold");
+                            gold_to_withdraw = (Gold.calculateActualGoldRegex(Gold.getGoldRegex()) - Gold.getGoldSpentTotal());
                         } else {
-                            Banking.withdrawItem(coins[0], Gold.calculateActualGoldRegex(Gold.getGoldRegex()));
+                            gold_to_withdraw = Gold.calculateActualGoldRegex(Gold.getGoldRegex());
+                        }
+                        if (Banking.withdrawItem(coins[0], gold_to_withdraw)) {
+                            debug("Withdrew " + gold_to_withdraw + " gold");
                         }
                     }
                 } else {
