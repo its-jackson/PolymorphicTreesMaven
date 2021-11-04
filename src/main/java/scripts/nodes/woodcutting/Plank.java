@@ -11,34 +11,35 @@ import scripts.api.antiban.AntiBan;
 import scripts.dax_api.walker_engine.interaction_handling.NPCInteraction;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * Purpose of class: Will perform the planking option by right clicking the sawmill operator.
+ * Purpose of class: Will perform the planking option by right-clicking the sawmill operator.
  * Author: Jackson (Polymorphic~TRiBot)
- * Date:
- * Time:
+ *
+ * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
  */
 
 public class Plank extends Node {
 
     // filter for finding any sawmill operator
-    private static Predicate<RSNPC> sawmill_operator_npc_filter() {
-        return rsnpc -> rsnpc.getName().toLowerCase().contains("sawmill operator");
+    private static Predicate<RSNPC> sawmillOperatorNpcFilter() {
+        return rsnpc -> rsnpc.getName()
+                .toLowerCase()
+                .contains("sawmill operator");
     }
-
-    private final Walk walk_node = new Walk();
 
     @Override
     public void execute(Task task) {
         debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
-        final int plank_gold = Plank.calculateOakPlankGold(Workable.getAllLogs());
+        final int plank_gold_start = Plank.calculateOakPlankGold(Workable.getAllLogs());
 
-        if (plank_gold != -1) {
+        if (plank_gold_start != -1) {
             // set the players gold currently inside inventory
-            debug("Start gold = " + plank_gold);
+            debug("Start gold = " + plank_gold_start);
         }
 
         // fetch all logs inside the player's inventory
@@ -50,7 +51,7 @@ public class Plank extends Node {
         if (plank_option != null) {
             // if the plank interface is open, then click plank option
             final boolean first_click_result = clickPlankOption(plank_option);
-            // if failed to click plank option, then proceed to run
+            // if failed to click plank option, then proceed to click
             if (!first_click_result) {
                 // open plank interface
                 debug("Utilizing sawmill operator");
@@ -65,15 +66,17 @@ public class Plank extends Node {
             } else {
                 debug("Planking complete!");
             }
+
             General.sleep(1000,3000);
-            //
+
             final int plank_gold_end = Plank.calculateOakPlankGold(Workable.getAllLogs());
+
             // if their are oak logs leftover check the plank gold
-            if (plank_gold_end != -1 && plank_gold != -1) {
-                // set the amount of gold that wasnt spent
-                Gold.setGoldSpentTotal(plank_gold - plank_gold_end);
+            if (plank_gold_end != -1 && plank_gold_start != -1) {
+                // set the amount of gold that wasn't spent
+                Gold.setGoldSpentTotal(plank_gold_start - plank_gold_end);
             } else {
-                Gold.setGoldSpentTotal(plank_gold);
+                Gold.setGoldSpentTotal(plank_gold_start);
             }
 
             debug("Gold spent = " + Gold.getGoldSpentTotal());
@@ -134,13 +137,10 @@ public class Plank extends Node {
             return -1;
         }
 
-        final boolean is_oak_log = Arrays
-                .stream(logs)
-                .anyMatch(rsItem -> rsItem
-                        .getDefinition()
-                        .getName()
-                        .toLowerCase()
-                        .contains("oak"));
+        final boolean is_oak_log = Arrays.stream(logs)
+                .map(RSItem::getDefinition)
+                .filter(Objects::nonNull)
+                .anyMatch(rsItemDefinition -> rsItemDefinition.getName().toLowerCase().contains("oak"));
 
         // no oak logs inside the inventory, leave now return -1
         if (!is_oak_log) {
@@ -149,15 +149,16 @@ public class Plank extends Node {
 
         // return the all oak logs in the inventory and multiply the count by 250
         return (int) (Arrays.stream(logs)
-                .filter(rsItem -> rsItem
-                        .getDefinition()
-                        .getName()
-                        .toLowerCase()
-                        .contains("oak")).count() * Workable.OAK_FEE);
+                .map(RSItem::getDefinition)
+                .filter(Objects::nonNull)
+                .filter(rsItemDefinition -> rsItemDefinition.getName().toLowerCase().contains("oak"))
+                .count()
+                * Workable.OAK_FEE
+        );
     }
 
     public static boolean isAtSawmill() {
-        final RSNPC[] sawmill_npcs = NPCs.findNearest(sawmill_operator_npc_filter());
+        final RSNPC[] sawmill_npcs = NPCs.findNearest(sawmillOperatorNpcFilter());
 
         if (sawmill_npcs.length == 0) {
             return false;
@@ -169,14 +170,18 @@ public class Plank extends Node {
     }
 
     private boolean openBuyPlankInterface() {
-        return NPCInteraction.clickNpc(sawmill_operator_npc_filter(), "Buy-plank");
+        return NPCInteraction.clickNpc(sawmillOperatorNpcFilter(), "Buy-plank");
     }
 
     private String calculatePlankOption(RSItem[] logs) {
         String option = null;
 
-        if (Arrays.stream(logs)
-                .anyMatch(rsItem -> rsItem.getDefinition().getName().toLowerCase().contains("oak"))) {
+       final boolean is_oak = Arrays.stream(logs)
+                .map(RSItem::getDefinition)
+                .filter(Objects::nonNull)
+                .anyMatch(rsItemDefinition -> rsItemDefinition.getName().toLowerCase().contains("oak"));
+
+        if (is_oak) {
             option = "Oak - 250gp";
         }
 
