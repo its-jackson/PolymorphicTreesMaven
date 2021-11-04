@@ -1,6 +1,7 @@
 package scripts.nodes.woodcutting;
 
 import org.tribot.api2007.Player;
+import org.tribot.api2007.types.RSItemDefinition;
 import scripts.api.Node;
 import org.tribot.api.General;
 import org.tribot.api2007.GroundItems;
@@ -17,12 +18,14 @@ import scripts.dax_api.walker_engine.interaction_handling.InteractionHelper;
  * Author: Jackson Johnson (Polymorphic~TRiBot)
  * Date: Aug 30th, 2020
  *
- *
+ * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
  */
 
 public class BirdNest extends Node {
 
-    private static final  String[] BIRD_NEST_NAMES = {
+    // Cache all the names of the bird nests in the game.
+    // Should be enum, but I am keeping this as an array of string.
+    private static final String[] BIRD_NEST_NAMES = {
             "Bird nest",
             "Clue nest (beginner)",
             "Clue nest (easy)",
@@ -41,13 +44,22 @@ public class BirdNest extends Node {
 
         if (bird_nests.length > 0) {
             final RSGroundItem bird_nest = bird_nests[0];
+            final RSItemDefinition bird_nest_definition = bird_nest.getDefinition();
 
-            if (bird_nest != null && Player.getPosition().distanceTo(bird_nest) < 5) {
-                boolean result = InteractionHelper.focusCamera(bird_nest);
+            if (Player.getPosition().distanceTo(bird_nest) < 5) {
+                boolean focusResult = InteractionHelper.focusCamera(bird_nest);
+
+                if (focusResult) {
+                    debug("Focused camera successful");
+                } else {
+                    debug("Focused camera unsuccessful");
+                }
 
                 if (InteractionHelper.click(bird_nest, "Take")) {
-                    final String bird_nest_name = bird_nest.getDefinition().getName().toLowerCase();
-                    debug("Taking " + bird_nest_name);
+                    if (bird_nest_definition != null) {
+                        final String bird_nest_name = bird_nest_definition.getName();
+                        debug("Taking " + bird_nest_name);
+                    }
                 }
             }
         }
