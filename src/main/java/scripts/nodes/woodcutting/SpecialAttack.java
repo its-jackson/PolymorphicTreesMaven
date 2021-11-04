@@ -15,6 +15,8 @@ import java.awt.*;
  * Purpose of class: Click axe special ability.
  * Author: Jackson (Polymorphic~TRiBot)
  * Date: Aug 30th, 2020
+ *
+ * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
  */
 
 public class SpecialAttack extends Node {
@@ -32,8 +34,15 @@ public class SpecialAttack extends Node {
             debug("Special attack boosting");
             final boolean result = performSpecialAttack(special_attack_preference, new Rectangle(special_box.getAbsoluteBounds()));
             if (result) {
-                Timing.waitCondition(() -> !Workable.isWorking(), General.random(1200, 2000));
-                Timing.waitCondition(Workable::isWorking, General.random(2200, 3300));
+                debug("Clicked special attack");
+                final boolean firstWaitResult = Timing.waitCondition(() -> !Workable.isWorking(), General.random(1200, 2000));
+                if (firstWaitResult) {
+                    debug("Player is not animating");
+                }
+                final boolean lastWaitResult = Timing.waitCondition(Workable::isWorking, General.random(3000, 4000));
+                if (lastWaitResult) {
+                    debug("Player is animating");
+                }
             }
         }
     }
