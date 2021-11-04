@@ -142,13 +142,7 @@ public class Bank extends Node {
             return true;
         }
 
-        boolean openBankResult = Banking.openBank();
-
-        if (openBankResult) {
-            return Timing.waitCondition(Banking::isBankScreenOpen, General.random(4000, 7000));
-        } else {
-            return false;
-        }
+        return Banking.openBank() && Timing.waitCondition(Banking::isBankScreenOpen, General.random(4000, 7000));
     }
 
     /**

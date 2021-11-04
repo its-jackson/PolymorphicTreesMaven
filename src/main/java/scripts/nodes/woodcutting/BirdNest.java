@@ -16,6 +16,8 @@ import scripts.dax_api.walker_engine.interaction_handling.InteractionHelper;
  * Purpose of class: Pick up the ground item "Bird nest".
  * Author: Jackson Johnson (Polymorphic~TRiBot)
  * Date: Aug 30th, 2020
+ *
+ *
  */
 
 public class BirdNest extends Node {
