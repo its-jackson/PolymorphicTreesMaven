@@ -13,9 +13,11 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * Purpose of class: Cut trees when inside the woodcutting location
+ * Purpose of class: Chop down trees while inside the active task's woodcutting location.
  * Author: Jackson Johnson (Polymorphic~TRiBot)
  * Date: Aug 30th, 2020
+ *
+ * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
  */
 
 public class Chop extends Node {
@@ -26,10 +28,9 @@ public class Chop extends Node {
 
     private RSObject[] trees;
     private RSObject tree;
-    private RSObject nextTree;
 
-    // filter redwood upper level
-    private static Predicate<RSObject> filter_upper_level(Task task) {
+    // filter redwood upper level predicate
+    private static Predicate<RSObject> filter_upper_level_redwood(Task task) {
         return rsObject -> {
             RSObjectDefinition definition = rsObject.getDefinition();
             if (definition == null) {
@@ -41,8 +42,8 @@ public class Chop extends Node {
         };
     }
 
-    // filter redwood lower level
-    private static Predicate<RSObject> filter_lower_level(Task task) {
+    // filter redwood lower level predicate
+    private static Predicate<RSObject> filter_lower_level_redwood(Task task) {
         return rsObject -> {
             RSObjectDefinition definition = rsObject.getDefinition();
             if (definition == null) {
@@ -67,14 +68,14 @@ public class Chop extends Node {
             case REDWOOD_SOUTH:
             case REDWOOD_NORTH: {
                 setTrees(Arrays.stream(getTrees())
-                    .filter(filter_lower_level(task))
-                    .toArray(RSObject[]::new));
+                        .filter(filter_lower_level_redwood(task))
+                        .toArray(RSObject[]::new));
             }
             break;
             case REDWOOD_SOUTH_UPPER_LEVEL:
             case REDWOOD_NORTH_UPPER_LEVEL: {
                 setTrees(Arrays.stream(getTrees())
-                        .filter(filter_upper_level(task))
+                        .filter(filter_upper_level_redwood(task))
                         .toArray(RSObject[]::new));
             }
             break;
@@ -85,11 +86,11 @@ public class Chop extends Node {
             }
             break;
             case ISLE_OF_SOULS:
-                case SORCERERS_TOWER: {
+            case SORCERERS_TOWER: {
                 setTrees(getTrees());
             }
             break;
-            default:  {
+            default: {
                 setTrees(reachableTrees(getTrees()));
             }
         }
@@ -102,38 +103,37 @@ public class Chop extends Node {
 
             Globals.setCurrentWorkingTree(getTree());
 
-            for (RSObject tree : getTrees()) {
-                if (!tree.equals(getTree())) {
-                    setNextTree(tree);
-                    break;
-                }
-            }
             // check if player can equip the axe in the inventory
             if (Workable.inventoryContainsAxe()) {
                 final List<RSItem> inventory_list = Inventory.getAllList();
                 int inventoryAxeId = 0;
                 String axeName = "";
-                for (final RSItem inventory_item : inventory_list) {
-                    final RSItemDefinition item_definition = inventory_item.getDefinition();
-                    for (final int axe_id : Workable.completeAxes()) {
+                if (inventory_list.size() > 0) {
+                    for (final RSItem inventory_item : inventory_list) {
+                        final RSItemDefinition item_definition = inventory_item.getDefinition();
                         if (item_definition != null) {
                             final int inventory_item_id = item_definition.getID();
-                            if (axe_id == inventory_item_id) {
-                                inventoryAxeId = inventory_item_id;
-                                axeName = item_definition.getName().toLowerCase();
-                                break;
+                            for (final int axe_id : Workable.completeAxes()) {
+                                if (axe_id == inventory_item_id) {
+                                    inventoryAxeId = inventory_item_id;
+                                    axeName = item_definition.getName().toLowerCase();
+                                    break;
+                                }
                             }
                         }
-                    }
-                    // found axe, lets get the hell out of here
-                    if (inventoryAxeId > 0) {
-                        break;
+                        // found axe, lets get the hell out of here
+                        if (inventoryAxeId > 0) {
+                            break;
+                        }
                     }
                 }
                 // attempt to equip axe, if value assigned
                 if (inventoryAxeId > 0) {
-                    if (FetchAxe.equipAxe(inventoryAxeId, getWorker().getPlayerAttackLevel(),
-                            getWorker().getPlayerFiremakingLevel(), getWorker().getPlayerAgilityLevel())) {
+                    if (FetchAxe.equipAxe(
+                            inventoryAxeId,
+                            getWorker().getPlayerAttackLevel(),
+                            getWorker().getPlayerFiremakingLevel(),
+                            getWorker().getPlayerAgilityLevel())) {
                         debug("Equipped " + axeName);
                     }
                 }
@@ -148,8 +148,9 @@ public class Chop extends Node {
             // destroy working tree object once tree dead or inventory full
             Globals.setCurrentWorkingTree(null);
         } else {
-            debug("No valid trees");
+            debug("No valid trees discovered");
         }
+
         // when no longer chopping (end of node execution). Generate the trackers for the next node
         AntiBan.generateTrackers((int) (System.currentTimeMillis() - start_time), false);
     }
@@ -172,8 +173,6 @@ public class Chop extends Node {
      * @param trees for performing tasks.
      */
     private void completeChoppingTask(RSObject[] trees, RSObject tree, Task task) {
-        final RSTile tree_tile = tree.getPosition().clone();
-
         switch (task.getActualLocation()) {
             case REDWOOD_NORTH:
             case REDWOOD_SOUTH:
@@ -182,6 +181,11 @@ public class Chop extends Node {
                 int optimal = Camera.getOptimalAngleForPositionable(tree);
                 if (Camera.getCameraAngle() != optimal) {
                     final boolean tree_adjust_result = tree.adjustCameraTo();
+                    if (tree_adjust_result) {
+                        debug("Adjusted camera successfully");
+                    } else {
+                        debug("Adjusted camera unsuccessful");
+                    }
                     Camera.setRotationMethod(Camera.getRotationMethod());
                     Camera.setCameraAngle(optimal);
                 }
@@ -194,7 +198,7 @@ public class Chop extends Node {
         // perform tasks while chopping down tree...
         // Objects.isAt(tree_tile, task.getTree()
         while (Workable.isWorking()) {
-            General.sleep(1000, 1800);
+            General.sleep(1000, 1500);
             debug("Chopping " + task.getTree().toLowerCase());
             if (task.isValidated()) {
                 debug("Task complete");
@@ -240,13 +244,17 @@ public class Chop extends Node {
     private boolean chopTree(RSObject tree) {
         final boolean focus_tree_result = InteractionHelper.focusCamera(tree);
 
+        if (focus_tree_result) {
+            debug("Focused tree successful");
+        }
+
         if (InteractionHelper.click(tree, "Chop down", "Cut")) {
             // We clicked the tree. Let's first wait to stop chopping for 1-1.2
             // seconds just in case we moved on to this tree while still performing
             // the chopping animation.
             final boolean time_result = Timing.waitCondition(() -> !Workable.isWorking(), General.random(1000, 1200));
             // wait until we are cutting before timout
-            return Timing.waitCondition(Workable::isWorking, General.random(5000, 6000));
+            return time_result || Timing.waitCondition(Workable::isWorking, General.random(5000, 6000));
         }
 
         return false;
@@ -281,8 +289,8 @@ public class Chop extends Node {
                 if (Workable.inventoryContainsAxe() || Workable.isAxeEquipped()) {
                     // return based on log disposal, inventory must have knife to return true for fletch
                     switch (log_disposal_option) {
-                        case "fletch-bank" :
-                            case"fletch-drop" : {
+                        case "fletch-bank":
+                        case "fletch-drop": {
                             return Workable.inventoryContainsKnife();
                         }
                         default: {
@@ -322,13 +330,5 @@ public class Chop extends Node {
 
     public void setTree(RSObject tree) {
         this.tree = tree;
-    }
-
-    public RSObject getNextTree() {
-        return nextTree;
-    }
-
-    public void setNextTree(RSObject nextTree) {
-        this.nextTree = nextTree;
     }
 }
