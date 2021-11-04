@@ -72,7 +72,7 @@ public class BirdNest extends Node {
 
     @Override
     public void debug(String status) {
-        String format = ("[Nest Control] ");
+        String format = ("[Bird Nest Control] ");
         Globals.setState(status);
         General.println(format.concat(status));
     }
