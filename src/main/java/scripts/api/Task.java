@@ -4,6 +4,7 @@ import org.tribot.api2007.types.RSItem;
 import scripts.dax_api.api_lib.models.RunescapeBank;
 
 public class Task {
+
     // not-dependable
     private String tree;
     private String location;
@@ -15,8 +16,7 @@ public class Task {
     private RunescapeBank bankLocation;
     private Location actualLocation;
 
-    public Task() {
-    }
+    public Task() {}
 
     public Task(String tree, String location, String logOption, int untilLevel, TimeElapse timer) {
         this.tree = tree;
@@ -45,21 +45,12 @@ public class Task {
 
     public boolean isValidated() {
         if ("plank-bank".equalsIgnoreCase(getLogOption()) && Globals.isUseGoldPerTask()) {
-            return reachedGoldLimit()
-                    || reachedAllGold()
-                    || reachedLevel()
-                    || reachedTime()
-                    ;
+            return reachedGoldLimit() || reachedAllGold() || reachedLevel() || reachedTime();
         }
         if ("plank-bank".equalsIgnoreCase(getLogOption()) && Globals.isUseAllGold()) {
-            return reachedAllGold()
-                    || reachedLevel()
-                    || reachedTime()
-                    ;
+            return reachedAllGold() || reachedLevel() || reachedTime();
         }
-        return reachedLevel()
-                || reachedTime()
-                ;
+        return reachedLevel() || reachedTime();
     }
 
     private boolean reachedAllGold() {
@@ -122,8 +113,7 @@ public class Task {
 
     public void setCompleteTask(String location, String tree) {
         final String complete_location =
-                location
-                        .concat(" ")
+                location.concat(" ")
                         .concat(tree)
                         .toLowerCase();
 

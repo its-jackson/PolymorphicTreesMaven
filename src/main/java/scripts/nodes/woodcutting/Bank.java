@@ -15,6 +15,8 @@ import java.util.List;
  * Purpose of class: Bank the inventory, check for axe upgrade simultaneously.
  * Author: Jackson Johnson (Polymorphic~TRiBot)
  * Date: Aug 30th, 2020
+ *
+ * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
  */
 
 public class Bank extends Node {
@@ -26,19 +28,26 @@ public class Bank extends Node {
     @Override
     public void execute(Task task) {
         debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
+
         debug("Opening bank");
 
         if (BankHelper.openBankAndWait()) {
             debug("Bank is open");
             depositInventory(task);
             debug("Deposited");
-            Timing.waitCondition(() -> {
+            boolean waitResult = Timing.waitCondition(() -> {
                 General.sleep(200, 300);
                 return !Inventory.isFull();
             }, General.random(1000, 2000));
+            if (waitResult) {
+                debug("Deposit successful");
+            } else {
+                debug("Deposit unsuccessful");
+            }
         }
 
-        if (task.shouldUpgradeAxe() && getUpgradeWorkerAxeNode().validate(task)) {
+        // perform axe upgrade node while inside the bank
+        if (getUpgradeWorkerAxeNode().validate(task)) {
             getUpgradeWorkerAxeNode().execute(task);
         }
     }
@@ -55,10 +64,18 @@ public class Bank extends Node {
         General.println(format.concat(status));
     }
 
+    /**
+     * This method is for the plank-bank option in the woodcutting guild
+     * @return True if the player is at the alternative deposit box in the woodcutting guild; false otherwise.
+     */
     public static boolean isInWoodcuttingGuildAlternativeBank() {
         return Player.getPosition().distanceTo(getSawmillWoodcuttingGuildAlternativeBank()) < 7;
     }
 
+    /**
+     * Deposit the inventory according to the active task such as fletch-then-bank or plank-then-bank.
+     * @param task The active task that is currently running.
+     */
     public void depositInventory(Task task) {
         if (Banking.isBankScreenOpen() || Banking.isDepositBoxOpen()) {
 
@@ -75,7 +92,12 @@ public class Bank extends Node {
                 for (int i = 0; i < keepItems.length; i++) {
                     keepItems[i] = blackList.get(i);
                 }
-                Banking.depositAllExcept(keepItems);
+                boolean depositResult = Banking.depositAllExcept(keepItems) > 0;
+                if (depositResult) {
+                    debug("Deposited inventory");
+                } else {
+                    debug("Deposit inventory unsuccessful");
+                }
             } else if (task.shouldPlankThenBank()) {
                 blackList.add(Workable.GOLD);
                 for (int i : Workable.completeAxes()) {
@@ -85,12 +107,27 @@ public class Bank extends Node {
                 for (int i = 0; i < keepItems.length; i++) {
                     keepItems[i] = blackList.get(i);
                 }
-                Banking.depositAllExcept(keepItems);
+                boolean depositResult = Banking.depositAllExcept(keepItems) > 0;
+                if (depositResult) {
+                    debug("Deposited inventory");
+                } else {
+                    debug("Deposit inventory unsuccessful");
+                }
             } else {
                 if (Inventory.find(Workable.completeAxes()).length > 0) {
-                    Banking.depositAllExcept(Workable.completeAxes());
+                    boolean depositExceptResult = Banking.depositAllExcept(Workable.completeAxes()) > 0;
+                    if (depositExceptResult) {
+                        debug("Deposited all except axe");
+                    } else {
+                        debug("Deposit all except axe unsuccessful");
+                    }
                 } else {
-                    Banking.depositAll();
+                    boolean depositAllResult = Banking.depositAll() > 0;
+                    if (depositAllResult) {
+                        debug("Deposited entire inventory");
+                    } else {
+                        debug("Deposit entire inventory unsuccessful");
+                    }
                 }
             }
         }
@@ -105,13 +142,23 @@ public class Bank extends Node {
             return true;
         }
 
-        Banking.openBank();
+        boolean openBankResult = Banking.openBank();
 
-        return Timing.waitCondition(Banking::isBankScreenOpen, General.random(4000, 5000));
+        if (openBankResult) {
+            return Timing.waitCondition(Banking::isBankScreenOpen, General.random(4000, 7000));
+        } else {
+            return false;
+        }
     }
 
+    /**
+     * The method for validating when the player should bank.
+     * @param task The task to determine when to bank according to log disposal option.
+     * @return True if the player should bank; false otherwise.
+     */
     private boolean shouldBank(Task task) {
         if (Inventory.isFull() && BankHelper.isInBank() &&!task.isValidated()) {
+            // validate banking for plank-then-bank
             if (task.shouldPlankThenBank()
                     && isInWoodcuttingGuildAlternativeBank()
                     && Workable.getAllPlanks().length > 0
@@ -119,6 +166,7 @@ public class Bank extends Node {
                     && Workable.inventoryContainsGold()) {
                 return true;
             }
+            // normal banking or fletch-then-bank
             return task.shouldBank() || task.shouldFletchThenBank();
         }
 
