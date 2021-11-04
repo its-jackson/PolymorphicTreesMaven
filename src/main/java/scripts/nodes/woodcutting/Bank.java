@@ -7,7 +7,6 @@ import org.tribot.api.General;
 import org.tribot.api.Timing;
 import scripts.api.antiban.AntiBan;
 import scripts.dax_api.shared.helpers.BankHelper;
-import scripts.nodes.woodcutting.progressive.UpgradeAxe;
 
 import java.util.ArrayList;
 import java.util.List;

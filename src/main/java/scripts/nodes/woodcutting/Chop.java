@@ -19,7 +19,6 @@ import java.util.function.Predicate;
  */
 
 public class Chop extends Node {
-    private final long start_time = System.currentTimeMillis();
 
     private final WorldHop world_hop_node = new WorldHop();
     private final SpecialAttack special_attack_node = new SpecialAttack();
@@ -29,6 +28,7 @@ public class Chop extends Node {
     private RSObject tree;
     private RSObject nextTree;
 
+    // filter redwood upper level
     private static Predicate<RSObject> filter_upper_level(Task task) {
         return rsObject -> {
             RSObjectDefinition definition = rsObject.getDefinition();
@@ -41,6 +41,7 @@ public class Chop extends Node {
         };
     }
 
+    // filter redwood lower level
     private static Predicate<RSObject> filter_lower_level(Task task) {
         return rsObject -> {
             RSObjectDefinition definition = rsObject.getDefinition();
@@ -55,11 +56,13 @@ public class Chop extends Node {
 
     @Override
     public void execute(Task task) {
+        final long start_time = System.currentTimeMillis();
+
         debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
         setTrees(Objects.findNearest(Globals.getTreeFactor(), task.getTree()));
 
-        // filter the trees
+        // filter the trees for the tasks location
         switch (task.getActualLocation()) {
             case REDWOOD_SOUTH:
             case REDWOOD_NORTH: {
@@ -113,11 +116,13 @@ public class Chop extends Node {
                 for (final RSItem inventory_item : inventory_list) {
                     final RSItemDefinition item_definition = inventory_item.getDefinition();
                     for (final int axe_id : Workable.completeAxes()) {
-                        final int inventory_item_id = item_definition.getID();
-                        if (axe_id == inventory_item_id) {
-                            inventoryAxeId = inventory_item_id;
-                            axeName = item_definition.getName().toLowerCase();
-                            break;
+                        if (item_definition != null) {
+                            final int inventory_item_id = item_definition.getID();
+                            if (axe_id == inventory_item_id) {
+                                inventoryAxeId = inventory_item_id;
+                                axeName = item_definition.getName().toLowerCase();
+                                break;
+                            }
                         }
                     }
                     // found axe, lets get the hell out of here
@@ -146,7 +151,7 @@ public class Chop extends Node {
             debug("No valid trees");
         }
         // when no longer chopping (end of node execution). Generate the trackers for the next node
-        AntiBan.generateTrackers((int) (System.currentTimeMillis() - getStartTime()), false);
+        AntiBan.generateTrackers((int) (System.currentTimeMillis() - start_time), false);
     }
 
     @Override
@@ -289,10 +294,6 @@ public class Chop extends Node {
         }
 
         return false;
-    }
-
-    public long getStartTime() {
-        return start_time;
     }
 
     public WorldHop getWorldHopNode() {

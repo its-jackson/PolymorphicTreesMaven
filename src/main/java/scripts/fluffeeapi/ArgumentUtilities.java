@@ -3,6 +3,10 @@ package scripts.fluffeeapi;
 
 import java.util.HashMap;
 
+/**
+ * Fluffee's Argument Utility Class
+ */
+
 public class ArgumentUtilities {
 
     /**
