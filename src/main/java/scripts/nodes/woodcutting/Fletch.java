@@ -20,11 +20,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
+ * Purpose of class: Fletch the task's logs into the best viable fletching option that is available to the player.
  * Jackson Johnson (Polymorphic)
+ *
+ * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
  */
 
 public class Fletch extends Node implements Workable {
-    private final long start_time = System.currentTimeMillis();
 
     private final HashMap<String, Integer> map_bows = getMappedBowLevels();
     private final HashMap<String, Integer> map_arrows = getMappedArrowLevels();
@@ -34,6 +36,8 @@ public class Fletch extends Node implements Workable {
 
     @Override
     public void execute(Task task) {
+        final long start_time = System.currentTimeMillis();
+
         debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
         // fetch all logs inside the player's inventory
@@ -74,6 +78,8 @@ public class Fletch extends Node implements Workable {
                 }
             }
         }
+
+        AntiBan.generateTrackers((int) (System.currentTimeMillis() - start_time), false);
 
         switch (task.getLogOption().toLowerCase()) {
             case "fletch-bank": {
@@ -132,10 +138,10 @@ public class Fletch extends Node implements Workable {
         if (InteractionHelper.click(knives[0], "Use")) {
             // if knife click result successful, click a log
             General.sleep(200, 400);
-            Arrays.stream(logs)
-                    .findAny()
-                    .ifPresent(InteractionHelper::click);
-            return true;
+            Optional<RSItem> log = Arrays.stream(logs)
+                    .findAny();
+            // a log will always be present no matter what, so we don't have to check if present.
+            return InteractionHelper.click(log.get());
         } else {
             return false;
         }
@@ -187,7 +193,7 @@ public class Fletch extends Node implements Workable {
                             option = arrow_shaft_key.get();
                             return option;
                         } else {
-                            return option;
+                            return null;
                         }
                     }
                 }
@@ -224,7 +230,7 @@ public class Fletch extends Node implements Workable {
                             option = arrow_shaft_key.get();
                             return option;
                         } else {
-                            return option;
+                            return null;
                         }
                     }
                 }
@@ -261,7 +267,7 @@ public class Fletch extends Node implements Workable {
                             option = arrow_shaft_key.get();
                             return option;
                         } else {
-                            return option;
+                            return null;
                         }
                     }
                 }
@@ -298,7 +304,7 @@ public class Fletch extends Node implements Workable {
                             option = arrow_shaft_key.get();
                             return option;
                         } else {
-                            return option;
+                            return null;
                         }
                     }
                 }
@@ -335,7 +341,7 @@ public class Fletch extends Node implements Workable {
                             option = arrow_shaft_key.get();
                             return option;
                         } else {
-                            return option;
+                            return null;
                         }
                     }
                 }
@@ -372,44 +378,35 @@ public class Fletch extends Node implements Workable {
                             option = arrow_shaft_key.get();
                             return option;
                         } else {
-                            return option;
+                            return null;
                         }
                     }
                 }
                 break;
                 case "redwood logs": {
-                    greyList = new String[]{"Redwood longbow", "Redwood shortbow", "105 arrow shafts"};
+                    greyList = new String[]{"Redwood shield", "105 arrow shafts"};
 
-                    final Optional<String> longbow_key = getMapBows()
+                    final Optional<String> shield_key = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[0]))
                             .findFirst();
 
-                    final Optional<String> shortbow_key = getMapBows()
+                    final Optional<String> arrow_shaft_key = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[1]))
                             .findFirst();
 
-                    final Optional<String> arrow_shaft_key = getMapArrows()
-                            .keySet()
-                            .stream()
-                            .filter(s -> s.equals(greyList[2]))
-                            .findFirst();
-
-                    if (longbow_key.isPresent() && shortbow_key.isPresent() && arrow_shaft_key.isPresent()) {
-                        if (fletchingLevel >= getMapBows().get(longbow_key.get())) {
-                            option = longbow_key.get();
+                    if (shield_key.isPresent() && arrow_shaft_key.isPresent()) {
+                        if (fletchingLevel >= getMapBows().get(shield_key.get())) {
+                            option = shield_key.get();
                             return option;
-                        } else if (fletchingLevel >= getMapBows().get(shortbow_key.get())) {
-                            option = shortbow_key.get();
-                            return option;
-                        } else if (fletchingLevel >= getMapArrows().get(arrow_shaft_key.get())) {
+                        } else if (fletchingLevel >= getMapBows().get(arrow_shaft_key.get())) {
                             option = arrow_shaft_key.get();
                             return option;
                         } else {
-                            return option;
+                            return null;
                         }
                     }
                 }
@@ -433,7 +430,7 @@ public class Fletch extends Node implements Workable {
             }
         }
 
-        return option;
+        return null;
     }
 
     private boolean clickFletchingOption(String fletchingResult) {
@@ -453,7 +450,7 @@ public class Fletch extends Node implements Workable {
             }
         }
 
-        return Timing.waitCondition(Workable::isWorking, General.random(1200, 2000)) || clickResult;
+        return Timing.waitCondition(Workable::isWorking, General.random(1200, 2000)) && clickResult;
     }
 
     private void completeFletchingTask(Task task) {
@@ -482,9 +479,5 @@ public class Fletch extends Node implements Workable {
 
     public Drop getDropNode() {
         return drop_node;
-    }
-
-    public long getStartTime() {
-        return start_time;
     }
 }

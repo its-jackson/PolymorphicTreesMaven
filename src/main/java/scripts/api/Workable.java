@@ -432,6 +432,7 @@ public interface Workable {
         map.putIfAbsent("Yew longbow", 70);
         map.putIfAbsent("Magic shortbow", 80);
         map.putIfAbsent("Magic longbow", 85);
+        map.putIfAbsent("Redwood shield", 92);
         return map;
     }
 
