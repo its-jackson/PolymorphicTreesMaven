@@ -13,6 +13,8 @@ import scripts.api.antiban.AntiBan;
  *                      1) banking bird nests after a certain point
  *                      2) banking the inventory if other junk occur
  *                      3) custom drop algorithms COMPLETE - 04/17/2021
+ *
+ *
  */
 
 public class Drop extends Node {
