@@ -14,7 +14,7 @@ import scripts.api.antiban.AntiBan;
  *                      2) banking the inventory if other junk occur
  *                      3) custom drop algorithms COMPLETE - 04/17/2021
  *
- *
+ * Updated 11/05/2021 - Changed naming convention for final variables.
  */
 
 public class Drop extends Node {
@@ -32,12 +32,12 @@ public class Drop extends Node {
 
         switch (task.getLogOption().toLowerCase()) {
             case "drop": {
-                final RSItem[] all_logs = Workable.getAllLogs();
+                final RSItem[] allLogs = Workable.getAllLogs();
 
-                if (all_logs.length > 0) {
+                if (allLogs.length > 0) {
                     debug(String.format("Dropping %s logs", task.getTree().toLowerCase()));
-                    final int drop_result = Inventory.drop(all_logs);
-                    if (drop_result > 0) {
+                    final int dropResult = Inventory.drop(allLogs);
+                    if (dropResult > 0) {
                         debug("Dropping complete");
                     }
                 }
@@ -45,21 +45,21 @@ public class Drop extends Node {
             break;
             case "fletch-drop": {
                 // todo
-                final RSItem[] all_bows = Workable.getAllBows();
-                final RSItem[] all_arrow_shafts = Workable.getAllArrowShafts();
+                final RSItem[] allBows = Workable.getAllBows();
+                final RSItem[] allArrowShafts = Workable.getAllArrowShafts();
 
-                if (all_bows.length > 0) {
+                if (allBows.length > 0) {
                     debug(String.format("Dropping %s bows", task.getTree().toLowerCase()));
-                    final int drop_result = Inventory.drop(all_bows);
-                    if (drop_result > 0) {
+                    final int dropResult = Inventory.drop(allBows);
+                    if (dropResult > 0) {
                         debug("Dropping complete");
                     }
                 }
 
-                if (all_arrow_shafts.length > 0) {
+                if (allArrowShafts.length > 0) {
                     debug("Dropping arrow shafts");
-                    final int drop_result = Inventory.drop(all_arrow_shafts);
-                    if (drop_result > 0) {
+                    final int dropResult = Inventory.drop(allArrowShafts);
+                    if (dropResult > 0) {
                         debug("Dropping complete");
                     }
                 }
