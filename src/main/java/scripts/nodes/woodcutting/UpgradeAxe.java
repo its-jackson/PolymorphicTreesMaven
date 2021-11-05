@@ -16,6 +16,8 @@ import scripts.api.antiban.AntiBan;
  * Purpose of class: Upgrade the current axe if a better axe exists within the bank.
  *
  * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
+ *
+ * Updated 11/05/2021 - Changed naming convention for final variables.
  */
 
 public class UpgradeAxe extends Node {
@@ -51,29 +53,29 @@ public class UpgradeAxe extends Node {
         // Once the bank is open, withdraw the best axe,
         // deposit inventory except the best axe and equip if possible.
         if (Banking.isBankLoaded()) {
-            int best_axe_id;
+            int bestAxeId;
 
             // calculate the best axe pertaining to account status (member / f2p)
             if (getWorker().isMember()) {
-                best_axe_id =
+                bestAxeId =
                         FetchAxe.calculateBestAxe(getWorker().getPlayerWoodcuttingLevel(),
                         getWorker().getPlayerFiremakingLevel(), getWorker().isSongOfElvesComplete());
             } else {
-                best_axe_id = FetchAxe.calculateBestAxeF2P(getWorker().getPlayerWoodcuttingLevel());
+                bestAxeId = FetchAxe.calculateBestAxeF2P(getWorker().getPlayerWoodcuttingLevel());
             }
 
             // check if axe is equipped; otherwise check if inventory has an axe
             // then proceed to upgrade.
-            if (getCurrentEquippedAxeID() > 0 && best_axe_id > 0) {
-                if (getCurrentEquippedAxeID() != best_axe_id) {
+            if (getCurrentEquippedAxeID() > 0 && bestAxeId > 0) {
+                if (getCurrentEquippedAxeID() != bestAxeId) {
                     // current equipped axe is not better than best axe in bank
-                    if (!(Workable.getMappedWCLevels().get(getCurrentEquippedAxeID()) > Workable.getMappedWCLevels().get(best_axe_id))) {
+                    if (!(Workable.getMappedWCLevels().get(getCurrentEquippedAxeID()) > Workable.getMappedWCLevels().get(bestAxeId))) {
                         // player has an inventory axe
                         if (getCurrentInventoryAxeID() > 0) {
                             // inventory axe is not better than the best axe in bank
-                            if (!(Workable.getMappedWCLevels().get(getCurrentInventoryAxeID()) > Workable.getMappedWCLevels().get(best_axe_id))) {
+                            if (!(Workable.getMappedWCLevels().get(getCurrentInventoryAxeID()) > Workable.getMappedWCLevels().get(bestAxeId))) {
                                 // perform the upgrade
-                                if (upgradeCurrentAxe(best_axe_id, getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel())) {
+                                if (upgradeCurrentAxe(bestAxeId, getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel())) {
                                     setAxeUpgradeComplete(true);
                                     debug("Upgrade complete");
                                 } else {
@@ -82,7 +84,7 @@ public class UpgradeAxe extends Node {
                             }
                         } else {
                             // no inventory axe, perform the upgrade
-                            if (upgradeCurrentAxe(best_axe_id, getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel())) {
+                            if (upgradeCurrentAxe(bestAxeId, getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel())) {
                                 setAxeUpgradeComplete(true);
                                 debug("Upgrade complete");
                             } else {
@@ -94,12 +96,12 @@ public class UpgradeAxe extends Node {
             } else {
                 // no equipped axe and no best axe in bank
                 // check if axe upgrade complete, inventory axe, best axe in bank
-                if (!isAxeUpgradeComplete() && getCurrentInventoryAxeID() > 0 && best_axe_id > 0) {
-                    if (getCurrentInventoryAxeID() != best_axe_id) {
+                if (!isAxeUpgradeComplete() && getCurrentInventoryAxeID() > 0 && bestAxeId > 0) {
+                    if (getCurrentInventoryAxeID() != bestAxeId) {
                         // inventory axe is not better than best axe in bank
-                        if (!(Workable.getMappedWCLevels().get(getCurrentInventoryAxeID()) > Workable.getMappedWCLevels().get(best_axe_id))) {
+                        if (!(Workable.getMappedWCLevels().get(getCurrentInventoryAxeID()) > Workable.getMappedWCLevels().get(bestAxeId))) {
                             // perform upgrade
-                            if (upgradeCurrentAxe(best_axe_id, getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel())) {
+                            if (upgradeCurrentAxe(bestAxeId, getWorker().getPlayerWoodcuttingLevel(), getWorker().getPlayerAttackLevel())) {
                                 debug("Upgrade completed");
                             } else {
                                 debug("Upgrade incomplete");
@@ -146,13 +148,13 @@ public class UpgradeAxe extends Node {
         }
 
         // attempt to withdraw the best axe inside the bank
-        boolean withdrawResult = FetchAxe.withdrawAxe(bestAxeId);
+        final boolean withdrawResult = FetchAxe.withdrawAxe(bestAxeId);
 
         if (withdrawResult) {
             General.sleep(1000, 1200);
             if (FetchAxe.equipAxe(bestAxeId, currentAttackLevel)) {
                 General.sleep(1000, 1200);
-                boolean depositSuccessful = Banking.depositAllExcept(bestAxeId) > 0;
+                final boolean depositSuccessful = Banking.depositAllExcept(bestAxeId) > 0;
                 if (depositSuccessful) {
                     debug("Deposited inventory");
                 }
@@ -169,16 +171,16 @@ public class UpgradeAxe extends Node {
      */
     private boolean optimizeBank() {
         // hard coded
-        final RSInterfaceChild show_menu = Interfaces.get(12, 111);
+        final RSInterfaceChild showMenu = Interfaces.get(12, 111);
         // hard coded
-        final RSInterface item_option = Interfaces.get(12, 50, 1);
+        final RSInterface itemOption = Interfaces.get(12, 50, 1);
 
-        if (show_menu == null || item_option == null) {
+        if (showMenu == null || itemOption == null) {
             return false;
         }
 
-        if (show_menu.getActions() != null) {
-            boolean showMenuClickResult = show_menu.click("Show");
+        if (showMenu.getActions() != null) {
+            boolean showMenuClickResult = showMenu.click("Show");
             if (showMenuClickResult) {
                 debug("Clicked show menu successful");
                 General.sleep(1000, 1200);
@@ -186,10 +188,10 @@ public class UpgradeAxe extends Node {
 
         }
 
-        boolean itemOptionClickResult = item_option.click("Show");
+        boolean itemOptionClickResult = itemOption.click("Show");
         if (itemOptionClickResult) {
             General.sleep(200, 400);
-            return show_menu.click();
+            return showMenu.click();
         }
 
         return false;
