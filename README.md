@@ -1,4 +1,4 @@
-# PolymorphicTreesMaven
+# Polymorphic Auto Woodcutter
 
 TRiBot's Community Driven Open-Source AIO Woodcutter.
 
