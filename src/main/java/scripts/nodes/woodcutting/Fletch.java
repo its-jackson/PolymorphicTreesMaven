@@ -24,19 +24,21 @@ import java.util.Optional;
  * Jackson Johnson (Polymorphic)
  *
  * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
+ *
+ * Updated 11/05/2021 - Changed naming convention for final variables.
  */
 
 public class Fletch extends Node implements Workable {
 
-    private final HashMap<String, Integer> map_bows = getMappedBowLevels();
-    private final HashMap<String, Integer> map_arrows = getMappedArrowLevels();
+    private final HashMap<String, Integer> bowLevels = getMappedBowLevels();
+    private final HashMap<String, Integer> arrowLevels = getMappedArrowLevels();
 
-    private final Bank bank_node = new Bank();
-    private final Drop drop_node = new Drop();
+    private final Bank bankNode = new Bank();
+    private final Drop dropNode = new Drop();
 
     @Override
     public void execute(Task task) {
-        final long start_time = System.currentTimeMillis();
+        final long startTime = System.currentTimeMillis();
 
         debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
@@ -44,20 +46,20 @@ public class Fletch extends Node implements Workable {
         final RSItem[] logs = Workable.getAllLogs();
 
         // calculate best fletching option such as shortbow or longbow etc
-        final String best_fletching_option = calculateBestFletchingOption(Skills.SKILLS.FLETCHING.getActualLevel(), logs);
+        final String calculateBestFletchingOption = calculateBestFletchingOption(Skills.SKILLS.FLETCHING.getActualLevel(), logs);
 
-        if (best_fletching_option != null) {
+        if (calculateBestFletchingOption != null) {
             // if interface is already open, click the optimal fletching option
-            final boolean first_click_result = clickFletchingOption(best_fletching_option);
+            final boolean firstClickResult = clickFletchingOption(calculateBestFletchingOption);
             // if the interface wasn't open, then proceed to run
-            if (!first_click_result) {
+            if (!firstClickResult) {
                 // use the knife on log
                 debug("Utilizing knife");
                 if (useKnifeOnLog(logs)) {
                     General.sleep(1000, 1200);
                     // select the best fletching option
-                    final boolean final_click_result = clickFletchingOption(best_fletching_option);
-                    if (final_click_result) {
+                    final boolean finalClickResult = clickFletchingOption(calculateBestFletchingOption);
+                    if (finalClickResult) {
                         completeFletchingTask(task);
                     }
                 }
@@ -79,7 +81,7 @@ public class Fletch extends Node implements Workable {
             }
         }
 
-        AntiBan.generateTrackers((int) (System.currentTimeMillis() - start_time), false);
+        AntiBan.generateTrackers((int) (System.currentTimeMillis() - startTime), false);
 
         switch (task.getLogOption().toLowerCase()) {
             case "fletch-bank": {
@@ -108,7 +110,7 @@ public class Fletch extends Node implements Workable {
     public boolean validate(Task task) {
         if (Inventory.isFull() && Workable.inventoryContainsKnife()) {
             if (task.shouldFletchThenBank()) {
-                String fletchingOption = calculateBestFletchingOption(Progressive.generateFletchingLevel(), Workable.getAllLogs());
+                final String fletchingOption = calculateBestFletchingOption(Progressive.generateFletchingLevel(), Workable.getAllLogs());
                 if (fletchingOption != null && fletchingOption.contains("arrow shafts")) {
                     return true;
                 }
@@ -138,7 +140,7 @@ public class Fletch extends Node implements Workable {
         if (InteractionHelper.click(knives[0], "Use")) {
             // if knife click result successful, click a log
             General.sleep(200, 400);
-            Optional<RSItem> log = Arrays.stream(logs)
+            final Optional<RSItem> log = Arrays.stream(logs)
                     .findAny();
             // a log will always be present no matter what, so we don't have to check if present.
             return InteractionHelper.click(log.get());
@@ -148,8 +150,7 @@ public class Fletch extends Node implements Workable {
     }
 
     private String calculateBestFletchingOption(int fletchingLevel, RSItem[] logs) {
-        String option = null;
-
+        String option;
         String[] greyList;
 
         if (logs != null && logs.length > 0 && fletchingLevel > 0) {
@@ -164,33 +165,33 @@ public class Fletch extends Node implements Workable {
                 case "logs": {
                     greyList = new String[]{"Longbow", "Shortbow", "15 arrow shafts"};
 
-                    final Optional<String> longbow_key = getMapBows()
+                    final Optional<String> longbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[0]))
                             .findFirst();
 
-                    final Optional<String> shortbow_key = getMapBows()
+                    final Optional<String> shortbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[1]))
                             .findFirst();
 
-                    final Optional<String> arrow_shaft_key = getMapArrows()
+                    final Optional<String> arrowShaftKey = getMapArrows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[2]))
                             .findFirst();
 
-                    if (longbow_key.isPresent() && shortbow_key.isPresent() && arrow_shaft_key.isPresent()) {
-                        if (fletchingLevel >= getMapBows().get(longbow_key.get())) {
-                            option = longbow_key.get();
+                    if (longbowKey.isPresent() && shortbowKey.isPresent() && arrowShaftKey.isPresent()) {
+                        if (fletchingLevel >= getMapBows().get(longbowKey.get())) {
+                            option = longbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapBows().get(shortbow_key.get())) {
-                            option = shortbow_key.get();
+                        } else if (fletchingLevel >= getMapBows().get(shortbowKey.get())) {
+                            option = shortbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapArrows().get(arrow_shaft_key.get())) {
-                            option = arrow_shaft_key.get();
+                        } else if (fletchingLevel >= getMapArrows().get(arrowShaftKey.get())) {
+                            option = arrowShaftKey.get();
                             return option;
                         } else {
                             return null;
@@ -201,33 +202,33 @@ public class Fletch extends Node implements Workable {
                 case "oak logs": {
                     greyList = new String[]{"Oak longbow", "Oak shortbow", "30 arrow shafts"};
 
-                    final Optional<String> longbow_key = getMapBows()
+                    final Optional<String> longbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[0]))
                             .findFirst();
 
-                    final Optional<String> shortbow_key = getMapBows()
+                    final Optional<String> shortbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[1]))
                             .findFirst();
 
-                    final Optional<String> arrow_shaft_key = getMapArrows()
+                    final Optional<String> arrowShaftKey = getMapArrows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[2]))
                             .findFirst();
 
-                    if (longbow_key.isPresent() && shortbow_key.isPresent() && arrow_shaft_key.isPresent()) {
-                        if (fletchingLevel >= getMapBows().get(longbow_key.get())) {
-                            option = longbow_key.get();
+                    if (longbowKey.isPresent() && shortbowKey.isPresent() && arrowShaftKey.isPresent()) {
+                        if (fletchingLevel >= getMapBows().get(longbowKey.get())) {
+                            option = longbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapBows().get(shortbow_key.get())) {
-                            option = shortbow_key.get();
+                        } else if (fletchingLevel >= getMapBows().get(shortbowKey.get())) {
+                            option = shortbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapArrows().get(arrow_shaft_key.get())) {
-                            option = arrow_shaft_key.get();
+                        } else if (fletchingLevel >= getMapArrows().get(arrowShaftKey.get())) {
+                            option = arrowShaftKey.get();
                             return option;
                         } else {
                             return null;
@@ -238,33 +239,33 @@ public class Fletch extends Node implements Workable {
                 case "willow logs": {
                     greyList = new String[]{"Willow longbow", "Willow shortbow", "45 arrow shafts"};
 
-                    final Optional<String> longbow_key = getMapBows()
+                    final Optional<String> longbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[0]))
                             .findFirst();
 
-                    final Optional<String> shortbow_key = getMapBows()
+                    final Optional<String> shortbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[1]))
                             .findFirst();
 
-                    final Optional<String> arrow_shaft_key = getMapArrows()
+                    final Optional<String> arrowShaftKey = getMapArrows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[2]))
                             .findFirst();
 
-                    if (longbow_key.isPresent() && shortbow_key.isPresent() && arrow_shaft_key.isPresent()) {
-                        if (fletchingLevel >= getMapBows().get(longbow_key.get())) {
-                            option = longbow_key.get();
+                    if (longbowKey.isPresent() && shortbowKey.isPresent() && arrowShaftKey.isPresent()) {
+                        if (fletchingLevel >= getMapBows().get(longbowKey.get())) {
+                            option = longbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapBows().get(shortbow_key.get())) {
-                            option = shortbow_key.get();
+                        } else if (fletchingLevel >= getMapBows().get(shortbowKey.get())) {
+                            option = shortbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapArrows().get(arrow_shaft_key.get())) {
-                            option = arrow_shaft_key.get();
+                        } else if (fletchingLevel >= getMapArrows().get(arrowShaftKey.get())) {
+                            option = arrowShaftKey.get();
                             return option;
                         } else {
                             return null;
@@ -275,33 +276,33 @@ public class Fletch extends Node implements Workable {
                 case "maple logs": {
                     greyList = new String[]{"Maple longbow", "Maple shortbow", "60 arrow shafts"};
 
-                    final Optional<String> longbow_key = getMapBows()
+                    final Optional<String> longbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[0]))
                             .findFirst();
 
-                    final Optional<String> shortbow_key = getMapBows()
+                    final Optional<String> shortbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[1]))
                             .findFirst();
 
-                    final Optional<String> arrow_shaft_key = getMapArrows()
+                    final Optional<String> arrowShaftKey = getMapArrows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[2]))
                             .findFirst();
 
-                    if (longbow_key.isPresent() && shortbow_key.isPresent() && arrow_shaft_key.isPresent()) {
-                        if (fletchingLevel >= getMapBows().get(longbow_key.get())) {
-                            option = longbow_key.get();
+                    if (longbowKey.isPresent() && shortbowKey.isPresent() && arrowShaftKey.isPresent()) {
+                        if (fletchingLevel >= getMapBows().get(longbowKey.get())) {
+                            option = longbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapBows().get(shortbow_key.get())) {
-                            option = shortbow_key.get();
+                        } else if (fletchingLevel >= getMapBows().get(shortbowKey.get())) {
+                            option = shortbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapArrows().get(arrow_shaft_key.get())) {
-                            option = arrow_shaft_key.get();
+                        } else if (fletchingLevel >= getMapArrows().get(arrowShaftKey.get())) {
+                            option = arrowShaftKey.get();
                             return option;
                         } else {
                             return null;
@@ -312,33 +313,33 @@ public class Fletch extends Node implements Workable {
                 case "yew logs": {
                     greyList = new String[]{"Yew longbow", "Yew shortbow", "75 arrow shafts"};
 
-                    final Optional<String> longbow_key = getMapBows()
+                    final Optional<String> longbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[0]))
                             .findFirst();
 
-                    final Optional<String> shortbow_key = getMapBows()
+                    final Optional<String> shortbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[1]))
                             .findFirst();
 
-                    final Optional<String> arrow_shaft_key = getMapArrows()
+                    final Optional<String> arrowShaftKey = getMapArrows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[2]))
                             .findFirst();
 
-                    if (longbow_key.isPresent() && shortbow_key.isPresent() && arrow_shaft_key.isPresent()) {
-                        if (fletchingLevel >= getMapBows().get(longbow_key.get())) {
-                            option = longbow_key.get();
+                    if (longbowKey.isPresent() && shortbowKey.isPresent() && arrowShaftKey.isPresent()) {
+                        if (fletchingLevel >= getMapBows().get(longbowKey.get())) {
+                            option = longbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapBows().get(shortbow_key.get())) {
-                            option = shortbow_key.get();
+                        } else if (fletchingLevel >= getMapBows().get(shortbowKey.get())) {
+                            option = shortbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapArrows().get(arrow_shaft_key.get())) {
-                            option = arrow_shaft_key.get();
+                        } else if (fletchingLevel >= getMapArrows().get(arrowShaftKey.get())) {
+                            option = arrowShaftKey.get();
                             return option;
                         } else {
                             return null;
@@ -349,33 +350,33 @@ public class Fletch extends Node implements Workable {
                 case "magic logs": {
                     greyList = new String[]{"Magic longbow", "Magic shortbow", "90 arrow shafts"};
 
-                    final Optional<String> longbow_key = getMapBows()
+                    final Optional<String> longbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[0]))
                             .findFirst();
 
-                    final Optional<String> shortbow_key = getMapBows()
+                    final Optional<String> shortbowKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[1]))
                             .findFirst();
 
-                    final Optional<String> arrow_shaft_key = getMapArrows()
+                    final Optional<String> arrowShaftKey = getMapArrows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[2]))
                             .findFirst();
 
-                    if (longbow_key.isPresent() && shortbow_key.isPresent() && arrow_shaft_key.isPresent()) {
-                        if (fletchingLevel >= getMapBows().get(longbow_key.get())) {
-                            option = longbow_key.get();
+                    if (longbowKey.isPresent() && shortbowKey.isPresent() && arrowShaftKey.isPresent()) {
+                        if (fletchingLevel >= getMapBows().get(longbowKey.get())) {
+                            option = longbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapBows().get(shortbow_key.get())) {
-                            option = shortbow_key.get();
+                        } else if (fletchingLevel >= getMapBows().get(shortbowKey.get())) {
+                            option = shortbowKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapArrows().get(arrow_shaft_key.get())) {
-                            option = arrow_shaft_key.get();
+                        } else if (fletchingLevel >= getMapArrows().get(arrowShaftKey.get())) {
+                            option = arrowShaftKey.get();
                             return option;
                         } else {
                             return null;
@@ -386,24 +387,24 @@ public class Fletch extends Node implements Workable {
                 case "redwood logs": {
                     greyList = new String[]{"Redwood shield", "105 arrow shafts"};
 
-                    final Optional<String> shield_key = getMapBows()
+                    final Optional<String> shieldKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[0]))
                             .findFirst();
 
-                    final Optional<String> arrow_shaft_key = getMapBows()
+                    final Optional<String> arrowShaftKey = getMapBows()
                             .keySet()
                             .stream()
                             .filter(s -> s.equals(greyList[1]))
                             .findFirst();
 
-                    if (shield_key.isPresent() && arrow_shaft_key.isPresent()) {
-                        if (fletchingLevel >= getMapBows().get(shield_key.get())) {
-                            option = shield_key.get();
+                    if (shieldKey.isPresent() && arrowShaftKey.isPresent()) {
+                        if (fletchingLevel >= getMapBows().get(shieldKey.get())) {
+                            option = shieldKey.get();
                             return option;
-                        } else if (fletchingLevel >= getMapBows().get(arrow_shaft_key.get())) {
-                            option = arrow_shaft_key.get();
+                        } else if (fletchingLevel >= getMapBows().get(arrowShaftKey.get())) {
+                            option = arrowShaftKey.get();
                             return option;
                         } else {
                             return null;
@@ -434,17 +435,17 @@ public class Fletch extends Node implements Workable {
     }
 
     private boolean clickFletchingOption(String fletchingResult) {
-        final RSInterfaceMaster master_interface = Interfaces.get(270);
+        final RSInterfaceMaster masterInterface = Interfaces.get(270);
 
         boolean clickResult = false;
 
-        if (master_interface != null) {
-            final Optional<RSInterfaceChild> fletch_option_interface = Arrays.stream(master_interface.getChildren())
+        if (masterInterface != null) {
+            final Optional<RSInterfaceChild> fletchOptionInterface = Arrays.stream(masterInterface.getChildren())
                     .filter(rsInterfaceChild -> rsInterfaceChild.getComponentName().contains(fletchingResult))
                     .findFirst();
 
-            if (fletch_option_interface.isPresent()) {
-                clickResult = fletch_option_interface
+            if (fletchOptionInterface.isPresent()) {
+                clickResult = fletchOptionInterface
                         .map(rsInterfaceChild -> rsInterfaceChild.click("Make"))
                         .orElse(false);
             }
@@ -466,18 +467,18 @@ public class Fletch extends Node implements Workable {
     }
 
     public HashMap<String, Integer> getMapBows() {
-        return map_bows;
+        return bowLevels;
     }
 
     public HashMap<String, Integer> getMapArrows() {
-        return map_arrows;
+        return arrowLevels;
     }
 
     public Bank getBankNode() {
-        return bank_node;
+        return bankNode;
     }
 
     public Drop getDropNode() {
-        return drop_node;
+        return dropNode;
     }
 }
