@@ -17,11 +17,13 @@ import java.util.List;
  * Date: Aug 30th, 2020
  *
  * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
+ *
+ * Updated 11/05/2021 - Changed naming convention for final variables
  */
 
 public class Bank extends Node {
 
-    private final UpgradeAxe upgrade_worker_axe_node = new UpgradeAxe();
+    private final UpgradeAxe upgradeWorkerAxeNode = new UpgradeAxe();
 
     private static final RSTile sawmill_woodcutting_guild_alternative_bank = new RSTile(1650, 3498, 0);
 
@@ -35,7 +37,7 @@ public class Bank extends Node {
             debug("Bank is open");
             depositInventory(task);
             debug("Deposited");
-            boolean waitResult = Timing.waitCondition(() -> {
+            final boolean waitResult = Timing.waitCondition(() -> {
                 General.sleep(200, 300);
                 return !Inventory.isFull();
             }, General.random(1000, 2000));
@@ -92,7 +94,7 @@ public class Bank extends Node {
                 for (int i = 0; i < keepItems.length; i++) {
                     keepItems[i] = blackList.get(i);
                 }
-                boolean depositResult = Banking.depositAllExcept(keepItems) > 0;
+                final boolean depositResult = Banking.depositAllExcept(keepItems) > 0;
                 if (depositResult) {
                     debug("Deposited inventory");
                 } else {
@@ -107,7 +109,7 @@ public class Bank extends Node {
                 for (int i = 0; i < keepItems.length; i++) {
                     keepItems[i] = blackList.get(i);
                 }
-                boolean depositResult = Banking.depositAllExcept(keepItems) > 0;
+                final boolean depositResult = Banking.depositAllExcept(keepItems) > 0;
                 if (depositResult) {
                     debug("Deposited inventory");
                 } else {
@@ -115,14 +117,14 @@ public class Bank extends Node {
                 }
             } else {
                 if (Inventory.find(Workable.completeAxes()).length > 0) {
-                    boolean depositExceptResult = Banking.depositAllExcept(Workable.completeAxes()) > 0;
+                    final boolean depositExceptResult = Banking.depositAllExcept(Workable.completeAxes()) > 0;
                     if (depositExceptResult) {
                         debug("Deposited all except axe");
                     } else {
                         debug("Deposit all except axe unsuccessful");
                     }
                 } else {
-                    boolean depositAllResult = Banking.depositAll() > 0;
+                    final boolean depositAllResult = Banking.depositAll() > 0;
                     if (depositAllResult) {
                         debug("Deposited entire inventory");
                     } else {
@@ -172,6 +174,6 @@ public class Bank extends Node {
     }
 
     public UpgradeAxe getUpgradeWorkerAxeNode() {
-        return upgrade_worker_axe_node;
+        return upgradeWorkerAxeNode;
     }
 }
