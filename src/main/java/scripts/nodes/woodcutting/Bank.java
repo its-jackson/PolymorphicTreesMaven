@@ -36,15 +36,12 @@ public class Bank extends Node {
         if (BankHelper.openBankAndWait()) {
             debug("Bank is open");
             depositInventory(task);
-            debug("Deposited");
             final boolean waitResult = Timing.waitCondition(() -> {
                 General.sleep(200, 300);
                 return !Inventory.isFull();
             }, General.random(1000, 2000));
             if (waitResult) {
-                debug("Deposit successful");
-            } else {
-                debug("Deposit unsuccessful");
+                debug("Wait result successful");
             }
         }
 
