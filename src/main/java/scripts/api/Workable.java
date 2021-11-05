@@ -8,7 +8,6 @@ import org.tribot.api2007.types.*;
 import scripts.api.antiban.AntiBan;
 import scripts.dax_api.api_lib.DaxWalker;
 import scripts.dax_api.api_lib.models.RunescapeBank;
-import scripts.dax_api.shared.helpers.BankHelper;
 import scripts.dax_api.walker_engine.WalkingCondition;
 
 import java.util.*;
@@ -272,7 +271,7 @@ public interface Workable {
         final WalkingPreference walkingPreference = AntiBan.generateWalkingPreference(playerDistance);
 
         if (walkingPreference.equals(WalkingPreference.MINIMAP)) {
-            return DaxWalker.walkToBank(bank, () -> {
+            return !DaxWalker.walkToBank(bank, () -> {
                 boolean run = AntiBan.activateRun();
                 if (Player.getPosition().distanceTo(bankTile) < 5) {
                     return WalkingCondition.State.EXIT_OUT_WALKER_SUCCESS;
@@ -281,7 +280,7 @@ public interface Workable {
                 }
             });
         } else {
-            return screenWalkToTile(bankTile);
+            return !screenWalkToTile(bankTile);
         }
     }
 

@@ -67,7 +67,7 @@ public class GUIController implements Initializable {
             "Catherby",
             "Lumbridge Castle",
             "Sorcerer's Tower",
-            "Grand Exchange"
+            //"Grand Exchange"
     };
 
     @DoNotRename
@@ -818,7 +818,7 @@ public class GUIController implements Initializable {
                 case "tree": {
                     choiceBoxLocation.getItems().add(getTreeLocations()[2]); // varrock west
                     choiceBoxLocation.getItems().add(getTreeLocations()[11]); // lumbridge castle
-                    choiceBoxLocation.getItems().add(getTreeLocations()[13]); // grand exchange
+                    //choiceBoxLocation.getItems().add(getTreeLocations()[13]); // grand exchange
                     choiceBoxLocation.getItems().add(getTreeLocations()[7]); // seers' village
 
                 }

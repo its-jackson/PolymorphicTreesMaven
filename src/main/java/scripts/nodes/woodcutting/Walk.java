@@ -512,7 +512,7 @@ public class Walk extends Node {
             case REDWOOD_SOUTH_UPPER_LEVEL: {
                 switch (playerPlane) {
                     case 0: {
-                        if (!Workable.walkToBank(task.getBankLocation())) {
+                        if (Workable.walkToBank(task.getBankLocation())) {
                             if (Workable.walkToTileA(task.getBankLocation().getPosition(), 15)) {
                                 debug("Using alternative walker-engine");
                             }
@@ -532,7 +532,7 @@ public class Walk extends Node {
             case REDWOOD_NORTH_UPPER_LEVEL: {
                 switch (playerPlane) {
                     case 0: {
-                        if (!Workable.walkToBank(task.getBankLocation())) {
+                        if (Workable.walkToBank(task.getBankLocation())) {
                             if (Workable.walkToTileA(task.getBankLocation().getPosition(), 15)) {
                                 debug("Using alternative walker-engine");
                             }
@@ -553,7 +553,7 @@ public class Walk extends Node {
             default: {
                 switch (playerPlane) {
                     case 0: {
-                        if (!Workable.walkToBank(task.getBankLocation())) {
+                        if (Workable.walkToBank(task.getBankLocation())) {
                             if (Workable.walkToTileA(task.getBankLocation().getPosition(), 5)) {
                                 debug("Using alternative walker-engine");
                             }
