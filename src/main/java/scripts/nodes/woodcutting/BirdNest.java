@@ -19,6 +19,9 @@ import scripts.dax_api.walker_engine.interaction_handling.InteractionHelper;
  * Date: Aug 30th, 2020
  *
  * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
+ *
+ * Updated 11/05/2021 - Changed naming convention for final variables.
+ *
  */
 
 public class BirdNest extends Node {
@@ -40,14 +43,14 @@ public class BirdNest extends Node {
 
         debug("Bird nest found");
 
-        final RSGroundItem[] bird_nests = GroundItems.findNearest(BIRD_NEST_NAMES);
+        final RSGroundItem[] birdNests = GroundItems.findNearest(BIRD_NEST_NAMES);
 
-        if (bird_nests.length > 0) {
-            final RSGroundItem bird_nest = bird_nests[0];
-            final RSItemDefinition bird_nest_definition = bird_nest.getDefinition();
+        if (birdNests.length > 0) {
+            final RSGroundItem birdNest = birdNests[0];
+            final RSItemDefinition birdNestDefinition = birdNest.getDefinition();
 
-            if (Player.getPosition().distanceTo(bird_nest) < 5) {
-                boolean focusResult = InteractionHelper.focusCamera(bird_nest);
+            if (Player.getPosition().distanceTo(birdNest) < 5) {
+                final boolean focusResult = InteractionHelper.focusCamera(birdNest);
 
                 if (focusResult) {
                     debug("Focused camera successful");
@@ -55,10 +58,10 @@ public class BirdNest extends Node {
                     debug("Focused camera unsuccessful");
                 }
 
-                if (InteractionHelper.click(bird_nest, "Take")) {
-                    if (bird_nest_definition != null) {
-                        final String bird_nest_name = bird_nest_definition.getName();
-                        debug("Taking " + bird_nest_name);
+                if (InteractionHelper.click(birdNest, "Take")) {
+                    if (birdNestDefinition != null) {
+                        final String birdNestName = birdNestDefinition.getName();
+                        debug("Taking " + birdNestName);
                     }
                 }
             }
@@ -67,7 +70,7 @@ public class BirdNest extends Node {
 
     @Override
     public boolean validate(Task task) {
-        return task.shouldPickupNest() && !Inventory.isFull() && exists();
+        return task.shouldPickupNest() && !Inventory.isFull() && birdNestExists();
     }
 
     @Override
@@ -77,7 +80,7 @@ public class BirdNest extends Node {
         General.println(format.concat(status));
     }
 
-    public static boolean exists() {
+    public static boolean birdNestExists() {
         return GroundItems.findNearest(BIRD_NEST_NAMES).length > 0;
     }
 }
