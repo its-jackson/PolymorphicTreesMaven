@@ -64,7 +64,7 @@ public class Chop extends Node {
     public void execute(Task task) {
         final long startTime = System.currentTimeMillis();
 
-        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
+        AntiBan.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         setTrees(Objects.findNearest(Globals.getTreeFactor(), task.getTree()));
 

@@ -26,7 +26,7 @@ public class FetchAxe extends Node {
     @Override
     public void execute(Task task) {
 
-        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
+        AntiBan.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         // format debug
         String format = String.format(

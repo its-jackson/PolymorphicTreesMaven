@@ -390,34 +390,6 @@ public interface Workable {
         }
     }
 
-    static void sleep(List<Integer> waitTimes, boolean humanFatigue) {
-        int reactionTime;
-
-        if (waitTimes.isEmpty()) {
-            AntiBan.generateTrackers(General.random(800, 1400), false);
-        } else {
-            AntiBan.generateTrackers(average(waitTimes), false);
-        }
-
-        if (humanFatigue) {
-            reactionTime = (int) (AntiBan.getReactionTime() * Globals.getCurrentFatigueMultiple());
-        } else {
-            reactionTime = AntiBan.getReactionTime();
-        }
-
-        waitTimes.add(reactionTime);
-        AntiBan.sleepReactionTime(reactionTime);
-    }
-
-    static int average(List<Integer> times) {
-        final OptionalDouble stream = times
-                .stream()
-                .mapToInt(Integer::intValue)
-                .average();
-
-        return stream.isPresent() ? (int) stream.getAsDouble() : 0;
-    }
-
     default HashMap<String, Integer> getMappedBowLevels() {
         final HashMap<String, Integer> map = new LinkedHashMap<>();
         map.putIfAbsent("Shortbow", 5);

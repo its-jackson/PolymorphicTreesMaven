@@ -28,7 +28,7 @@ public class WorldHop extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
+        AntiBan.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         setPlayerMember(Progressive.isMember());
 

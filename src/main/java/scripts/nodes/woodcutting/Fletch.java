@@ -40,7 +40,7 @@ public class Fletch extends Node implements Workable {
     public void execute(Task task) {
         final long startTime = System.currentTimeMillis();
 
-        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
+        AntiBan.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         // fetch all logs inside the player's inventory
         final RSItem[] logs = Workable.getAllLogs();

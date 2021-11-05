@@ -41,7 +41,7 @@ public class Walk extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
+        AntiBan.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         getWalking(
                 isWalkToBankController(),

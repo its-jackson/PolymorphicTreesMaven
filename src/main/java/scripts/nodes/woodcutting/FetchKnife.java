@@ -23,7 +23,7 @@ public class FetchKnife extends Node {
 
     @Override
     public void execute(Task task) {
-        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
+        AntiBan.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         debug("Retrieving knife");
 
