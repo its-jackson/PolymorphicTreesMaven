@@ -14,11 +14,15 @@ import java.util.function.Predicate;
 /**
  * Class purpose: Simply change the players world if their are variable n, players in the woodcutting area. That is
  * currently animating and thus competing.
- * for recognition,
- * n = 5;
+ * for recognition n = 5;
+ *
+ * - Updated 11/05/2021
+ * - Added null safe checks to all methods and cached all return values.
+ * - Changed naming convention for final variables.
  */
 
 public class WorldHop extends Node {
+
     private boolean isPlayerMember;
     private int world;
 
@@ -36,7 +40,12 @@ public class WorldHop extends Node {
 
         if (getWorld() != -1) {
             debug("Changing world");
-            WorldHopper.changeWorld(getWorld());
+            final boolean worldChangeResult = WorldHopper.changeWorld(getWorld());
+            if (worldChangeResult) {
+                debug("Changed world successful");
+            }
+        } else {
+            debug("Couldn't locate a world to change");
         }
 
     }
