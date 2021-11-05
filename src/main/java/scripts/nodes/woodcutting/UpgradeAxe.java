@@ -30,7 +30,7 @@ public class UpgradeAxe extends Node {
 
     @Override
     public void execute(Task task) {
-        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
+        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         // set the players currently equipped axe
         setCurrentEquippedAxeID(generateEquippedAxeID());

@@ -64,7 +64,7 @@ public class Chop extends Node {
     public void execute(Task task) {
         final long startTime = System.currentTimeMillis();
 
-        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
+        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         setTrees(Objects.findNearest(Globals.getTreeFactor(), task.getTree()));
 
@@ -257,9 +257,8 @@ public class Chop extends Node {
             // We clicked the tree. Let's first wait to stop chopping for 1-1.2
             // seconds just in case we moved on to this tree while still performing
             // the chopping animation.
-            final boolean timeResult = Timing.waitCondition(() -> !Workable.isWorking(), General.random(1000, 1200));
             // wait until we are cutting before timout
-            return timeResult || Timing.waitCondition(Workable::isWorking, General.random(5000, 6000));
+            return Timing.waitCondition(Workable::isWorking, General.random(5000, 6000));
         }
 
         return false;

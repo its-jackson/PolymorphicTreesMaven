@@ -22,7 +22,7 @@ public class Drop extends Node {
     @Override
     public void execute(Task task) {
 
-        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
+        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         Inventory.setDroppingMethod(AntiBan.generateDroppingPreference());
         Inventory.setDroppingPattern(AntiBan.generateDroppingPattern());

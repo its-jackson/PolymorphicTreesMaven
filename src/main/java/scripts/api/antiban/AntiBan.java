@@ -398,6 +398,7 @@ public final class AntiBan {
             return;
         }
         try {
+            debug(String.format("Sleeping %sms", time));
             getABCUtil().sleep(time);
             incrementABCCount();
         } catch (InterruptedException e) {

@@ -36,7 +36,7 @@ public class Plank extends Node {
 
     @Override
     public void execute(Task task) {
-        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
+        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         final int plankGoldStart = Plank.calculateOakPlankGold(Workable.getAllLogs());
 

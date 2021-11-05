@@ -390,7 +390,7 @@ public interface Workable {
         }
     }
 
-    static int sleep(List<Integer> waitTimes, boolean humanFatigue) {
+    static void sleep(List<Integer> waitTimes, boolean humanFatigue) {
         int reactionTime;
 
         if (waitTimes.isEmpty()) {
@@ -401,14 +401,12 @@ public interface Workable {
 
         if (humanFatigue) {
             reactionTime = (int) (AntiBan.getReactionTime() * Globals.getCurrentFatigueMultiple());
-            AntiBan.sleepReactionTime(reactionTime);
-            waitTimes.add(reactionTime);
-            return reactionTime;
         } else {
             reactionTime = AntiBan.getReactionTime();
         }
 
-        return reactionTime;
+        waitTimes.add(reactionTime);
+        AntiBan.sleepReactionTime(reactionTime);
     }
 
     static int average(List<Integer> times) {

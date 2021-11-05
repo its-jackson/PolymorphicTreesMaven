@@ -29,7 +29,7 @@ public class Bank extends Node {
 
     @Override
     public void execute(Task task) {
-        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
+        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         debug("Opening bank");
 
@@ -81,7 +81,7 @@ public class Bank extends Node {
     public void depositInventory(Task task) {
         if (Banking.isBankScreenOpen() || Banking.isDepositBoxOpen()) {
 
-            debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
+            Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
             List<Integer> blackList = new ArrayList<>();
 

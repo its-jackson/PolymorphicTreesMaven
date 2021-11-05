@@ -25,7 +25,7 @@ public class SpecialAttack extends Node {
 
     @Override
     public void execute(Task task) {
-        debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
+        Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue());
 
         final SpecialAttackPreference specialAttackPreference = AntiBan.generateSpecialAttackPreference();
         debug("Special preference " + specialAttackPreference.toString().toLowerCase());
