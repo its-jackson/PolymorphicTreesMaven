@@ -17,6 +17,8 @@ import java.awt.*;
  * Date: Aug 30th, 2020
  *
  * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
+ *
+ * Updated 11/05/2021 - Changed naming convention for final variables.
  */
 
 public class SpecialAttack extends Node {
@@ -25,14 +27,14 @@ public class SpecialAttack extends Node {
     public void execute(Task task) {
         debug("Sleeping " + Workable.sleep(Globals.getWaitTimes(), AntiBan.getHumanFatigue()));
 
-        final SpecialAttackPreference special_attack_preference = AntiBan.generateSpecialAttackPreference();
-        debug("Special preference " + special_attack_preference.toString().toLowerCase());
+        final SpecialAttackPreference specialAttackPreference = AntiBan.generateSpecialAttackPreference();
+        debug("Special preference " + specialAttackPreference.toString().toLowerCase());
 
-        final RSInterfaceChild special_box = generateSpecialBox(special_attack_preference);
+        final RSInterfaceChild specialBox = generateSpecialBox(specialAttackPreference);
 
-        if (special_box != null) {
+        if (specialBox != null) {
             debug("Special attack boosting");
-            final boolean result = performSpecialAttack(special_attack_preference, new Rectangle(special_box.getAbsoluteBounds()));
+            final boolean result = performSpecialAttack(specialAttackPreference, new Rectangle(specialBox.getAbsoluteBounds()));
             if (result) {
                 debug("Clicked special attack");
                 final boolean firstWaitResult = Timing.waitCondition(() -> !Workable.isWorking(), General.random(1200, 2000));
@@ -84,13 +86,14 @@ public class SpecialAttack extends Node {
                 return true;
             }
             case COMBAT_TAB : {
-                openCombatTab();
-                General.sleep(400, 800);
-                Mouse.moveBox(rectangle);
-                General.sleep(200, 400);
-                Mouse.click(0);
-                General.sleep(200, 400);
-                return true;
+                if (openCombatTab()) {
+                    General.sleep(400, 800);
+                    Mouse.moveBox(rectangle);
+                    General.sleep(200, 400);
+                    Mouse.click(0);
+                    General.sleep(200, 400);
+                    return true;
+                }
             }
         }
         return false;
@@ -98,8 +101,9 @@ public class SpecialAttack extends Node {
 
     private boolean openCombatTab() {
         if (GameTab.getOpen().equals(GameTab.TABS.COMBAT)) {
-            return false;
+            return true;
         }
+
         return GameTab.open(GameTab.TABS.COMBAT);
     }
 
