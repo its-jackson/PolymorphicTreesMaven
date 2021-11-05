@@ -15,6 +15,8 @@ import scripts.dax_api.shared.helpers.BankHelper;
  * Purpose of class: Fetch a knife from the player's bank
  *
  * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
+ *
+ * Updated 11/05/2021 - Changed naming convention for final variables.
  */
 
 public class FetchKnife extends Node {
@@ -33,7 +35,7 @@ public class FetchKnife extends Node {
                     }
                 }
                 if (Banking.withdraw(1, Workable.KNIFE)) {
-                    boolean result = Timing.waitCondition(Workable::inventoryContainsKnife, General.random(1000, 3000));
+                    final boolean result = Timing.waitCondition(Workable::inventoryContainsKnife, General.random(1000, 3000));
                     if (result) {
                         debug("Knife withdrew complete");
                     }
