@@ -16,6 +16,8 @@ import java.util.*;
  * Attempts equipping the axe in comparison to appropriate stats/levels.
  *
  * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
+ *
+ * Updated 11/05/2021 - Changed naming convention for final variables.
  */
 
 public class FetchAxe extends Node {
@@ -56,7 +58,7 @@ public class FetchAxe extends Node {
                         debug("Optimal axe found");
                         General.sleep(1000, 1200);
                         if (Inventory.find(best_axe_id).length > 0) {
-                            RSItem[] axeWithdrew = Inventory.find(best_axe_id);
+                            final RSItem[] axeWithdrew = Inventory.find(best_axe_id);
                             if (axeWithdrew.length > 0 && axeWithdrew[0] != null) {
                                 final RSItemDefinition definition = axeWithdrew[0].getDefinition();
                                 if (definition != null) {
@@ -88,12 +90,12 @@ public class FetchAxe extends Node {
                 } else {
                     // determine the best axe to withdraw from the players bank pertaining to woodcutting level
                     // for F2P players
-                    final int best_axe_id = calculateBestAxeF2P(getWorker().getPlayerWoodcuttingLevel());
+                    final int bestAxeId = calculateBestAxeF2P(getWorker().getPlayerWoodcuttingLevel());
 
                     // confirm the axe has been withdrawn
-                    if ((best_axe_id > 0) && withdrawAxe(best_axe_id)) {
+                    if ((bestAxeId > 0) && withdrawAxe(bestAxeId)) {
                         debug("Optimal axe found");
-                        RSItem[] optimalAxes = Inventory.find(best_axe_id);
+                        final RSItem[] optimalAxes = Inventory.find(bestAxeId);
                         General.sleep(1000, 1200);
                         if (optimalAxes.length > 0 && optimalAxes[0] != null) {
                             final RSItemDefinition definition = optimalAxes[0].getDefinition();
@@ -104,7 +106,7 @@ public class FetchAxe extends Node {
                         }
                     }
 
-                    if (Banking.depositAllExcept(best_axe_id) > 0) {
+                    if (Banking.depositAllExcept(bestAxeId) > 0) {
                         debug("Deposited inventory");
                     }
 
@@ -113,7 +115,7 @@ public class FetchAxe extends Node {
                     }
 
                     // equip the axe if appropriate
-                    if (equipAxe(best_axe_id, getWorker().getPlayerAttackLevel())) {
+                    if (equipAxe(bestAxeId, getWorker().getPlayerAttackLevel())) {
                         debug("Equipped axe");
                     }
                 }
@@ -158,17 +160,17 @@ public class FetchAxe extends Node {
      */
     public static boolean equipAxe(int axe, int playerAttackLevel) {
         // utilize mapped axe levels for appropriate axe to be equipped
-        HashMap<Integer, Integer> mappedATTLevels =
+        final HashMap<Integer, Integer> mappedATTLevels =
                 Workable.getMappedATTLevels();
 
         // validate and filter
         if (!mappedATTLevels.isEmpty() && axe > 0 && playerAttackLevel > 0) {
             // find the axe in the mapped hashmap
-            for (Integer axeID : mappedATTLevels.keySet()) {
+            for (final Integer axeID : mappedATTLevels.keySet()) {
                 // find axe in hashmap first before checking against players level
                 if (axe == axeID) {
                     // find the given axe in the inventory and equip
-                    RSItem[] axeToEquip = Inventory.find(axeID);
+                    final RSItem[] axeToEquip = Inventory.find(axeID);
                     // player attack level greater than or equal to the mapped axe level
                     if (playerAttackLevel >= mappedATTLevels.get(axeID) && axeToEquip.length > 0 && axeToEquip[0] != null) {
                         return axeToEquip[0].click("Wield");
@@ -189,18 +191,18 @@ public class FetchAxe extends Node {
      */
     public static boolean equipAxe(int axe, int playerAttackLevel, int playerFiremakingLevel, int playerAgilityLevel) {
         // utilize mapped axe levels for appropriate axe to be equipped
-        HashMap<Integer, Integer> mappedATTLevels =
+        final HashMap<Integer, Integer> mappedATTLevels =
                 Workable.getMappedATTLevels();
 
         // validate and filter
         if (!mappedATTLevels.isEmpty() && axe > 0 && playerAttackLevel > 0 && playerFiremakingLevel > 0
                 && playerAgilityLevel > 0) {
             // find the axe in the mapped hashmap
-            for (Integer axeID : mappedATTLevels.keySet()) {
+            for (final Integer axeID : mappedATTLevels.keySet()) {
                 // find axe in hashmap first before checking against players level
                 if (axe == axeID) {
                     // find the given axe in the inventory and equip
-                    RSItem[] axeToEquip = Inventory.find(axeID);
+                    final RSItem[] axeToEquip = Inventory.find(axeID);
                     // player attack level greater than or equal to the mapped axe level
                     if (playerAttackLevel >= mappedATTLevels.get(axeID) && axeToEquip.length > 0 && axeToEquip[0] != null) {
                         // more validation if special axe is passed as argument
@@ -220,8 +222,8 @@ public class FetchAxe extends Node {
                             }
                             break;
                             default: {
-                                List<String> blackList = List.of("Wield");
-                                RSItemDefinition definition = axeToEquip[0].getDefinition();
+                                final List<String> blackList = List.of("Wield");
+                                final RSItemDefinition definition = axeToEquip[0].getDefinition();
 
                                 if (definition != null) {
                                     String[] viableOptions = definition.getActions();
@@ -250,14 +252,14 @@ public class FetchAxe extends Node {
     // if the player has a crystal axe but no requirements are met then the next option is infernal or dragon.
     // for woodcutting utilization
     public static int calculateBestAxe(int playerWoodcuttingLevel, int playerFiremakingLevel, boolean isQuestComplete) {
-        final HashMap<Integer, Integer> mapped_wc_levels = Workable.getMappedWCLevels();
-        final RSItem[] axes = findAxesInBank();
+        final HashMap<Integer, Integer> mappedWCLevels = Workable.getMappedWCLevels();
+        final RSItem[] axesInBank = findAxesInBank();
         int bestAxe = 0;
 
-        for (final RSItem axe_item : axes) {
-            switch (axe_item.getID()) {
+        for (final RSItem axeItem : axesInBank) {
+            switch (axeItem.getID()) {
                 case Workable.CRYSTAL_AXE_ACTIVE: {
-                    if (playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.CRYSTAL_AXE_ACTIVE)
+                    if (playerWoodcuttingLevel >= mappedWCLevels.get(Workable.CRYSTAL_AXE_ACTIVE)
                             && isQuestComplete && !Globals.isSpecialAxe()) {
                         bestAxe = Workable.CRYSTAL_AXE_ACTIVE;
                         break;
@@ -267,8 +269,8 @@ public class FetchAxe extends Node {
                 case Workable.CRYSTAL_AXE_INACTIVE: {
                     boolean hasCrystalAxe = false;
 
-                    for (final RSItem axe : axes) {
-                        RSItemDefinition definition = axe.getDefinition();
+                    for (final RSItem axe : axesInBank) {
+                        final RSItemDefinition definition = axe.getDefinition();
                         if (definition != null) {
                             if (definition.getID() == Workable.CRYSTAL_AXE_ACTIVE) {
                                 hasCrystalAxe = true;
@@ -276,7 +278,7 @@ public class FetchAxe extends Node {
                             }
                         }
                     }
-                    if (!hasCrystalAxe && playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.CRYSTAL_AXE_INACTIVE)
+                    if (!hasCrystalAxe && playerWoodcuttingLevel >= mappedWCLevels.get(Workable.CRYSTAL_AXE_INACTIVE)
                             && isQuestComplete && !Globals.isSpecialAxe()) {
                         // if no better axe found, use this one
                         if (!(Inventory.find(Workable.CRYSTAL_AXE_ACTIVE, Workable.CRYSTAL_AXE_INACTIVE).length > 0)
@@ -289,7 +291,7 @@ public class FetchAxe extends Node {
                 break;
 
                 case Workable.INFERNAL_AXE_ACTIVE: {
-                    if (playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.INFERNAL_AXE_ACTIVE)
+                    if (playerWoodcuttingLevel >= mappedWCLevels.get(Workable.INFERNAL_AXE_ACTIVE)
                             && Globals.isSpecialAxe()
                             && playerFiremakingLevel >= 85) { // let the user decide if they want to use this
                         bestAxe = Workable.INFERNAL_AXE_ACTIVE;
@@ -299,13 +301,13 @@ public class FetchAxe extends Node {
                 break;
 
                 case Workable.INFERNAL_AXE_INACTIVE: {
-                    if (playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.INFERNAL_AXE_INACTIVE)
+                    if (playerWoodcuttingLevel >= mappedWCLevels.get(Workable.INFERNAL_AXE_INACTIVE)
                             && playerFiremakingLevel >= 85 && !Globals.isSpecialAxe()) {
 
                         // search for better axe before moving forward on final decision
                         int axeCount = 0;
-                        for (final RSItem axe : axes) {
-                            RSItemDefinition definition = axe.getDefinition();
+                        for (final RSItem axe : axesInBank) {
+                            final RSItemDefinition definition = axe.getDefinition();
                             if (definition != null) {
                                 int id = definition.getID();
                                 if (id == Workable.CRYSTAL_AXE_INACTIVE) {
@@ -332,12 +334,12 @@ public class FetchAxe extends Node {
                 break;
 
                 case Workable.DRAGON_AXE: {
-                    if (playerWoodcuttingLevel >= mapped_wc_levels.get(Workable.DRAGON_AXE) && !Globals.isSpecialAxe()) {
+                    if (playerWoodcuttingLevel >= mappedWCLevels.get(Workable.DRAGON_AXE) && !Globals.isSpecialAxe()) {
                         // search for better axe before moving forward on final decision
                         int axeCount = 0;
 
-                        for (final RSItem axe : axes) {
-                            RSItemDefinition definition = axe.getDefinition();
+                        for (final RSItem axe : axesInBank) {
+                            final RSItemDefinition definition = axe.getDefinition();
                             if (definition != null) {
                                 int id = definition.getID();
                                 if (id == Workable.CRYSTAL_AXE_INACTIVE) {
@@ -382,16 +384,16 @@ public class FetchAxe extends Node {
         return bestAxe;
     }
 
-    // a method that determines the best axe per woodcutting level for F2P's
+    // a method that determines the best axe as per woodcutting level for F2P
     public static int calculateBestAxeF2P(int playerWoodcuttingLevel) {
         final HashMap<Integer, Integer> mappedWCLevels = Workable.getMappedWCLevels();
         final RSItem[] axes = findAxesInBank();
         int bestAxe = 0;
 
         // loop through all axes found in the players bank
-        for (final RSItem axe_item : axes) {
+        for (final RSItem axeItem : axes) {
             // switch each axe found and determine the best axe accordingly
-            RSItemDefinition definition =  axe_item.getDefinition();
+            final RSItemDefinition definition =  axeItem.getDefinition();
             if (definition != null) {
                 int id = definition.getID();
                 switch (id) {
@@ -415,7 +417,7 @@ public class FetchAxe extends Node {
                         // find better axe in bank and keep a count
                         int axeCount = 0;
                         for (final RSItem axe : axes) {
-                            RSItemDefinition axeDefinition = axe.getDefinition();
+                            final RSItemDefinition axeDefinition = axe.getDefinition();
                             if (axeDefinition != null) {
                                 if (axeDefinition.getID() == Workable.RUNE_AXE) {
                                     axeCount++;
@@ -444,7 +446,7 @@ public class FetchAxe extends Node {
                         // find better axe in bank and keep a count
                         int axeCount = 0;
                         for (final RSItem axe : axes) {
-                            RSItemDefinition axeDefinition = axe.getDefinition();
+                            final RSItemDefinition axeDefinition = axe.getDefinition();
                             if (axeDefinition != null) {
                                 int axeID = axeDefinition.getID();
                                 if (axeID == Workable.RUNE_AXE) {
@@ -503,7 +505,7 @@ public class FetchAxe extends Node {
                         int axeCount = 0;
                         for (final RSItem axe : axes) {
                             axeCount = getAxeCount(axeCount, axe);
-                            RSItemDefinition axeDefinition = axe.getDefinition();
+                            final RSItemDefinition axeDefinition = axe.getDefinition();
                             if (axeDefinition != null) {
                                 int axeID = axeDefinition.getID();
                                 if (axeID == Workable.BLACK_AXE) {
@@ -536,7 +538,7 @@ public class FetchAxe extends Node {
                         int axeCount = 0;
                         for (final RSItem axe : axes) {
                             axeCount = getAxeCount(axeCount, axe);
-                            RSItemDefinition axeDefinition = axe.getDefinition();
+                            final RSItemDefinition axeDefinition = axe.getDefinition();
                             if (axeDefinition != null) {
                                 int axeID = axeDefinition.getID();
                                 if (axeID == Workable.BLACK_AXE) {
@@ -612,10 +614,10 @@ public class FetchAxe extends Node {
     }
 
     private static int getAxeCount(int axeCount, RSItem axe) {
-        RSItemDefinition definition = axe.getDefinition();
+        final RSItemDefinition definition = axe.getDefinition();
 
         if (definition != null) {
-            int id = definition.getID();
+            final int id = definition.getID();
 
             if (id == Workable.RUNE_AXE) {
                 axeCount++;
