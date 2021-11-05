@@ -13,6 +13,8 @@ import scripts.dax_api.shared.helpers.BankHelper;
  * The player can either start with any amount of gold in the inventory or start without gold.
  *
  * Updated 11/04/2021 - Added null safe checks to all methods and cached all return values.
+ *
+ * Updated 11/05/2021 - Changed naming convention for final variables.
  */
 
 public class FetchGold extends Node {
@@ -32,7 +34,7 @@ public class FetchGold extends Node {
                 }
                 if (Banking.find(Workable.GOLD).length > 0) {
                     // find the coins and withdraw accordingly
-                    RSItem[] coins = Banking.find(Workable.GOLD);
+                    final RSItem[] coins = Banking.find(Workable.GOLD);
 
                     if (Globals.isUseAllGold()) {
                         // count - The amount to withdraw. Use '0' for all, or '-1' for all but one.
@@ -42,14 +44,14 @@ public class FetchGold extends Node {
                     } else {
                         // withdraw the remaining gold from the bank for the given task
                         // actualPlayerChosenGold - actualPlayerSpentGold = amount of gold to withdraw for given task
-                        final int gold_to_withdraw;
+                        final int goldToWithdraw;
                         if (Gold.getGoldSpentTotal() != 0) {
-                            gold_to_withdraw = (Gold.calculateActualGoldRegex(Gold.getGoldRegex()) - Gold.getGoldSpentTotal());
+                            goldToWithdraw = (Gold.calculateActualGoldRegex(Gold.getGoldRegex()) - Gold.getGoldSpentTotal());
                         } else {
-                            gold_to_withdraw = Gold.calculateActualGoldRegex(Gold.getGoldRegex());
+                            goldToWithdraw = Gold.calculateActualGoldRegex(Gold.getGoldRegex());
                         }
-                        if (Banking.withdrawItem(coins[0], gold_to_withdraw)) {
-                            debug("Withdrew " + gold_to_withdraw + " gold");
+                        if (Banking.withdrawItem(coins[0], goldToWithdraw)) {
+                            debug("Withdrew " + goldToWithdraw + " gold");
                         }
                     }
                 } else {
