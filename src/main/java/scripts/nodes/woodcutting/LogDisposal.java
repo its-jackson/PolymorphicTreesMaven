@@ -8,12 +8,14 @@ import scripts.api.Task;
 /**
  * Purpose of class: Dispose the logs accordingly to the current task.
  *
+ * Updated 11/05/2021 - Changed naming convention for final variables.
  */
 
 public class LogDisposal extends Node {
-    private final Bank bank_node = new Bank();
-    private final Drop drop_node = new Drop();
-    private final Fletch fletch_node = new Fletch();
+
+    private final Bank bankNode = new Bank();
+    private final Drop dropNode = new Drop();
+    private final Fletch fletchNode = new Fletch();
 
     private Node logDisposalNode;
 
@@ -68,15 +70,15 @@ public class LogDisposal extends Node {
     }
 
     public Bank getBankNode() {
-        return bank_node;
+        return bankNode;
     }
 
     public Drop getDropNode() {
-        return drop_node;
+        return dropNode;
     }
 
     public Fletch getFletchNode() {
-        return fletch_node;
+        return fletchNode;
     }
 
     public Node getLogDisposalNode() {
