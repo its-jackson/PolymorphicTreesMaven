@@ -3,6 +3,10 @@ package scripts.api;
 import org.tribot.api2007.types.RSArea;
 import org.tribot.api2007.types.RSTile;
 
+/**
+ * This enumeration contains all the woodcutting locations.
+ */
+
 public enum Location {
     ISLE_OF_SOULS(new RSArea(
             new RSTile[] {

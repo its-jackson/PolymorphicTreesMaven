@@ -6,11 +6,10 @@ import org.tribot.api2007.types.RSInterface;
 
 /**
  * Purpose of class: Actively track the player stats to determine which axe to use,
- * which tree to chop and the location to work in.
+ *                      which tree to chop and the location to work in.
  */
 
 public class Progressive extends Node implements Runnable {
-    private Worker worker;
 
     private int playerWoodcuttingLevel;
     private int playerAttackLevel;
@@ -158,49 +157,6 @@ public class Progressive extends Node implements Runnable {
             return false;
         }
     }
-
-//    private void generatePlayerTracker() {
-//        if (getPlayerWoodcuttingLevel() >= 60 && !isPlayerMember()) {
-//            Globals.TREE = "Yew";
-//            Globals.LOCATION = Location.FALADOR_YEWS;
-//            setPlayerWoodcuttingLocation("Falador");
-//        } else if (getPlayerWoodcuttingLevel() >= 30 && getPlayerWoodcuttingLevel() < 60 && !isPlayerMember()) {
-//            // set safe spot location for low level players
-//            // at the draynor willow spot if applicable
-//            if (getPlayerCombatLevel() < 14) {
-//                Globals.TREE = "Willow";
-//                Globals.LOCATION = Location.PORT_SARIM_WILLOWS;
-//                setPlayerWoodcuttingLocation("Port Sarim");
-//            } else {
-//                Globals.TREE = "Willow";
-//                Globals.LOCATION = Location.DRAYNOR_WILLOWS;
-//                setPlayerWoodcuttingLocation("Draynor");
-//            }
-//        } else if (getPlayerWoodcuttingLevel() >= 15 && getPlayerWoodcuttingLevel() < 30 && !isPlayerMember()) {
-//            Globals.TREE = "Oak";
-//            Globals.LOCATION = Location.VARROCK_PALACE_OAKS;
-//            setPlayerWoodcuttingLocation("Varrock Palace");
-//        } else {
-//            Globals.TREE = "Tree";
-//            Globals.LOCATION = Location.VARROCK_WEST_TREES;
-//            setPlayerWoodcuttingLocation("Varrock West");
-//        }
-//    }
-//
-//    private void refreshProgressive() {
-//        setPlayerWoodcuttingLevel(generateWoodcuttingLevel());
-//
-//        generatePlayerTracker();
-//
-//        String format = String.format("Tree: %s, location: %s, woodcutting level: %s",
-//                Globals.TREE.toLowerCase(Locale.ROOT), getPlayerWoodcuttingLocation().toLowerCase(Locale.ROOT), getPlayerWoodcuttingLevel());
-//
-//        debug(format);
-//
-//        if (!Globals.START) {
-//            Globals.START = true;
-//        }
-//    }
 
     public int getPlayerWoodcuttingLevel() {
         return playerWoodcuttingLevel;

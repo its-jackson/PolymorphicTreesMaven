@@ -4,6 +4,7 @@ package scripts.api;
  *
  */
 public class Worker implements Workable{
+
     private int playerAttackLevel;
     private int playerWoodcuttingLevel;
     private int playerFiremakingLevel;

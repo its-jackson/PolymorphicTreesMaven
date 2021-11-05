@@ -3,6 +3,11 @@ package scripts.api;
 import org.tribot.api2007.types.RSItem;
 import scripts.dax_api.api_lib.models.RunescapeBank;
 
+/**
+ * Purpose of class: The task class is used to determine the core functionality of the script.
+ *                      Such as witch tree to chop, where to chop, and how to dispose the logs.
+ */
+
 public class Task {
 
     // not-dependable

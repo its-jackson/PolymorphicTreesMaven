@@ -7,9 +7,16 @@ import java.util.List;
 
 /**
  * Globals class contain all the variables necessary for this script to function correctly.
+ *
+ * IMPORTANT NOTE: Anyone who is looking at this class, it should use the singleton pattern where there
+ *          is only one instance of this object for wide system usage.
  */
 
 public class Globals {
+
+    // class should use singleton pattern
+    // will leave as it is currently.
+
     // gui and script state
     private static long currentTime;
 
@@ -33,7 +40,6 @@ public class Globals {
 
     private static boolean onRepeatShuffle;
     private static boolean onRepeat;
-//    private static boolean dontRepeat = true;
 
     // trees
     private static RSObject currentWorkingTree;

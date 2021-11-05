@@ -78,7 +78,7 @@ public class GUIFX extends Application {
     public void start(Stage stage) throws Exception {
         this.stage = stage;
 
-        stage.setTitle("Polymorphic Auto Woodcutter V1.06");
+        stage.setTitle("Polymorphic Auto Woodcutter V1.07");
 
         stage.setAlwaysOnTop(true);
 

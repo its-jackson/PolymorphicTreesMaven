@@ -2,9 +2,13 @@ package scripts.api;
 
 /**
  * Purpose of class: Control the player's gold for planking.
+ *
+ * IMPORTANT NOTE: Anyone who is looking at this class, it should use the singleton pattern where there
+ *                  is only one instance of this object for wide system usage.
  */
 
 public class Gold {
+
     private static String goldRegex = "10k";
     private static int goldSpentTotal = 0;
     private static int goldTotalBank = -1;
@@ -14,8 +18,7 @@ public class Gold {
     private static final int max_gold = 2147000000;
 
     // private constructor, cannot instantiate class
-    private Gold() {
-    }
+    private Gold() {}
 
     /**
      * Calculate the amount of gold.

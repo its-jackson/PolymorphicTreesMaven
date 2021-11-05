@@ -27,11 +27,7 @@ public class TimeElapse {
     public TimeElapse(String condition) {
         this.condition = condition;
 
-        if (this.condition != null
-                && !this.condition.isBlank()
-                && !this.condition.isEmpty()
-                && this.condition.matches("\\d\\d:\\d\\d:\\d\\d:\\d\\d")) {
-
+        if (this.condition != null && this.condition.matches("\\d\\d:\\d\\d:\\d\\d:\\d\\d")) {
             final String[] split = this.condition.split(":");
 
             if (split.length > 0) {
@@ -74,36 +70,24 @@ public class TimeElapse {
     // create a duration of the amount in ChronoUnit milliseconds.
     // for time elapsed, Task.
     private void completeDuration(long day, long hour, long minute, long second) {
-        final long day_to_millisecond =
-                Duration
-                        .of(day, ChronoUnit.DAYS)
-                        .toMillis();
+        final long dayToMillisecond = Duration.of(day, ChronoUnit.DAYS)
+                .toMillis();
 
-        final long hour_to_millisecond =
-                Duration
-                        .of(hour, ChronoUnit.HOURS)
-                        .toMillis();
+        final long hourToMillisecond = Duration.of(hour, ChronoUnit.HOURS)
+                .toMillis();
 
-        final long minute_to_millisecond =
-                Duration
-                        .of(minute, ChronoUnit.MINUTES)
-                        .toMillis();
+        final long minuteToMillisecond = Duration.of(minute, ChronoUnit.MINUTES)
+                .toMillis();
 
-        final long second_to_millisecond =
-                Duration
-                        .of(second, ChronoUnit.SECONDS)
-                        .toMillis();
+        final long secondToMillisecond = Duration.of(second, ChronoUnit.SECONDS)
+                .toMillis();
 
-        final long total_time_millisecond =
-                day_to_millisecond
-                        + hour_to_millisecond
-                        + minute_to_millisecond
-                        + second_to_millisecond;
+        final long totalTimeMillisecond = dayToMillisecond
+                + hourToMillisecond
+                + minuteToMillisecond
+                + secondToMillisecond;
 
-        this.duration =
-                Duration
-                        .of(total_time_millisecond, ChronoUnit.MILLIS)
-                        .abs();
+        this.duration = Duration.of(totalTimeMillisecond, ChronoUnit.MILLIS).abs();
     }
 
     public String getCondition() {

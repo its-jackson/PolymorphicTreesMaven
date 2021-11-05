@@ -47,8 +47,8 @@ import java.util.List;
         authors = {"Polymorphic"},
         category = "Woodcutting",
         name = "Polymorphic Auto Woodcutter",
-        version = 1.06,
-        description = "# Polymorphic's Auto Woodcutter v1.06\n",
+        version = 1.07,
+        description = "# Polymorphic's Auto Woodcutter v1.07\n",
         gameMode = 1)
 
 public class TreeChopper extends Script implements
@@ -289,7 +289,7 @@ public class TreeChopper extends Script implements
         gg.drawString("XP Gained:", 15, 420); // gained xp
         gg.drawString("XP/Hour:", 15, 435); // gained xp
         gg.drawString("Status:", 15, 450); // script state
-        gg.drawString("Version: 1.06", 15, 465); // script state
+        gg.drawString("Version: 1.07", 15, 465); // script state
 
         gg.setFont(getFontStatus());
         gg.setColor(getPaintSecondaryColour()); // white font colour
@@ -352,7 +352,10 @@ public class TreeChopper extends Script implements
 
     @Override
     public void onEnd() {
+        // close/destroy anti-ban instance
         AntiBan.destroy();
+        // call end method
+        end();
     }
 
     @Override

@@ -20,7 +20,10 @@ import java.util.*;
  */
 
 public interface Workable {
+
+    // the oak fee to actually make oak planks
     int OAK_FEE = 250;
+
     // gold id constant
     int GOLD = 995;
 
@@ -104,7 +107,10 @@ public interface Workable {
                 INFERNAL_AXE_ACTIVE,
                 INFERNAL_AXE_INACTIVE)
         );
-        Arrays.stream(AXES).forEach(temp::add);
+
+        Arrays.stream(AXES)
+                .forEach(temp::add);
+
         return temp.stream()
                 .mapToInt(Integer::intValue)
                 .toArray();
@@ -141,15 +147,15 @@ public interface Workable {
         final RSItem axe = Equipment.getItem(Equipment.SLOTS.WEAPON);
 
         if (axe != null) {
-            final int axe_id = axe.getID();
-            if (axe_id > 0) {
-                switch (axe_id) {
+            final int axeID = axe.getID();
+            if (axeID > 0) {
+                switch (axeID) {
                     case INFERNAL_AXE_ACTIVE:
                     case INFERNAL_AXE_INACTIVE:
                     case CRYSTAL_AXE_ACTIVE:
                     case CRYSTAL_AXE_INACTIVE:
                     case DRAGON_AXE: {
-                        return Equipment.isEquipped(axe_id);
+                        return Equipment.isEquipped(axeID);
                     }
                 }
             }
@@ -166,10 +172,10 @@ public interface Workable {
     static boolean nearObjects(int distance, String object) {
         if (object != null) {
             final RSObject[] objects = Objects.findNearest(distance, object);
-            final int player_plane = Player.getPosition().getPlane();
+            final int playerPlane = Player.getPosition().getPlane();
             if (objects.length > 0) {
                 for (final RSObject o : objects) {
-                    if (o.getPosition().getPlane() == player_plane) {
+                    if (o.getPosition().getPlane() == playerPlane) {
                         return true;
                     }
                 }
@@ -208,6 +214,7 @@ public interface Workable {
      */
     static RSTile[] discoverTreeTiles(RSTile[] treeArea, String treeName) {
         List<RSTile> treeList = new ArrayList<>();
+
         if (treeArea != null && treeName != null) {
             if (treeArea.length > 0 && !treeName.isEmpty()) {
                 for (RSTile tile : treeArea) {
@@ -215,6 +222,7 @@ public interface Workable {
                         treeList.add(tile);
                     }
                 }
+
                 Collections.shuffle(treeList);
             }
         }
@@ -223,15 +231,16 @@ public interface Workable {
     }
 
     static boolean walkToTileA(RSTile tile, int distance) {
-        final int player_distance = Player.getPosition().distanceTo(tile);
-        final WalkingPreference walking_preference = AntiBan.generateWalkingPreference(player_distance);
+        final RSTile[] path = Walking.generateStraightPath(tile);
+        final int playerDistance = Player.getPosition().distanceTo(tile);
+        final WalkingPreference walkingPreference = AntiBan.generateWalkingPreference(playerDistance);
+
         Walking.setControlClick(true);
-        RSTile[] path = Walking.generateStraightPath(tile);
-        AntiBan.activateRun();
-        if (walking_preference.equals(WalkingPreference.MINIMAP)) {
+
+        if (walkingPreference.equals(WalkingPreference.MINIMAP)) {
             return Walking.walkPath(path, () -> {
                 RSTile playerPos = Player.getPosition();
-                AntiBan.activateRun();
+                boolean run = AntiBan.activateRun();
                 return playerPos.distanceTo(tile) < distance;
             }, 1000);
         } else {
@@ -240,12 +249,12 @@ public interface Workable {
     }
 
     static boolean walkToTile(RSTile tile) {
-        final int player_distance = Player.getPosition().distanceTo(tile);
-        final WalkingPreference walking_preference = AntiBan.generateWalkingPreference(player_distance);
-        AntiBan.activateRun();
-        if (walking_preference.equals(WalkingPreference.MINIMAP)) {
+        final int playerDistance = Player.getPosition().distanceTo(tile);
+        final WalkingPreference walkingPreference = AntiBan.generateWalkingPreference(playerDistance);
+
+        if (walkingPreference.equals(WalkingPreference.MINIMAP)) {
             return DaxWalker.walkTo(tile, () -> {
-                AntiBan.activateRun();
+                boolean run = AntiBan.activateRun();
                 if (Player.getPosition().distanceTo(tile) < 5) {
                     return WalkingCondition.State.EXIT_OUT_WALKER_SUCCESS;
                 } else {
@@ -258,63 +267,55 @@ public interface Workable {
     }
 
     static boolean walkToBank(RunescapeBank bank) {
-        final RSTile bank_tile = bank.getPosition();
-        final int player_distance = Player.getPosition().distanceTo(bank_tile);
-        final WalkingPreference walking_preference = AntiBan.generateWalkingPreference(player_distance);
-        AntiBan.activateRun();
-        if (walking_preference.equals(WalkingPreference.MINIMAP)) {
+        final RSTile bankTile = bank.getPosition();
+        final int playerDistance = Player.getPosition().distanceTo(bankTile);
+        final WalkingPreference walkingPreference = AntiBan.generateWalkingPreference(playerDistance);
+
+        if (walkingPreference.equals(WalkingPreference.MINIMAP)) {
             return DaxWalker.walkToBank(bank, () -> {
-                AntiBan.activateRun();
-                if (Player.getPosition().distanceTo(bank_tile) < 5) {
+                boolean run = AntiBan.activateRun();
+                if (Player.getPosition().distanceTo(bankTile) < 5) {
                     return WalkingCondition.State.EXIT_OUT_WALKER_SUCCESS;
                 } else {
                     return WalkingCondition.State.CONTINUE_WALKER;
                 }
             });
         } else {
-            return screenWalkToTile(bank_tile);
+            return screenWalkToTile(bankTile);
         }
     }
 
-    static boolean walkToBank() {
-        AntiBan.activateRun();
-        return DaxWalker.walkToBank(() -> {
-            AntiBan.activateRun();
-            if (BankHelper.isInBank()) {
-                return WalkingCondition.State.EXIT_OUT_WALKER_SUCCESS;
-            } else {
-                return WalkingCondition.State.CONTINUE_WALKER;
-            }
-        });
-    }
-
     static boolean screenWalkToTile(RSTile tile) {
-        RSTile[] walkingPath = Walking.generateStraightScreenPath(tile);
+        final RSTile[] walkingPath = Walking.generateStraightScreenPath(tile);
         return Walking.walkScreenPath(walkingPath);
     }
 
     static boolean isInLocation(Task task, RSPlayer player) {
-        final RSTile player_tile = player.getPosition();
-        final int player_plane = player_tile.getPlane();
+        final RSTile playerTile = player.getPosition();
+        final int playerPlane = playerTile.getPlane();
+
         if (task != null) {
-            final RSTile[] location_tiles = task.getActualLocation().getRSArea().getAllTiles();
-            for (RSTile tile : location_tiles) {
-                if (tile.distanceTo(player_tile) <= 3 && player_plane == tile.getPlane()) {
+            final RSTile[] locationTiles = task.getActualLocation().getRSArea().getAllTiles();
+            for (final RSTile tile : locationTiles) {
+                if (tile.distanceTo(playerTile) <= 3 && playerPlane == tile.getPlane()) {
                     return true;
                 }
             }
         }
+
         return false;
     }
 
     // a method that returns true if we have an axe in the inventory
     static boolean inventoryContainsAxe() {
-        final int[] all_axes = completeAxes();
-        for (final int axe : all_axes) {
+        final int[] allAxes = completeAxes();
+
+        for (final int axe : allAxes) {
             if (Inventory.find(axe).length > 0) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -328,12 +329,14 @@ public interface Workable {
 
     // a method that returns true if we have an axe equipped
     static boolean isAxeEquipped() {
-        final int[] all_axes = completeAxes();
-        for (final int axe : all_axes) {
+        final int[] allAxes = completeAxes();
+
+        for (final int axe : allAxes) {
             if (Equipment.isEquipped(axe)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -409,11 +412,10 @@ public interface Workable {
     }
 
     static int average(List<Integer> times) {
-        final OptionalDouble stream =
-                times
-                        .stream()
-                        .mapToInt(Integer::intValue)
-                        .average();
+        final OptionalDouble stream = times
+                .stream()
+                .mapToInt(Integer::intValue)
+                .average();
 
         return stream.isPresent() ? (int) stream.getAsDouble() : 0;
     }
