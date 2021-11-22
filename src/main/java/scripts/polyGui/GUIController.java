@@ -29,7 +29,6 @@ import scripts.api.TimeElapse;
 import scripts.api.Gold;
 import scripts.fluffeeapi.Utilities;
 
-
 @DoNotRename
 public class GUIController implements Initializable {
 
@@ -67,7 +66,6 @@ public class GUIController implements Initializable {
             "Catherby",
             "Lumbridge Castle",
             "Sorcerer's Tower",
-            //"Grand Exchange"
     };
 
     @DoNotRename
@@ -508,7 +506,7 @@ public class GUIController implements Initializable {
 
     @FXML
     @DoNotRename
-    private void btnSaveProfilePressed() throws IOException {
+    private void btnSaveProfilePressed() {
         //StringBuilder content = new StringBuilder();
         Gson gson = new GsonBuilder()
                 .setPrettyPrinting()
@@ -538,7 +536,7 @@ public class GUIController implements Initializable {
 
         if (file != null) {
             // save text tp file
-            file = new File(file.getAbsolutePath() + ".json");
+            file = new File(file.getAbsolutePath());
             saveTextToFile(gson.toJson(tableViewMain.getItems()), file);
 //            if (file.createNewFile()) {
 //                //
@@ -818,9 +816,7 @@ public class GUIController implements Initializable {
                 case "tree": {
                     choiceBoxLocation.getItems().add(getTreeLocations()[2]); // varrock west
                     choiceBoxLocation.getItems().add(getTreeLocations()[11]); // lumbridge castle
-                    //choiceBoxLocation.getItems().add(getTreeLocations()[13]); // grand exchange
                     choiceBoxLocation.getItems().add(getTreeLocations()[7]); // seers' village
-
                 }
                 break;
                 case "oak": {

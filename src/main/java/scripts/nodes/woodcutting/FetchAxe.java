@@ -50,8 +50,8 @@ public class FetchAxe extends Node {
                     // calculate the best axe found in the bank pertaining
                     // to player woodcutting/firemaking/quests respectively
                     final int best_axe_id = calculateBestAxe(
-                            getWorker().getPlayerWoodcuttingLevel(),
-                            getWorker().getPlayerFiremakingLevel(),
+                            Skills.SKILLS.WOODCUTTING.getActualLevel(),
+                            Skills.SKILLS.FIREMAKING.getActualLevel(),
                             getWorker().isSongOfElvesComplete()
                     );
 
@@ -92,7 +92,7 @@ public class FetchAxe extends Node {
                 } else {
                     // determine the best axe to withdraw from the players bank pertaining to woodcutting level
                     // for F2P players
-                    final int bestAxeId = calculateBestAxeF2P(getWorker().getPlayerWoodcuttingLevel());
+                    final int bestAxeId = calculateBestAxeF2P(Skills.SKILLS.WOODCUTTING.getActualLevel());
 
                     // confirm the axe has been withdrawn
                     if ((bestAxeId > 0) && withdrawAxe(bestAxeId)) {

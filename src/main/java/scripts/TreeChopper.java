@@ -74,18 +74,18 @@ public class TreeChopper extends Script implements
 
     private Fatigue workerFatigue;
 
-    private final List<Node> node_list = new ArrayList<>();
+    private final List<Node> nodeList = new ArrayList<>();
     private final Image img = getImage("https://jacksonjohnson.ca/polywoodcutter/paint.png");
     private final RenderingHints aa = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     private final Font font = new Font("Verdana", Font.BOLD, 12);
-    private final Font font_status = new Font("Verdana", Font.PLAIN, 12);
-    private final Font font_level = new Font("Verdana", Font.PLAIN, 10);
-    private final Font font_progress_bar = new Font("Verdana", Font.PLAIN, 24);
-    private final long start_time = System.currentTimeMillis();
+    private final Font fontStatus = new Font("Verdana", Font.PLAIN, 12);
+    private final Font fontLevel = new Font("Verdana", Font.PLAIN, 10);
+    private final Font fontProgressBar = new Font("Verdana", Font.PLAIN, 24);
+    private final long startTime = System.currentTimeMillis();
 
-    private final Color mouse_colour = new Color(0, 153, 76); // custom green
-    private final Color paint_main_colour = new Color(0, 100, 0); // dark green
-    private final Color paint_secondary_colour = new Color(0, 0, 0); // black
+    private final Color mouseColour = new Color(0, 153, 76); // custom green
+    private final Color paintMainColour = new Color(0, 100, 0); // dark green
+    private final Color paintSecondaryColour = new Color(0, 0, 0); // black
 
     @Override
     public void run() {
@@ -110,7 +110,7 @@ public class TreeChopper extends Script implements
         DaxWalker.setCredentials(new DaxCredentialsProvider() {
             @Override
             public DaxCredentials getDaxCredentials() {
-                return new DaxCredentials("sub_JK3knXqxVGZtGR", "74aa47de-1cb1-4ee1-a8c9-5bae53c70b22");
+                return new DaxCredentials("", "");
             }
         });
 
@@ -527,7 +527,7 @@ public class TreeChopper extends Script implements
     }
 
     public List<Node> getNodeList() {
-        return node_list;
+        return nodeList;
     }
 
     public Image getImg() {
@@ -543,31 +543,31 @@ public class TreeChopper extends Script implements
     }
 
     public Font getFontStatus() {
-        return font_status;
+        return fontStatus;
     }
 
     public Font getFontLevel() {
-        return font_level;
+        return fontLevel;
     }
 
     public Font getFontProgressBar() {
-        return font_progress_bar;
+        return fontProgressBar;
     }
 
     public long getStartTime() {
-        return start_time;
+        return startTime;
     }
 
     public Color getMouseColour() {
-        return mouse_colour;
+        return mouseColour;
     }
 
     public Color getPaintMainColour() {
-        return paint_main_colour;
+        return paintMainColour;
     }
 
     public Color getPaintSecondaryColour() {
-        return paint_secondary_colour;
+        return paintSecondaryColour;
     }
 
     public void incrementLogCount() {
